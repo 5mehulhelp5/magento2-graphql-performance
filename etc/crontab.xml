@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="graphql_performance">
+        <job name="graphql_cache_cleanup" instance="Sterk\GraphQlPerformance\Cron\CacheCleanup" method="execute">
+            <schedule>0 */6 * * *</schedule>
+        </job>
+        <job name="graphql_cache_warm" instance="Sterk\GraphQlPerformance\Cron\CacheWarming" method="execute">
+            <schedule>*/30 * * * *</schedule>
+        </job>
+        <job name="graphql_connection_pool_cleanup" instance="Sterk\GraphQlPerformance\Cron\ConnectionPoolCleanup" method="execute">
+            <schedule>*/15 * * * *</schedule>
+        </job>
+        <job name="graphql_performance_report" instance="Sterk\GraphQlPerformance\Cron\PerformanceReport" method="execute">
+            <schedule>0 0 * * *</schedule>
+        </job>
+    </group>
+</config>

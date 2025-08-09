@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="sterk" translate="label" sortOrder="200">
+            <label>Sterk Extensions</label>
+        </tab>
+        <section id="graphql_performance" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>GraphQL Performance</label>
+            <tab>sterk</tab>
+            <resource>Sterk_GraphQlPerformance::config</resource>
+
+            <!-- Cache Settings -->
+            <group id="cache" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Cache Settings</label>
+                <field id="lifetime" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Cache Lifetime</label>
+                    <comment>Cache lifetime in seconds. Default: 3600 (1 hour)</comment>
+                </field>
+                <field id="enable_full_page_cache" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Full Page Cache</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable full page caching for GraphQL responses</comment>
+                </field>
+                <field id="enable_redis_cache" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Redis Cache</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Use Redis for caching GraphQL responses</comment>
+                </field>
+            </group>
+
+            <!-- Query Settings -->
+            <group id="query" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Query Settings</label>
+                <field id="max_complexity" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Query Complexity</label>
+                    <comment>Maximum allowed complexity for GraphQL queries</comment>
+                </field>
+                <field id="max_depth" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Query Depth</label>
+                    <comment>Maximum allowed depth for GraphQL queries</comment>
+                </field>
+                <field id="batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Batch Size</label>
+                    <comment>Default batch size for DataLoader operations</comment>
+                </field>
+            </group>
+
+            <!-- Connection Pool Settings -->
+            <group id="connection_pool" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Connection Pool Settings</label>
+                <field id="max_connections" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Connections</label>
+                    <comment>Maximum number of database connections in the pool</comment>
+                </field>
+                <field id="min_connections" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Minimum Connections</label>
+                    <comment>Minimum number of database connections to maintain</comment>
+                </field>
+                <field id="idle_timeout" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Idle Timeout</label>
+                    <comment>Time in seconds before an idle connection is closed</comment>
+                </field>
+            </group>
+
+            <!-- Monitoring Settings -->
+            <group id="monitoring" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Monitoring Settings</label>
+                <field id="enable_query_logging" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Query Logging</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Log GraphQL query execution details</comment>
+                </field>
+                <field id="slow_query_threshold" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Slow Query Threshold</label>
+                    <comment>Time in milliseconds after which a query is considered slow</comment>
+                </field>
+                <field id="enable_performance_monitoring" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Performance Monitoring</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Monitor and log performance metrics</comment>
+                </field>
+            </group>
+
+            <!-- Field Resolver Settings -->
+            <group id="field_resolvers" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Field Resolver Settings</label>
+
+                <!-- Product Settings -->
+                <group id="product" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Resolver Settings</label>
+                    <field id="batch_attributes" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Batch Load Attributes</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Enable batch loading of product attributes</comment>
+                    </field>
+                    <field id="cache_lifetime" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Cache Lifetime</label>
+                        <comment>Cache lifetime for product data in seconds</comment>
+                    </field>
+                    <field id="preload_media" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Preload Media Gallery</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Preload product media gallery data</comment>
+                    </field>
+                </group>
+
+                <!-- Category Settings -->
+                <group id="category" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Category Resolver Settings</label>
+                    <field id="batch_children" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Batch Load Children</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Enable batch loading of category children</comment>
+                    </field>
+                    <field id="cache_lifetime" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Cache Lifetime</label>
+                        <comment>Cache lifetime for category data in seconds</comment>
+                    </field>
+                    <field id="preload_product_counts" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Preload Product Counts</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Preload category product counts</comment>
+                    </field>
+                </group>
+
+                <!-- Order Settings -->
+                <group id="order" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order Resolver Settings</label>
+                    <field id="batch_items" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Batch Load Items</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Enable batch loading of order items</comment>
+                    </field>
+                    <field id="cache_lifetime" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Cache Lifetime</label>
+                        <comment>Cache lifetime for order data in seconds</comment>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Logging:etc/logging.xsd">
+    <groups>
+        <group name="graphql_performance">
+            <label>GraphQL Performance</label>
+            <expected_models>
+                <expected_model class="Sterk\GraphQlPerformance\Model\Performance\QueryTimer"/>
+                <expected_model class="Sterk\GraphQlPerformance\Model\Cache\ResolverCache"/>
+                <expected_model class="Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPool"/>
+            </expected_models>
+            <events>
+                <event name="graphql_slow_query" is_system="0">
+                    <label>Slow GraphQL Query</label>
+                </event>
+                <event name="graphql_cache_miss" is_system="0">
+                    <label>GraphQL Cache Miss</label>
+                </event>
+                <event name="graphql_connection_pool_exhausted" is_system="0">
+                    <label>GraphQL Connection Pool Exhausted</label>
+                </event>
+                <event name="graphql_query_complexity_exceeded" is_system="0">
+                    <label>GraphQL Query Complexity Exceeded</label>
+                </event>
+            </events>
+        </group>
+    </groups>
+</config>

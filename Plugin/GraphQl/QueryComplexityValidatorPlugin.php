@@ -1,0 +1,68 @@
+<?php
+declare(strict_types=1);
+
+namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
+
+use Magento\Framework\GraphQl\Query\QueryProcessor;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Schema;
+use Sterk\GraphQlPerformance\Model\QueryComplexity\ComplexityValidator;
+
+class QueryComplexityValidatorPlugin
+{
+    public function __construct(
+        private readonly ComplexityValidator $complexityValidator
+    ) {}
+
+    /**
+     * Validate query complexity before processing
+     *
+     * @param QueryProcessor $subject
+     * @param callable $proceed
+     * @param Schema $schema
+     * @param string $source
+     * @param ContextInterface|null $contextValue
+     * @param array|null $variableValues
+     * @param string|null $operationName
+     * @return array
+     */
+    public function aroundExecute(
+        QueryProcessor $subject,
+        callable $proceed,
+        Schema $schema,
+        string $source,
+        ?ContextInterface $contextValue = null,
+        ?array $variableValues = null,
+        ?string $operationName = null
+    ): array {
+        // Parse the query to get AST
+        $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
+
+        // Get operation
+        $operation = null;
+        foreach ($documentNode->definitions as $definition) {
+            if ($definition->kind === 'OperationDefinition') {
+                if ($operationName === null || $definition->name->value === $operationName) {
+                    $operation = $definition;
+                    break;
+                }
+            }
+        }
+
+        if ($operation) {
+            // Create ResolveInfo
+            $info = new \Magento\Framework\GraphQl\Query\Resolver\ResolveInfo(
+                $operation->name ? $operation->name->value : null,
+                [],
+                $schema->getType('Query'),
+                $documentNode
+            );
+
+            // Validate complexity
+            $this->complexityValidator->validate($info);
+        }
+
+        // Proceed with query execution
+        return $proceed($schema, $source, $contextValue, $variableValues, $operationName);
+    }
+}

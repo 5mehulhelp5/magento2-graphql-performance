@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
+    <type name="graphql_cache" translate="label,description" instance="Sterk\GraphQlPerformance\Model\Cache\GraphQlCache">
+        <label>GraphQL Query Cache</label>
+        <description>Cache for GraphQL query results and field resolvers</description>
+        <tags>GRAPHQL_CACHE,GRAPHQL_QUERY_CACHE</tags>
+    </type>
+</config>

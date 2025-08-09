@@ -1,0 +1,54 @@
+type Query {
+    performanceMetrics: PerformanceMetrics @resolver(class: "Sterk\\GraphQlPerformance\\Model\\Resolver\\PerformanceMetricsResolver")
+}
+
+type PerformanceMetrics {
+    query_count: Int!
+    average_response_time: Float!
+    cache_hit_rate: Float!
+    error_rate: Float!
+    slow_queries: Int!
+    memory_usage: MemoryMetrics!
+    cache_stats: CacheStats!
+    connection_pool_stats: ConnectionPoolStats!
+}
+
+type MemoryMetrics {
+    current_usage: Float!
+    peak_usage: Float!
+    limit: Float!
+}
+
+type CacheStats {
+    hits: Int!
+    misses: Int!
+    hit_rate: Float!
+    entries: Int!
+    memory_usage: Float!
+}
+
+type ConnectionPoolStats {
+    active_connections: Int!
+    idle_connections: Int!
+    total_connections: Int!
+    max_connections: Int!
+    wait_count: Int!
+}
+
+interface CacheableField {
+    cache_hash: String!
+    cache_ttl: Int!
+    cache_tags: [String!]!
+}
+
+interface BatchLoadableField {
+    batch_key: String!
+    batch_size: Int!
+}
+
+type BatchStats {
+    total_batches: Int!
+    average_batch_size: Float!
+    max_batch_size: Int!
+    total_items: Int!
+}

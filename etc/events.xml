@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="graphql_query_resolver_before">
+        <observer name="sterk_graphql_performance_before_resolver"
+                 instance="Sterk\GraphQlPerformance\Observer\BeforeResolver"/>
+    </event>
+    <event name="graphql_query_resolver_after">
+        <observer name="sterk_graphql_performance_after_resolver"
+                 instance="Sterk\GraphQlPerformance\Observer\AfterResolver"/>
+    </event>
+    <event name="clean_cache_by_tags">
+        <observer name="sterk_graphql_performance_clean_cache"
+                 instance="Sterk\GraphQlPerformance\Observer\CleanCache"/>
+    </event>
+    <event name="admin_system_config_changed_section_graphql_performance">
+        <observer name="sterk_graphql_performance_config_change"
+                 instance="Sterk\GraphQlPerformance\Observer\ConfigChange"/>
+    </event>
+</config>

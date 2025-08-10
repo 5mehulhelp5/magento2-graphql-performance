@@ -8,33 +8,10 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Resolver\Categories\CategoriesResolver;
 
-class CategoryResolverPlugin
+class CategoryResolverPlugin extends AbstractResolverPlugin
 {
-    public function __construct(
-        private readonly CategoriesResolver $optimizedResolver
-    ) {}
-
-    /**
-     * Replace the original categories resolver with our optimized version
-     *
-     * @param Categories $subject
-     * @param callable $proceed
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
-     * @return array
-     */
-    public function aroundResolve(
-        Categories $subject,
-        callable $proceed,
-        Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = null,
-        array $args = null
-    ) {
-        return $this->optimizedResolver->resolve($field, $context, $info, $value ?? [], $args ?? []);
+    public function __construct(CategoriesResolver $optimizedResolver)
+    {
+        parent::__construct($optimizedResolver);
     }
 }

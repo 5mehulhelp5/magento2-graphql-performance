@@ -1,45 +1,42 @@
 # IDE
 .idea
 .vscode
-*.sublime-*
-*.code-workspace
+*.sublime-workspace
+*.sublime-project
+
+# Composer
+/vendor/
+composer.lock
+
+# Testing
+/coverage/
+/test-reports/
+.phpunit.result.cache
+coverage.xml
+coverage.txt
 
 # OS
 .DS_Store
 Thumbs.db
 
 # Magento
-/vendor/
 /var/
 /generated/
 /pub/static/
 /app/etc/env.php
 /app/etc/config.php
 
-# Testing
-/dev/tests/integration/tmp/
-/dev/tests/integration/var/
-/dev/tests/unit/tmp/
-/dev/tests/unit/var/
-/phpunit.xml
-
-# Build artifacts
-/releases/
-*.zip
-*.tar
-*.gz
-
-# Composer
-composer.lock
-auth.json
-
 # Node
-node_modules/
-npm-debug.log
-yarn-error.log
+/node_modules/
+package-lock.json
 
-# Misc
+# Logs
 *.log
-*.tmp
-*.swp
-*.swo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+/build/
+/dist/
+*.zip

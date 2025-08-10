@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/graphql-performance/metrics" method="GET">
+        <service class="Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface" method="getMetrics"/>
+        <resources>
+            <resource ref="Magento_GraphQl::graphql"/>
+        </resources>
+    </route>
+    <route url="/V1/graphql-performance/cache/clean" method="POST">
+        <service class="Sterk\GraphQlPerformance\Api\CacheManagementInterface" method="clean"/>
+        <resources>
+            <resource ref="Magento_GraphQl::graphql"/>
+        </resources>
+    </route>
+    <route url="/V1/graphql-performance/cache/warm" method="POST">
+        <service class="Sterk\GraphQlPerformance\Api\CacheManagementInterface" method="warm"/>
+        <resources>
+            <resource ref="Magento_GraphQl::graphql"/>
+        </resources>
+    </route>
+</routes>

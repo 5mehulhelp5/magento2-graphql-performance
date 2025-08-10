@@ -47,17 +47,10 @@ class CustomerDataLoader extends FrequentDataLoader
         return $result;
     }
 
-    protected function generateCacheKey(string $id): string
-    {
-        return sprintf('customer_data_%s', $id);
-    }
+    use CacheKeyGeneratorTrait;
 
-    protected function getCacheTags(mixed $item): array
+    protected function getEntityType(): string
     {
-        $tags = ['customer'];
-        if ($item && method_exists($item, 'getId')) {
-            $tags[] = 'customer_' . $item->getId();
-        }
-        return $tags;
+        return 'customer';
     }
 }

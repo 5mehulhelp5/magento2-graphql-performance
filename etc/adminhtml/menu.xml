@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Sterk_GraphQlPerformance::performance"
+             title="GraphQL Performance"
+             module="Sterk_GraphQlPerformance"
+             sortOrder="90"
+             parent="Magento_Backend::system"
+             resource="Sterk_GraphQlPerformance::performance"/>
+
+        <add id="Sterk_GraphQlPerformance::metrics"
+             title="Performance Metrics"
+             module="Sterk_GraphQlPerformance"
+             sortOrder="10"
+             parent="Sterk_GraphQlPerformance::performance"
+             action="graphql_performance/metrics/index"
+             resource="Sterk_GraphQlPerformance::metrics"/>
+
+        <add id="Sterk_GraphQlPerformance::cache"
+             title="Cache Management"
+             module="Sterk_GraphQlPerformance"
+             sortOrder="20"
+             parent="Sterk_GraphQlPerformance::performance"
+             action="graphql_performance/cache/index"
+             resource="Sterk_GraphQlPerformance::cache"/>
+
+        <add id="Sterk_GraphQlPerformance::reports"
+             title="Performance Reports"
+             module="Sterk_GraphQlPerformance"
+             sortOrder="30"
+             parent="Sterk_GraphQlPerformance::performance"
+             action="graphql_performance/reports/index"
+             resource="Sterk_GraphQlPerformance::reports"/>
+    </menu>
+</config>

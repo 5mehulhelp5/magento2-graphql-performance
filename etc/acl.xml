@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Sterk_GraphQlPerformance::config" title="GraphQL Performance Configuration" sortOrder="50"/>
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="Magento_Backend::system">
+                    <resource id="Sterk_GraphQlPerformance::performance" title="GraphQL Performance" sortOrder="60">
+                        <resource id="Sterk_GraphQlPerformance::metrics" title="View Performance Metrics" sortOrder="10"/>
+                        <resource id="Sterk_GraphQlPerformance::cache" title="Cache Management" sortOrder="20">
+                            <resource id="Sterk_GraphQlPerformance::cache_clean" title="Clean Cache" sortOrder="10"/>
+                            <resource id="Sterk_GraphQlPerformance::cache_warm" title="Warm Cache" sortOrder="20"/>
+                        </resource>
+                        <resource id="Sterk_GraphQlPerformance::reports" title="Performance Reports" sortOrder="30"/>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

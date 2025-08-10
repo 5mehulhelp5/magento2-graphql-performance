@@ -1,5 +1,5 @@
 {
-    "name": "sterk/module-graphql-performance",
+    "name": "veysiyildiz/module-graphql-performance",
     "description": "A comprehensive GraphQL performance optimization module for Magento 2",
     "type": "magento2-module",
     "version": "1.0.0",
@@ -14,7 +14,17 @@
     "require": {
         "php": "~7.4.0||~8.1.0",
         "magento/framework": ">=103.0.0",
-        "magento/module-graph-ql": ">=100.4.0"
+        "magento/module-graph-ql": ">=100.4.0",
+        "magento/module-catalog-graph-ql": ">=100.4.0",
+        "magento/module-store-graph-ql": ">=100.4.0",
+        "magento/module-customer-graph-ql": ">=100.4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "magento/magento-coding-standard": ">=6.0",
+        "phpstan/phpstan": "^1.0",
+        "vimeo/psalm": "^4.0",
+        "squizlabs/php_codesniffer": "^3.6"
     },
     "autoload": {
         "files": [
@@ -23,5 +33,26 @@
         "psr-4": {
             "Sterk\\GraphQlPerformance\\": ""
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sterk\\GraphQlPerformance\\Test\\": "Test/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "phpcs": "phpcs --standard=Magento2 --ignore=vendor/* .",
+        "phpcbf": "phpcbf --standard=Magento2 --ignore=vendor/* .",
+        "phpstan": "phpstan analyse",
+        "psalm": "psalm"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "support": {
+        "issues": "https://github.com/veysiyildiz/magento2-graphql-performance/issues",
+        "source": "https://github.com/veysiyildiz/magento2-graphql-performance",
+        "docs": "https://github.com/veysiyildiz/magento2-graphql-performance/wiki"
     }
 }

@@ -1,0 +1,14 @@
+parameters:
+    level: 8
+    paths:
+        - Model
+        - Plugin
+        - Observer
+    excludePaths:
+        - Test/*
+        - vendor/*
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - '#Method .* has parameter .* with no value type specified in iterable type array#'
+        - '#Property .* type has no value type specified in iterable type array#'

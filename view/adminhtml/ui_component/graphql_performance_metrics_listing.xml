@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">graphql_performance_metrics_listing.graphql_performance_metrics_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="refresh_metrics" class="Sterk\GraphQlPerformance\Block\Adminhtml\Metrics\RefreshButton"/>
+        </buttons>
+        <spinner>graphql_performance_metrics_columns</spinner>
+        <deps>
+            <dep>graphql_performance_metrics_listing.graphql_performance_metrics_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="graphql_performance_metrics_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Sterk_GraphQlPerformance::metrics</aclResource>
+        <dataProvider class="Sterk\GraphQlPerformance\Ui\DataProvider\MetricsDataProvider" name="graphql_performance_metrics_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <columns name="graphql_performance_metrics_columns">
+        <column name="query_name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Query Name</label>
+            </settings>
+        </column>
+        <column name="execution_time" class="Sterk\GraphQlPerformance\Ui\Component\Listing\Column\ExecutionTime">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Execution Time (ms)</label>
+            </settings>
+        </column>
+        <column name="cache_hit_rate" class="Sterk\GraphQlPerformance\Ui\Component\Listing\Column\Percentage">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Cache Hit Rate</label>
+            </settings>
+        </column>
+        <column name="error_rate" class="Sterk\GraphQlPerformance\Ui\Component\Listing\Column\Percentage">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Error Rate</label>
+            </settings>
+        </column>
+        <column name="memory_usage" class="Sterk\GraphQlPerformance\Ui\Component\Listing\Column\Memory">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Memory Usage</label>
+            </settings>
+        </column>
+        <column name="last_execution" class="Magento\Ui\Component\Listing\Columns\Date">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Last Execution</label>
+                <sorting>desc</sorting>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Sterk\GraphQlPerformance\Ui\Component\Listing\Column\MetricsActions">
+            <settings>
+                <indexField>id</indexField>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

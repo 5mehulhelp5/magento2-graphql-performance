@@ -12,15 +12,20 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 
-class ProductsResolver implements BatchServiceContractResolverInterface
+class ProductsResolver extends AbstractResolver
 {
+    use FieldSelectionTrait;
+    use PaginationTrait;
+
     public function __construct(
         private readonly ProductRepositoryInterface $productRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
-        private readonly ResolverCache $cache,
         private readonly ProductDataLoader $dataLoader,
-        private readonly QueryTimer $queryTimer
-    ) {}
+        ResolverCache $cache,
+        QueryTimer $queryTimer
+    ) {
+        parent::__construct($cache, $queryTimer);
+    }
 
     /**
      * Batch resolve products
@@ -32,49 +37,31 @@ class ProductsResolver implements BatchServiceContractResolverInterface
      * @param array $args
      * @return array
      */
-    public function resolve(
+    protected function getEntityType(): string
+    {
+        return 'product';
+    }
+
+    protected function getCacheTags(): array
+    {
+        return ['catalog_product'];
+    }
+
+    protected function resolveData(
         Field $field,
         $context,
         ResolveInfo $info,
         array $value = [],
         array $args = []
-    ) {
-        $this->queryTimer->start($info->operation->name->value, $info->operation->loc->source->body);
+    ): array {
+        // Build search criteria from arguments
+        $searchCriteria = $this->buildSearchCriteria($args);
 
-        try {
-            // Try to get from cache first
-            $cacheKey = $this->generateCacheKey($field, $context, $info, $value, $args);
-            $cachedData = $this->cache->get($cacheKey);
+        // Get products using data loader for batching
+        $products = $this->dataLoader->loadMany($searchCriteria);
 
-            if ($cachedData !== null) {
-                $this->queryTimer->stop($info->operation->name->value, $info->operation->loc->source->body, true);
-                return $cachedData;
-            }
-
-            // Build search criteria from arguments
-            $searchCriteria = $this->buildSearchCriteria($args);
-
-            // Get products using data loader for batching
-            $products = $this->dataLoader->loadMany($searchCriteria);
-
-            // Transform to GraphQL format
-            $result = $this->transformProductsToGraphQL($products, $info);
-
-            // Cache the result
-            $this->cache->set(
-                $cacheKey,
-                $result,
-                ['catalog_product'],
-                3600 // 1 hour cache
-            );
-
-            $this->queryTimer->stop($info->operation->name->value, $info->operation->loc->source->body);
-
-            return $result;
-        } catch (\Exception $e) {
-            $this->queryTimer->stop($info->operation->name->value, $info->operation->loc->source->body);
-            throw $e;
-        }
+        // Transform to GraphQL format
+        return $this->transformProductsToGraphQL($products, $info, $args);
     }
 
     /**
@@ -151,27 +138,17 @@ class ProductsResolver implements BatchServiceContractResolverInterface
      * @param ResolveInfo $info
      * @return array
      */
-    private function transformProductsToGraphQL(array $products, ResolveInfo $info): array
+    private function transformProductsToGraphQL(array $products, ResolveInfo $info, array $args): array
     {
         $items = [];
         foreach ($products as $product) {
-            $productData = [
-                'id' => $product->getId(),
-                'uid' => base64_encode('product/' . $product->getId()),
-                'name' => $product->getName(),
-                'sku' => $product->getSku(),
-                'url_key' => $product->getUrlKey(),
-                'stock_status' => $product->getExtensionAttributes()->getStockItem()->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK',
-                '__typename' => 'SimpleProduct', // Add logic for different product types
-            ];
+            $productData = $this->getBaseProductData($product);
 
-            // Add requested fields based on GraphQL query
-            $fields = $info->getFieldSelection();
-            if (isset($fields['price_range'])) {
+            if ($this->isFieldRequested($info, 'price_range')) {
                 $productData['price_range'] = $this->getPriceRange($product);
             }
 
-            if (isset($fields['small_image'])) {
+            if ($this->isFieldRequested($info, 'small_image')) {
                 $productData['small_image'] = [
                     'url' => $product->getSmallImage()
                 ];
@@ -180,20 +157,30 @@ class ProductsResolver implements BatchServiceContractResolverInterface
             // Add custom attributes if requested
             $customAttributes = ['es_saat_mekanizma', 'es_kasa_capi', 'es_kasa_cinsi', 'es_kordon_tipi', 'manufacturer'];
             foreach ($customAttributes as $attribute) {
-                if (isset($fields[$attribute])) {
-                    $productData[$attribute] = $this->getAttributeValueLabel($product, $attribute);
-                }
+                $productData = $this->addFieldIfRequested(
+                    $productData,
+                    $info,
+                    $attribute,
+                    $this->getAttributeValueLabel($product, $attribute)
+                );
             }
 
             $items[] = $productData;
         }
 
+        return $this->getPaginatedResult($items, count($products), $args);
+    }
+
+    private function getBaseProductData($product): array
+    {
         return [
-            'items' => $items,
-            'total_count' => count($products),
-            'page_info' => [
-                'total_pages' => ceil(count($products) / ($args['pageSize'] ?? 20))
-            ]
+            'id' => $product->getId(),
+            'uid' => base64_encode('product/' . $product->getId()),
+            'name' => $product->getName(),
+            'sku' => $product->getSku(),
+            'url_key' => $product->getUrlKey(),
+            'stock_status' => $product->getExtensionAttributes()->getStockItem()->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK',
+            '__typename' => 'SimpleProduct', // Add logic for different product types
         ];
     }
 

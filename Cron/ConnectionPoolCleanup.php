@@ -6,20 +6,17 @@ namespace Sterk\GraphQlPerformance\Cron;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPool;
 use Psr\Log\LoggerInterface;
 
-class ConnectionPoolCleanup
+class ConnectionPoolCleanup extends AbstractCron
 {
     public function __construct(
         private readonly ConnectionPool $connectionPool,
-        private readonly LoggerInterface $logger
-    ) {}
+        LoggerInterface $logger
+    ) {
+        parent::__construct($logger);
+    }
 
-    public function execute(): void
+    protected function process(): void
     {
-        try {
-            $this->connectionPool->cleanup();
-            $this->logger->info('GraphQL connection pool cleanup completed successfully');
-        } catch (\Exception $e) {
-            $this->logger->error('GraphQL connection pool cleanup failed: ' . $e->getMessage());
-        }
+        $this->connectionPool->cleanup();
     }
 }

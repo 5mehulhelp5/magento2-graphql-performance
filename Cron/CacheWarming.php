@@ -7,36 +7,39 @@ use Sterk\GraphQlPerformance\Model\Config;
 use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Psr\Log\LoggerInterface;
 
-class CacheWarming
+class CacheWarming extends AbstractCron
 {
     public function __construct(
         private readonly Config $config,
         private readonly QueryProcessor $queryProcessor,
-        private readonly LoggerInterface $logger
-    ) {}
+        LoggerInterface $logger
+    ) {
+        parent::__construct($logger);
+    }
 
-    public function execute(): void
+    protected function process(): void
     {
         if (!$this->config->isCacheWarmingEnabled()) {
             return;
         }
 
+        $patterns = $this->config->getCacheWarmingPatterns();
+        foreach ($patterns as $name => $query) {
+            $this->warmPattern($name, $query);
+        }
+    }
+
+    private function warmPattern(string $name, string $query): void
+    {
         try {
-            $patterns = $this->config->getCacheWarmingPatterns();
-            foreach ($patterns as $name => $query) {
-                try {
-                    $this->queryProcessor->process(
-                        $query,
-                        [],
-                        ['store_id' => $this->config->getDefaultStoreId()]
-                    );
-                    $this->logger->info(sprintf('Cache warming completed for pattern: %s', $name));
-                } catch (\Exception $e) {
-                    $this->logger->error(sprintf('Cache warming failed for pattern %s: %s', $name, $e->getMessage()));
-                }
-            }
+            $this->queryProcessor->process(
+                $query,
+                [],
+                ['store_id' => $this->config->getDefaultStoreId()]
+            );
+            $this->logger->info(sprintf('Cache warming completed for pattern: %s', $name));
         } catch (\Exception $e) {
-            $this->logger->error('GraphQL cache warming failed: ' . $e->getMessage());
+            $this->logger->error(sprintf('Cache warming failed for pattern %s: %s', $name, $e->getMessage()));
         }
     }
 }

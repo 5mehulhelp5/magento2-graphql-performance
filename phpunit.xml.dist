@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/9.5/phpunit.xsd"
+         colors="true"
+         columns="max"
+         bootstrap="Test/Unit/framework/bootstrap.php"
+         beStrictAboutTestsThatDoNotTestAnything="false">
+    <coverage>
+        <include>
+            <directory suffix=".php">./Model</directory>
+            <directory suffix=".php">./Plugin</directory>
+            <directory suffix=".php">./Observer</directory>
+        </include>
+        <exclude>
+            <directory>./Test</directory>
+            <directory>./vendor</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="coverage"/>
+            <text outputFile="coverage.txt"/>
+            <clover outputFile="coverage.xml"/>
+        </report>
+    </coverage>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>Test/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>Test/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="date.timezone" value="UTC"/>
+        <ini name="xdebug.max_nesting_level" value="200"/>
+        <env name="MAGENTO_ENVIRONMENT" value="test"/>
+    </php>
+    <logging>
+        <junit outputFile="test-reports/junit.xml"/>
+        <testdoxHtml outputFile="test-reports/testdox.html"/>
+        <testdoxText outputFile="test-reports/testdox.txt"/>
+    </logging>
+</phpunit>

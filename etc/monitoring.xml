@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <graphql_performance>
+            <monitoring>
+                <enable_query_logging>1</enable_query_logging>
+                <slow_query_threshold>1000</slow_query_threshold>
+                <enable_performance_monitoring>1</enable_performance_monitoring>
+                <enable_tracing>0</enable_tracing>
+                <trace_sample_rate>0.1</trace_sample_rate>
+                <metrics_enabled>1</metrics_enabled>
+                <metrics_provider>prometheus</metrics_provider>
+                <metrics_endpoint>/metrics</metrics_endpoint>
+                <alert_thresholds>
+                    <response_time>5000</response_time>
+                    <error_rate>0.05</error_rate>
+                    <memory_usage>256</memory_usage>
+                </alert_thresholds>
+            </monitoring>
+        </graphql_performance>
+    </default>
+</config>

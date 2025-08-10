@@ -14,17 +14,22 @@ use Sterk\GraphQlPerformance\Model\DataLoader\CategoryDataLoader;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Magento\Store\Model\StoreManagerInterface;
 
-class CategoriesResolver implements BatchServiceContractResolverInterface
+class CategoriesResolver extends AbstractResolver
 {
+    use FieldSelectionTrait;
+    use PaginationTrait;
+
     public function __construct(
         private readonly CategoryRepositoryInterface $categoryRepository,
         private readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
-        private readonly ResolverCache $cache,
         private readonly CategoryDataLoader $dataLoader,
-        private readonly QueryTimer $queryTimer,
-        private readonly StoreManagerInterface $storeManager
-    ) {}
+        private readonly StoreManagerInterface $storeManager,
+        ResolverCache $cache,
+        QueryTimer $queryTimer
+    ) {
+        parent::__construct($cache, $queryTimer);
+    }
 
     /**
      * Batch resolve categories
@@ -36,46 +41,28 @@ class CategoriesResolver implements BatchServiceContractResolverInterface
      * @param array $args
      * @return array
      */
-    public function resolve(
+    protected function getEntityType(): string
+    {
+        return 'category';
+    }
+
+    protected function getCacheTags(): array
+    {
+        return ['catalog_category'];
+    }
+
+    protected function resolveData(
         Field $field,
         $context,
         ResolveInfo $info,
         array $value = [],
         array $args = []
-    ) {
-        $this->queryTimer->start($info->operation->name->value, $info->operation->loc->source->body);
+    ): array {
+        // Get categories using optimized collection
+        $collection = $this->getCategoryCollection($args);
 
-        try {
-            // Try to get from cache first
-            $cacheKey = $this->generateCacheKey($field, $context, $info, $value, $args);
-            $cachedData = $this->cache->get($cacheKey);
-
-            if ($cachedData !== null) {
-                $this->queryTimer->stop($info->operation->name->value, $info->operation->loc->source->body, true);
-                return $cachedData;
-            }
-
-            // Get categories using optimized collection
-            $collection = $this->getCategoryCollection($args);
-
-            // Transform to GraphQL format
-            $result = $this->transformCategoriesToGraphQL($collection, $info);
-
-            // Cache the result
-            $this->cache->set(
-                $cacheKey,
-                $result,
-                ['catalog_category'],
-                3600 // 1 hour cache
-            );
-
-            $this->queryTimer->stop($info->operation->name->value, $info->operation->loc->source->body);
-
-            return $result;
-        } catch (\Exception $e) {
-            $this->queryTimer->stop($info->operation->name->value, $info->operation->loc->source->body);
-            throw $e;
-        }
+        // Transform to GraphQL format
+        return $this->transformCategoriesToGraphQL($collection, $info, $args);
     }
 
     /**
@@ -133,58 +120,55 @@ class CategoriesResolver implements BatchServiceContractResolverInterface
      * @param ResolveInfo $info
      * @return array
      */
-    private function transformCategoriesToGraphQL($collection, ResolveInfo $info): array
+    private function transformCategoriesToGraphQL($collection, ResolveInfo $info, array $args): array
     {
         $items = [];
         foreach ($collection as $category) {
-            $categoryData = [
-                'id' => $category->getId(),
-                'uid' => base64_encode('category/' . $category->getId()),
-                'name' => $category->getName(),
-                'url_key' => $category->getUrlKey(),
-                'url_path' => $category->getUrlPath(),
-                'path' => $category->getPath(),
-                'level' => $category->getLevel(),
-                'description' => $category->getDescription(),
-                'product_count' => $category->getProductCount(),
-                'is_active' => (bool)$category->getIsActive(),
-                'include_in_menu' => (bool)$category->getIncludeInMenu(),
-                '__typename' => 'CategoryTree'
-            ];
+            $categoryData = $this->getBaseCategoryData($category);
 
-            // Add requested fields based on GraphQL query
-            $fields = $info->getFieldSelection();
-
-            if (isset($fields['image'])) {
+            if ($this->isFieldRequested($info, 'image')) {
                 $categoryData['image'] = $category->getImage() ? $this->getImageUrl($category->getImage()) : null;
             }
 
-            if (isset($fields['breadcrumbs'])) {
+            if ($this->isFieldRequested($info, 'breadcrumbs')) {
                 $categoryData['breadcrumbs'] = $this->getBreadcrumbs($category);
             }
 
-            // Handle custom attributes for your specific case
-            if (isset($fields['is_collection'])) {
-                $categoryData['is_collection'] = (bool)$category->getData('is_collection');
-            }
-            if (isset($fields['is_brand'])) {
-                $categoryData['is_brand'] = (bool)$category->getData('is_brand');
-            }
-            if (isset($fields['is_featured'])) {
-                $categoryData['is_featured'] = (bool)$category->getData('is_featured');
+            // Handle custom attributes
+            $customAttributes = ['is_collection', 'is_brand', 'is_featured'];
+            foreach ($customAttributes as $attribute) {
+                $categoryData = $this->addFieldIfRequested(
+                    $categoryData,
+                    $info,
+                    $attribute,
+                    (bool)$category->getData($attribute)
+                );
             }
 
             $items[] = $categoryData;
         }
 
+        return $this->getPaginatedResult($items, $collection->getSize(), [
+            'pageSize' => $collection->getPageSize() ?: 20,
+            'currentPage' => $collection->getCurPage()
+        ]);
+    }
+
+    private function getBaseCategoryData($category): array
+    {
         return [
-            'items' => $items,
-            'total_count' => $collection->getSize(),
-            'page_info' => [
-                'total_pages' => ceil($collection->getSize() / ($collection->getPageSize() ?: 20)),
-                'current_page' => $collection->getCurPage(),
-                'page_size' => $collection->getPageSize()
-            ]
+            'id' => $category->getId(),
+            'uid' => base64_encode('category/' . $category->getId()),
+            'name' => $category->getName(),
+            'url_key' => $category->getUrlKey(),
+            'url_path' => $category->getUrlPath(),
+            'path' => $category->getPath(),
+            'level' => $category->getLevel(),
+            'description' => $category->getDescription(),
+            'product_count' => $category->getProductCount(),
+            'is_active' => (bool)$category->getIsActive(),
+            'include_in_menu' => (bool)$category->getIncludeInMenu(),
+            '__typename' => 'CategoryTree'
         ];
     }
 

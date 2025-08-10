@@ -50,7 +50,7 @@
    git commit -m "Initial release of Sterk GraphQL Performance module"
    
    # Add remote repository
-   git remote add origin https://github.com/sterk/magento2-graphql-performance.git
+   git remote add origin https://github.com/veysiyildiz/magento2-graphql-performance.git
    
    # Push to main branch
    git push -u origin main
@@ -106,6 +106,6 @@ bin/magento cache:clean
 
 ## Support Channels
 
-1. GitHub Issues: https://github.com/sterk/magento2-graphql-performance/issues
+1. GitHub Issues: https://github.com/veysiyildiz/magento2-graphql-performance/issues
 2. Email Support: veysiyildiz@gmail.com
-3. Documentation: https://github.com/sterk/magento2-graphql-performance/wiki
+3. Documentation: https://github.com/veysiyildiz/magento2-graphql-performance/wiki

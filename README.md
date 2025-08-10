@@ -42,7 +42,7 @@ The Sterk GraphQL Performance module is a comprehensive solution for optimizing 
 
 1. Install via Composer:
 ```bash
-composer require sterk/module-graphql-performance
+composer require veysiyildiz/module-graphql-performance
 ```
 
 2. Enable the module:

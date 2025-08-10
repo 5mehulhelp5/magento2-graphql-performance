@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace Sterk\GraphQlPerformance\Model\DataLoader;
 
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\ObjectManagerInterface;
+use Sterk\GraphQlPerformance\Model\Repository\ProductRepositoryAdapter;
 
 class ProductDataLoader extends BatchDataLoader
 {
     public function __construct(
         ObjectManagerInterface $objectManager,
-        private readonly ProductRepositoryInterface $productRepository,
-        private readonly SearchCriteriaBuilder $searchCriteriaBuilder
+        private readonly ProductRepositoryAdapter $repository
     ) {
         parent::__construct($objectManager);
     }
@@ -25,17 +23,6 @@ class ProductDataLoader extends BatchDataLoader
      */
     protected function batchLoad(array $ids): array
     {
-        $searchCriteria = $this->searchCriteriaBuilder
-            ->addFilter('entity_id', $ids, 'in')
-            ->create();
-
-        $products = $this->productRepository->getList($searchCriteria)->getItems();
-
-        $result = [];
-        foreach ($products as $product) {
-            $result[$product->getId()] = $product;
-        }
-
-        return $result;
+        return $this->repository->getByIds($ids);
     }
 }

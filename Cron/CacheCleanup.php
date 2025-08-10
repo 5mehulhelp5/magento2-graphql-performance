@@ -6,20 +6,17 @@ namespace Sterk\GraphQlPerformance\Cron;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Psr\Log\LoggerInterface;
 
-class CacheCleanup
+class CacheCleanup extends AbstractCron
 {
     public function __construct(
         private readonly ResolverCache $cache,
-        private readonly LoggerInterface $logger
-    ) {}
+        LoggerInterface $logger
+    ) {
+        parent::__construct($logger);
+    }
 
-    public function execute(): void
+    protected function process(): void
     {
-        try {
-            $this->cache->cleanExpired();
-            $this->logger->info('GraphQL cache cleanup completed successfully');
-        } catch (\Exception $e) {
-            $this->logger->error('GraphQL cache cleanup failed: ' . $e->getMessage());
-        }
+        $this->cache->cleanExpired();
     }
 }

@@ -1,0 +1,41 @@
+.graphql-performance-metrics-chart {
+    margin: 20px;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+}
+
+.metrics-chart-container {
+    margin-bottom: 20px;
+}
+
+.metrics-summary {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.metric-box {
+    flex: 1;
+    min-width: 200px;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 5px;
+}
+
+.metric-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333333;
+}

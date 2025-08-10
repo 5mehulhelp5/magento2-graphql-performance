@@ -24,13 +24,6 @@
                 <enable_query_batching>1</enable_query_batching>
                 <enable_query_persisted>0</enable_query_persisted>
                 <persisted_query_ttl>86400</persisted_query_ttl>
-                <rate_limiting>
-                    <enabled>1</enabled>
-                    <max_requests>1000</max_requests>
-                    <time_window>3600</time_window>
-                    <by_ip>1</by_ip>
-                    <by_token>1</by_token>
-                </rate_limiting>
                 <error_handling>
                     <show_debug_info>0</show_debug_info>
                     <log_errors>1</log_errors>
@@ -47,78 +40,6 @@
                 <health_check_interval>60</health_check_interval>
                 <enable_persistent_connections>1</enable_persistent_connections>
             </connection_pool>
-            <monitoring>
-                <enable_query_logging>1</enable_query_logging>
-                <slow_query_threshold>1000</slow_query_threshold>
-                <enable_performance_monitoring>1</enable_performance_monitoring>
-                <enable_tracing>0</enable_tracing>
-                <trace_sample_rate>0.1</trace_sample_rate>
-                <metrics_enabled>1</metrics_enabled>
-                <metrics_provider>prometheus</metrics_provider>
-                <metrics_endpoint>/metrics</metrics_endpoint>
-                <alert_thresholds>
-                    <response_time>5000</response_time>
-                    <error_rate>0.05</error_rate>
-                    <memory_usage>256</memory_usage>
-                </alert_thresholds>
-            </monitoring>
-            <field_resolvers>
-                <product>
-                    <batch_attributes>1</batch_attributes>
-                    <cache_lifetime>3600</cache_lifetime>
-                    <preload_media>1</preload_media>
-                    <media_placeholder_enabled>1</media_placeholder_enabled>
-                    <lazy_load_attributes>1</lazy_load_attributes>
-                    <attribute_preload_list>name,price,status,visibility,url_key</attribute_preload_list>
-                    <price_calculation_strategy>on_demand</price_calculation_strategy>
-                    <stock_check_strategy>cached</stock_check_strategy>
-                </product>
-                <category>
-                    <batch_children>1</batch_children>
-                    <cache_lifetime>7200</cache_lifetime>
-                    <preload_product_counts>1</preload_product_counts>
-                    <max_depth>3</max_depth>
-                    <children_batch_size>50</children_batch_size>
-                    <product_count_cache_lifetime>3600</product_count_cache_lifetime>
-                    <url_rewrites_preload>1</url_rewrites_preload>
-                </category>
-                <cart>
-                    <cache_lifetime>600</cache_lifetime>
-                    <batch_items>1</batch_items>
-                    <enable_price_recalculation>0</enable_price_recalculation>
-                    <price_recalculation_interval>300</price_recalculation_interval>
-                    <shipping_rate_cache_lifetime>300</shipping_rate_cache_lifetime>
-                </cart>
-                <order>
-                    <cache_lifetime>3600</cache_lifetime>
-                    <batch_items>1</batch_items>
-                    <batch_invoices>1</batch_invoices>
-                    <batch_shipments>1</batch_shipments>
-                    <tracking_info_cache_lifetime>300</tracking_info_cache_lifetime>
-                    <status_history_enabled>1</status_history_enabled>
-                </order>
-                <customer>
-                    <address_cache_lifetime>7200</address_cache_lifetime>
-                    <wishlist_cache_lifetime>3600</wishlist_cache_lifetime>
-                    <recent_orders_limit>10</recent_orders_limit>
-                    <session_lifetime>86400</session_lifetime>
-                </customer>
-                <cms>
-                    <cache_lifetime>86400</cache_lifetime>
-                    <enable_draft_preview>0</enable_draft_preview>
-                    <media_processing_strategy>lazy</media_processing_strategy>
-                </cms>
-            </field_resolvers>
-            <security>
-                <enable_cors>0</enable_cors>
-                <allowed_origins>*</allowed_origins>
-                <max_upload_size>10</max_upload_size>
-                <allowed_file_types>jpg,jpeg,png,gif,pdf</allowed_file_types>
-                <enable_csrf_validation>1</enable_csrf_validation>
-                <csrf_token_lifetime>3600</csrf_token_lifetime>
-                <enable_query_whitelist>0</enable_query_whitelist>
-                <query_whitelist_file>etc/graphql/whitelist.json</query_whitelist_file>
-            </security>
             <response>
                 <enable_compression>1</enable_compression>
                 <compression_threshold>1024</compression_threshold>

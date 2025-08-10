@@ -219,7 +219,7 @@ For support, please:
 1. Check documentation
 2. Search existing issues
 3. Create a new issue
-4. Contact support@sterk.com
+4. Contact veysiyildiz@gmail.com
 
 ## Changelog
 See CHANGELOG.md for version history

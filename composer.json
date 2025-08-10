@@ -54,5 +54,20 @@
         "issues": "https://github.com/veysiyildiz/magento2-graphql-performance/issues",
         "source": "https://github.com/veysiyildiz/magento2-graphql-performance",
         "docs": "https://github.com/veysiyildiz/magento2-graphql-performance/wiki"
-    }
+    },
+    "keywords": [
+        "magento2",
+        "magento2-module",
+        "graphql",
+        "performance",
+        "caching",
+        "optimization"
+    ],
+    "homepage": "https://github.com/veysiyildiz/magento2-graphql-performance",
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/veysiyildiz"
+        }
+    ]
 }

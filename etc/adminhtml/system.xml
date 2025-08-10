@@ -79,6 +79,118 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Monitor and log performance metrics</comment>
                 </field>
+                <field id="metrics_provider" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Metrics Provider</label>
+                    <source_model>Sterk\GraphQlPerformance\Model\Config\Source\MetricsProvider</source_model>
+                    <comment>Select metrics collection provider</comment>
+                </field>
+                <field id="metrics_endpoint" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Metrics Endpoint</label>
+                    <comment>Endpoint for metrics collection (e.g., /metrics for Prometheus)</comment>
+                    <depends>
+                        <field id="metrics_provider">prometheus</field>
+                    </depends>
+                </field>
+                <field id="alert_thresholds" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Alert Thresholds</label>
+                    <frontend_model>Sterk\GraphQlPerformance\Block\Adminhtml\Form\Field\Thresholds</frontend_model>
+                    <backend_model>Sterk\GraphQlPerformance\Model\Config\Backend\Thresholds</backend_model>
+                    <comment>Configure alert thresholds for different metrics</comment>
+                </field>
+                <field id="alert_email" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Alert Email</label>
+                    <validate>validate-email</validate>
+                    <comment>Email address for performance alerts</comment>
+                </field>
+                <field id="log_retention" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Log Retention Period</label>
+                    <comment>Number of days to retain performance logs</comment>
+                </field>
+            </group>
+
+            <!-- Security Settings -->
+            <group id="security" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Security Settings</label>
+                <field id="enable_rate_limiting" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Rate Limiting</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable rate limiting for GraphQL queries</comment>
+                </field>
+                <field id="rate_limit" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rate Limit</label>
+                    <comment>Maximum number of requests per time window</comment>
+                    <depends>
+                        <field id="enable_rate_limiting">1</field>
+                    </depends>
+                </field>
+                <field id="rate_limit_window" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rate Limit Window</label>
+                    <comment>Time window in seconds for rate limiting</comment>
+                    <depends>
+                        <field id="enable_rate_limiting">1</field>
+                    </depends>
+                </field>
+                <field id="whitelist_ips" translate="label comment" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Whitelisted IPs</label>
+                    <comment>List of IPs to exclude from rate limiting (one per line)</comment>
+                    <depends>
+                        <field id="enable_rate_limiting">1</field>
+                    </depends>
+                </field>
+                <field id="max_query_complexity" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Query Complexity</label>
+                    <comment>Maximum allowed complexity for GraphQL queries</comment>
+                </field>
+                <field id="max_query_depth" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Query Depth</label>
+                    <comment>Maximum allowed depth for GraphQL queries</comment>
+                </field>
+                <field id="enable_query_batching" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Query Batching</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Allow multiple queries in a single request</comment>
+                </field>
+                <field id="max_batch_size" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Batch Size</label>
+                    <comment>Maximum number of queries allowed in a batch</comment>
+                    <depends>
+                        <field id="enable_query_batching">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <!-- Advanced Settings -->
+            <group id="advanced" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Advanced Settings</label>
+                <field id="debug_mode" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Debug Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable detailed debug information in responses</comment>
+                </field>
+                <field id="enable_tracing" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Tracing</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable Apollo Tracing extension</comment>
+                </field>
+                <field id="trace_sample_rate" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Trace Sample Rate</label>
+                    <comment>Percentage of requests to trace (0.0 - 1.0)</comment>
+                    <depends>
+                        <field id="enable_tracing">1</field>
+                    </depends>
+                </field>
+                <field id="enable_persisted_queries" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Persisted Queries</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable automatic persisted queries</comment>
+                </field>
+                <field id="persisted_query_ttl" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Persisted Query TTL</label>
+                    <comment>Time-to-live for persisted queries in seconds</comment>
+                    <depends>
+                        <field id="enable_persisted_queries">1</field>
+                    </depends>
+                </field>
             </group>
 
             <!-- Field Resolver Settings -->

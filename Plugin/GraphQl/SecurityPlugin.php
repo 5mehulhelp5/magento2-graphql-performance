@@ -12,14 +12,15 @@ class SecurityPlugin
     public function __construct(
         private readonly RequestValidator $requestValidator,
         private readonly RequestInterface $request
-    ) {}
+    ) {
+    }
 
     /**
      * Validate request before processing
      *
-     * @param QueryProcessor $subject
-     * @param string $query
-     * @param array|null $variables
+     * @param  QueryProcessor $subject
+     * @param  string         $query
+     * @param  array|null     $variables
      * @return array
      */
     public function beforeProcess(

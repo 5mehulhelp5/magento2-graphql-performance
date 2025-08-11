@@ -13,12 +13,13 @@ abstract class BatchDataLoader
 
     public function __construct(
         protected readonly ObjectManagerInterface $objectManager
-    ) {}
+    ) {
+    }
 
     /**
      * Load a single item by ID
      *
-     * @param string|int $id
+     * @param  string|int $id
      * @return mixed
      */
     public function load($id)
@@ -44,7 +45,7 @@ abstract class BatchDataLoader
     /**
      * Load multiple items by IDs
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     public function loadMany(array $ids): array
@@ -106,7 +107,7 @@ abstract class BatchDataLoader
     /**
      * Batch load items - to be implemented by specific loaders
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     abstract protected function batchLoad(array $ids): array;

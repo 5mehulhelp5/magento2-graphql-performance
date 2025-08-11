@@ -20,7 +20,7 @@ class BrandCategoryDataLoader extends BatchDataLoader
     /**
      * Batch load brand categories
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     protected function batchLoad(array $ids): array

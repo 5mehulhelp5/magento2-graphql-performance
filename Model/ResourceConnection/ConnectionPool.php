@@ -25,12 +25,12 @@ class ConnectionPool
     private array $activeConnections = [];
 
     /**
-     * @param ResourceConnection $resourceConnection Resource connection instance
-     * @param DeploymentConfig $deploymentConfig Deployment configuration
-     * @param LoggerInterface|null $logger Logger instance
-     * @param int $maxConnections Maximum number of connections in the pool
-     * @param int $minConnections Minimum number of connections to maintain
-     * @param int $idleTimeout Time in seconds before idle connections are cleaned up
+     * @param ResourceConnection   $resourceConnection Resource connection instance
+     * @param DeploymentConfig     $deploymentConfig   Deployment configuration
+     * @param LoggerInterface|null $logger             Logger instance
+     * @param int                  $maxConnections     Maximum number of connections in the pool
+     * @param int                  $minConnections     Minimum number of connections to maintain
+     * @param int                  $idleTimeout        Time in seconds before idle connections are cleaned up
      */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
@@ -39,12 +39,13 @@ class ConnectionPool
         private readonly int $maxConnections = 50,
         private readonly int $minConnections = 5,
         private readonly int $idleTimeout = 300 // 5 minutes
-    ) {}
+    ) {
+    }
 
     /**
      * Get a connection from the pool
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return AdapterInterface
      */
     public function getConnection(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): AdapterInterface
@@ -71,7 +72,7 @@ class ConnectionPool
     /**
      * Release a connection back to the pool
      *
-     * @param AdapterInterface $connection
+     * @param  AdapterInterface $connection
      * @return void
      */
     public function releaseConnection(AdapterInterface $connection): void
@@ -87,7 +88,7 @@ class ConnectionPool
     /**
      * Create a new connection
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return AdapterInterface
      */
     private function createNewConnection(string $connectionName): AdapterInterface
@@ -113,7 +114,7 @@ class ConnectionPool
     /**
      * Wait for an available connection
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return AdapterInterface
      */
     private function waitForAvailableConnection(string $connectionName): AdapterInterface
@@ -155,8 +156,9 @@ class ConnectionPool
             }
 
             // Remove idle connections
-            if (!isset($this->activeConnections[$key]) &&
-                ($now - $connection['created'] > $this->idleTimeout)) {
+            if (!isset($this->activeConnections[$key])
+                && ($now - $connection['created'] > $this->idleTimeout)
+            ) {
                 try {
                     $connection['connection']->closeConnection();
                 } catch (\Exception $e) {
@@ -170,7 +172,7 @@ class ConnectionPool
     /**
      * Optimize MySQL connection settings
      *
-     * @param Mysql $connection
+     * @param  Mysql $connection
      * @return void
      */
     private function optimizeConnection(Mysql $connection): void
@@ -181,7 +183,13 @@ class ConnectionPool
 
             // Default optimization settings
             $optimizations = [
-                'SET SESSION sql_mode = ?'                => 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION',
+                'SET SESSION sql_mode = ?' => implode(',', [
+                    'STRICT_TRANS_TABLES',
+                    'NO_ZERO_IN_DATE',
+                    'NO_ZERO_DATE',
+                    'ERROR_FOR_DIVISION_BY_ZERO',
+                    'NO_ENGINE_SUBSTITUTION'
+                ]),
                 'SET SESSION wait_timeout = ?'            => 28800,  // 8 hours
                 'SET SESSION interactive_timeout = ?'     => 28800,  // 8 hours
                 'SET SESSION net_read_timeout = ?'        => 30,

@@ -18,16 +18,17 @@ class OrderResolver implements BatchResolverInterface
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve orders
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -37,10 +38,15 @@ class OrderResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $orderIds */
-        $orderIds = array_map(function ($item) {
-            return $item['order_id'] ?? null;
-        }, $value);
+        /**
+ * @var array $orderIds
+*/
+        $orderIds = array_map(
+            function ($item) {
+                return $item['order_id'] ?? null;
+            },
+            $value
+        );
         $orderIds = array_filter($orderIds);
 
         if (empty($orderIds)) {
@@ -73,9 +79,9 @@ class OrderResolver implements BatchResolverInterface
     /**
      * Load orders in batch
      *
-     * @param array $orderIds
-     * @param int $storeId
-     * @param int|null $customerId
+     * @param  array    $orderIds
+     * @param  int      $storeId
+     * @param  int|null $customerId
      * @return void
      */
     private function loadOrders(array $orderIds, int $storeId, ?int $customerId): void
@@ -134,8 +140,8 @@ class OrderResolver implements BatchResolverInterface
     /**
      * Transform order data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\OrderInterface $order
+     * @param  array                                  $fields
      * @return array
      */
     private function transformOrderData($order, array $fields): array
@@ -193,7 +199,7 @@ class OrderResolver implements BatchResolverInterface
     /**
      * Get order totals
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param  \Magento\Sales\Api\Data\OrderInterface $order
      * @return array
      */
     private function getOrderTotals($order): array
@@ -250,7 +256,7 @@ class OrderResolver implements BatchResolverInterface
     /**
      * Get order discounts
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param  \Magento\Sales\Api\Data\OrderInterface $order
      * @return array
      */
     private function getOrderDiscounts($order): array
@@ -273,8 +279,8 @@ class OrderResolver implements BatchResolverInterface
     /**
      * Calculate tax rate
      *
-     * @param float $taxAmount
-     * @param float $baseAmount
+     * @param  float $taxAmount
+     * @param  float $baseAmount
      * @return float
      */
     private function calculateTaxRate(float $taxAmount, float $baseAmount): float
@@ -288,9 +294,9 @@ class OrderResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $orderId
-     * @param int $storeId
-     * @param int|null $customerId
+     * @param  int      $orderId
+     * @param  int      $storeId
+     * @param  int|null $customerId
      * @return string
      */
     private function generateCacheKey(int $orderId, int $storeId, ?int $customerId): string

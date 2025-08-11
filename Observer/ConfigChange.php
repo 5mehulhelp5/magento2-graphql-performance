@@ -13,7 +13,8 @@ class ConfigChange implements ObserverInterface
     public function __construct(
         private readonly ResolverCache $cache,
         private readonly CacheWarmer $cacheWarmer
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

@@ -14,7 +14,7 @@ enum ConfigPath: string
     /**
      * Get full path for a field
      *
-     * @param string $field
+     * @param  string $field
      * @return string
      */
     public function getPath(string $field): string

@@ -16,16 +16,17 @@ class ChildrenResolver implements BatchResolverInterface
     public function __construct(
         private readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve category children
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -35,14 +36,19 @@ class ChildrenResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories */
+        /**
+ * @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories
+*/
         $categories = $value['categories'] ?? [];
         $result = [];
 
         // Get all parent IDs
-        $parentIds = array_map(function ($category) {
-            return $category->getId();
-        }, $categories);
+        $parentIds = array_map(
+            function ($category) {
+                return $category->getId();
+            },
+            $categories
+        );
 
         // Load children data in batch
         $childrenData = $this->getChildrenData($parentIds);
@@ -58,7 +64,7 @@ class ChildrenResolver implements BatchResolverInterface
     /**
      * Get children data for multiple categories
      *
-     * @param array $parentIds
+     * @param  array $parentIds
      * @return array
      */
     private function getChildrenData(array $parentIds): array

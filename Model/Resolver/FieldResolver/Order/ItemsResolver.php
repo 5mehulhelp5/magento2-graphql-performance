@@ -21,16 +21,17 @@ class ItemsResolver implements BatchResolverInterface
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache,
         private readonly ProductDataLoader $productDataLoader
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve order items
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -40,10 +41,15 @@ class ItemsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $orderIds */
-        $orderIds = array_map(function ($item) {
-            return $item['id'] ?? null;
-        }, $value);
+        /**
+ * @var array $orderIds
+*/
+        $orderIds = array_map(
+            function ($item) {
+                return $item['id'] ?? null;
+            },
+            $value
+        );
         $orderIds = array_filter($orderIds);
 
         if (empty($orderIds)) {
@@ -78,8 +84,8 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Load order items in batch
      *
-     * @param array $orderIds
-     * @param int $storeId
+     * @param  array $orderIds
+     * @param  int   $storeId
      * @return void
      */
     private function loadOrderItems(array $orderIds, int $storeId): void
@@ -140,7 +146,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Load products for order items
      *
-     * @param array $itemsByOrder
+     * @param  array $itemsByOrder
      * @return void
      */
     private function loadProducts(array $itemsByOrder): void
@@ -172,8 +178,8 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Transform order item data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\OrderItemInterface $item
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\OrderItemInterface $item
+     * @param  array                                      $fields
      * @return array
      */
     private function transformOrderItemData($item, array $fields): array
@@ -225,7 +231,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Get selected options for order item
      *
-     * @param \Magento\Sales\Api\Data\OrderItemInterface $item
+     * @param  \Magento\Sales\Api\Data\OrderItemInterface $item
      * @return array
      */
     private function getSelectedOptions($item): array
@@ -259,8 +265,8 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $orderId
-     * @param int $storeId
+     * @param  int $orderId
+     * @param  int $storeId
      * @return string
      */
     private function generateCacheKey(int $orderId, int $storeId): string

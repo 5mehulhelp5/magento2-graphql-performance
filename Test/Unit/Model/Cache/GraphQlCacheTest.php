@@ -57,9 +57,11 @@ class GraphQlCacheTest extends TestCase
             ->with(
                 $this->isType('string'),
                 $identifier,
-                $this->callback(function ($param) use ($tags) {
-                    return is_array($param) && empty(array_diff($param, $tags));
-                }),
+                $this->callback(
+                    function ($param) use ($tags) {
+                        return is_array($param) && empty(array_diff($param, $tags));
+                    }
+                ),
                 $lifeTime
             )
             ->willReturn(true);
@@ -113,9 +115,11 @@ class GraphQlCacheTest extends TestCase
         $this->cacheFrontend->expects($this->once())
             ->method('clean')
             ->with(
-                $this->callback(function ($param) use ($tags) {
-                    return is_array($param) && empty(array_diff($param, $tags));
-                })
+                $this->callback(
+                    function ($param) use ($tags) {
+                        return is_array($param) && empty(array_diff($param, $tags));
+                    }
+                )
             )
             ->willReturn(true);
 
@@ -123,4 +127,3 @@ class GraphQlCacheTest extends TestCase
         $this->assertTrue($result);
     }
 }
-

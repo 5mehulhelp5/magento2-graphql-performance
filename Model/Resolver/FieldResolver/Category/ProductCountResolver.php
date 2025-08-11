@@ -18,16 +18,17 @@ class ProductCountResolver implements BatchResolverInterface
         private readonly ProductCollectionFactory $productCollectionFactory,
         private readonly StockStatusResource $stockStatusResource,
         private readonly StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve product count
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -37,14 +38,19 @@ class ProductCountResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories */
+        /**
+ * @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories
+*/
         $categories = $value['categories'] ?? [];
         $result = [];
 
         // Get all category IDs
-        $categoryIds = array_map(function ($category) {
-            return $category->getId();
-        }, $categories);
+        $categoryIds = array_map(
+            function ($category) {
+                return $category->getId();
+            },
+            $categories
+        );
 
         // Load product counts in batch
         $productCounts = $this->getProductCounts($categoryIds);
@@ -60,7 +66,7 @@ class ProductCountResolver implements BatchResolverInterface
     /**
      * Get product counts for multiple categories
      *
-     * @param array $categoryIds
+     * @param  array $categoryIds
      * @return array
      */
     private function getProductCounts(array $categoryIds): array

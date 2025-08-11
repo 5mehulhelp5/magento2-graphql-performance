@@ -8,25 +8,38 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
+use Psr\Log\LoggerInterface;
 
+/**
+ * Resolver for selected payment method in checkout
+ */
 class SelectedPaymentMethodResolver implements BatchResolverInterface
 {
+    /**
+     * @var array Cart objects cache
+     */
     private array $cartCache = [];
+
+    /**
+     * @var array Payment method instance cache
+     */
     private array $methodInstanceCache = [];
 
     public function __construct(
         private readonly CartRepositoryInterface $cartRepository,
-        private readonly PaymentHelper $paymentHelper
-    ) {}
+        private readonly PaymentHelper $paymentHelper,
+        private readonly ?LoggerInterface $logger = null
+    ) {
+    }
 
     /**
      * Batch resolve selected payment methods
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -36,7 +49,9 @@ class SelectedPaymentMethodResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Quote\Api\Data\CartInterface[] $carts */
+        /**
+ * @var \Magento\Quote\Api\Data\CartInterface[] $carts
+*/
         $carts = $value['carts'] ?? [];
         $result = [];
 
@@ -45,9 +60,14 @@ class SelectedPaymentMethodResolver implements BatchResolverInterface
         }
 
         // Load all carts in batch
-        $this->loadCarts(array_map(function ($cart) {
-            return $cart->getId();
-        }, $carts));
+        $this->loadCarts(
+            array_map(
+                function ($cart) {
+                    return $cart->getId();
+                },
+                $carts
+            )
+        );
 
         foreach ($carts as $cart) {
             $cartId = $cart->getId();
@@ -67,7 +87,7 @@ class SelectedPaymentMethodResolver implements BatchResolverInterface
     /**
      * Load carts in batch
      *
-     * @param array $cartIds
+     * @param  array $cartIds
      * @return void
      */
     private function loadCarts(array $cartIds): void
@@ -87,14 +107,19 @@ class SelectedPaymentMethodResolver implements BatchResolverInterface
                 $this->cartCache[$cart->getId()] = $cart;
             }
         } catch (\Exception $e) {
-            // Log error if needed
+            // Silently handle cart loading errors to avoid breaking the GraphQL response
+            // Individual cart errors will be reflected in the result array
+            $this->logger?->error('Error loading carts: ' . $e->getMessage(), [
+                'cart_ids' => $uncachedIds,
+                'exception' => $e
+            ]);
         }
     }
 
     /**
      * Get selected payment method data
      *
-     * @param \Magento\Quote\Api\Data\PaymentInterface $payment
+     * @param  \Magento\Quote\Api\Data\PaymentInterface $payment
      * @return array|null
      */
     private function getSelectedPaymentMethodData($payment): ?array
@@ -115,19 +140,23 @@ class SelectedPaymentMethodResolver implements BatchResolverInterface
             'code' => $method,
             'title' => $methodInstance->getTitle(),
             'purchase_order_number' => $payment->getPoNumber(),
-            'additional_data' => array_map(function ($key, $value) {
-                return [
+            'additional_data' => array_map(
+                function ($key, $value) {
+                    return [
                     'key' => $key,
                     'value' => $value
-                ];
-            }, array_keys($additionalData), $additionalData)
+                    ];
+                },
+                array_keys($additionalData),
+                $additionalData
+            )
         ];
     }
 
     /**
      * Get payment method instance
      *
-     * @param string $method
+     * @param  string $method
      * @return \Magento\Payment\Model\MethodInterface|null
      */
     private function getPaymentMethodInstance(string $method)
@@ -146,7 +175,7 @@ class SelectedPaymentMethodResolver implements BatchResolverInterface
     /**
      * Build search criteria
      *
-     * @param array $filters
+     * @param  array $filters
      * @return \Magento\Framework\Api\SearchCriteria
      */
     private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria

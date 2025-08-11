@@ -14,7 +14,8 @@ abstract class BatchedResolver implements ResolverInterface
     public function __construct(
         protected readonly ResolverCache $cache,
         protected readonly BatchDataLoader $dataLoader
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritdoc
@@ -58,11 +59,11 @@ abstract class BatchedResolver implements ResolverInterface
     /**
      * Get IDs that need to be loaded
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return array
      */
     abstract protected function getIdsToLoad(
@@ -76,12 +77,12 @@ abstract class BatchedResolver implements ResolverInterface
     /**
      * Transform loaded items into the final result
      *
-     * @param array $items
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  array       $items
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return mixed
      */
     abstract protected function transformLoadedItems(
@@ -103,11 +104,11 @@ abstract class BatchedResolver implements ResolverInterface
     /**
      * Generate cache key for the resolver
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return string
      */
     protected function generateCacheKey(
@@ -138,11 +139,11 @@ abstract class BatchedResolver implements ResolverInterface
     /**
      * Get cache tags for the resolver
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return array
      */
     protected function getCacheTags(

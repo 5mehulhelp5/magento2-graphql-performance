@@ -49,8 +49,8 @@ class TagManager
     /**
      * Get cache tags for entity
      *
-     * @param string $entityType
-     * @param string|int $entityId
+     * @param  string     $entityType
+     * @param  string|int $entityId
      * @return array
      */
     public function getEntityTags(string $entityType, string|int $entityId): array
@@ -74,7 +74,7 @@ class TagManager
     /**
      * Get invalidation events for entity type
      *
-     * @param string $entityType
+     * @param  string $entityType
      * @return array
      */
     public function getInvalidationEvents(string $entityType): array
@@ -85,7 +85,7 @@ class TagManager
     /**
      * Get related entity types
      *
-     * @param string $entityType
+     * @param  string $entityType
      * @return array
      */
     public function getRelatedEntities(string $entityType): array
@@ -96,7 +96,7 @@ class TagManager
     /**
      * Get cache tags for query
      *
-     * @param string $query
+     * @param  string $query
      * @return array
      */
     public function getQueryTags(string $query): array
@@ -126,7 +126,7 @@ class TagManager
     /**
      * Get cache tags for result
      *
-     * @param array $result
+     * @param  array $result
      * @return array
      */
     public function getResultTags(array $result): array

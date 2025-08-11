@@ -9,7 +9,8 @@ abstract class AbstractCron
 {
     public function __construct(
         protected readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * Execute cron job

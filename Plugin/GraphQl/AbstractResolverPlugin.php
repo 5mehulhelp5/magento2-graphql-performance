@@ -11,18 +11,19 @@ abstract class AbstractResolverPlugin
 {
     public function __construct(
         private readonly ResolverInterface $optimizedResolver
-    ) {}
+    ) {
+    }
 
     /**
      * Replace the original resolver with our optimized version
      *
-     * @param object $subject
-     * @param callable $proceed
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  object      $subject
+     * @param  callable    $proceed
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return array
      */
     public function aroundResolve(

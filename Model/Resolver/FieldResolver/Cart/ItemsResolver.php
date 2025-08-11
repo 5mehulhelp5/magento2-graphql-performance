@@ -36,11 +36,11 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Batch resolve cart items
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -50,7 +50,9 @@ class ItemsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Quote\Api\Data\CartInterface[] $carts */
+        /**
+ * @var \Magento\Quote\Api\Data\CartInterface[] $carts
+*/
         $carts = $value['carts'] ?? [];
         $result = [];
 
@@ -59,9 +61,12 @@ class ItemsResolver implements BatchResolverInterface
         }
 
         // Get all cart IDs
-        $cartIds = array_map(function ($cart) {
-            return $cart->getId();
-        }, $carts);
+        $cartIds = array_map(
+            function ($cart) {
+                return $cart->getId();
+            },
+            $carts
+        );
 
         // Load items for all carts in batch
         $this->loadCartItems($cartIds);
@@ -83,7 +88,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Load cart items in batch
      *
-     * @param array $cartIds
+     * @param  array $cartIds
      * @return void
      */
     private function loadCartItems(array $cartIds): void
@@ -139,18 +144,21 @@ class ItemsResolver implements BatchResolverInterface
         } catch (\Exception $e) {
             // Silently handle product loading errors to avoid breaking the GraphQL response
             // Individual product errors will be reflected in the result array
-            $this->logger?->error('Error loading products: ' . $e->getMessage(), [
+            $this->logger?->error(
+                'Error loading products: ' . $e->getMessage(),
+                [
                 'product_ids' => $productIds,
                 'exception' => $e
-            ]);
+                ]
+            );
         }
     }
 
     /**
      * Transform cart items to GraphQL format
      *
-     * @param array $items
-     * @param array $fields
+     * @param  array $items
+     * @param  array $fields
      * @return array
      */
     private function transformCartItems(array $items, array $fields): array
@@ -183,8 +191,8 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Get product data
      *
-     * @param \Magento\Catalog\Api\Data\ProductInterface $product
-     * @param array $fields
+     * @param  \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param  array                                      $fields
      * @return array
      */
     private function getProductData($product, array $fields): array
@@ -216,8 +224,8 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Get price data
      *
-     * @param \Magento\Quote\Api\Data\CartItemInterface $item
-     * @param string $currency
+     * @param  \Magento\Quote\Api\Data\CartItemInterface $item
+     * @param  string                                    $currency
      * @return array
      */
     private function getPriceData($item, string $currency): array
@@ -253,7 +261,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Get custom options
      *
-     * @param \Magento\Quote\Api\Data\CartItemInterface $item
+     * @param  \Magento\Quote\Api\Data\CartItemInterface $item
      * @return array
      */
     private function getCustomOptions($item): array
@@ -281,7 +289,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Format price
      *
-     * @param float $price
+     * @param  float $price
      * @return float
      */
     private function formatPrice(float $price): float
@@ -292,7 +300,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Get media URL
      *
-     * @param string $path
+     * @param  string $path
      * @return string
      */
     private function getMediaUrl(string $path): string
@@ -304,7 +312,7 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Build search criteria
      *
-     * @param array $filters
+     * @param  array $filters
      * @return \Magento\Framework\Api\SearchCriteria
      */
     private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria

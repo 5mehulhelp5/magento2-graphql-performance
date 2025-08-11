@@ -12,7 +12,8 @@ abstract class CachedResolver implements ResolverInterface
 {
     public function __construct(
         private readonly ResolverCache $cache
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritdoc
@@ -48,11 +49,11 @@ abstract class CachedResolver implements ResolverInterface
     /**
      * Generate cache key for the resolver
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return string
      */
     protected function generateCacheKey(
@@ -83,11 +84,11 @@ abstract class CachedResolver implements ResolverInterface
     /**
      * Get cache tags for the resolver
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return array
      */
     protected function getCacheTags(
@@ -103,11 +104,11 @@ abstract class CachedResolver implements ResolverInterface
     /**
      * Actual resolver implementation
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return mixed
      */
     abstract protected function resolveData(

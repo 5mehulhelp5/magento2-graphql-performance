@@ -77,7 +77,8 @@ class CacheWarmer
         private readonly StoreManagerInterface $storeManager,
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * Warm up cache for all stores
@@ -94,7 +95,7 @@ class CacheWarmer
     /**
      * Warm up cache for specific store
      *
-     * @param int $storeId
+     * @param  int $storeId
      * @return void
      */
     public function warmupStoreCache(int $storeId): void
@@ -108,18 +109,22 @@ class CacheWarmer
         foreach ($queries as $queryName => $query) {
             try {
                 $this->executeQuery($query, $storeId);
-                $this->logger->info(sprintf(
-                    'Successfully warmed up cache for query "%s" in store %d',
-                    $queryName,
-                    $storeId
-                ));
+                $this->logger->info(
+                    sprintf(
+                        'Successfully warmed up cache for query "%s" in store %d',
+                        $queryName,
+                        $storeId
+                    )
+                );
             } catch (\Exception $e) {
-                $this->logger->error(sprintf(
-                    'Failed to warm up cache for query "%s" in store %d: %s',
-                    $queryName,
-                    $storeId,
-                    $e->getMessage()
-                ));
+                $this->logger->error(
+                    sprintf(
+                        'Failed to warm up cache for query "%s" in store %d: %s',
+                        $queryName,
+                        $storeId,
+                        $e->getMessage()
+                    )
+                );
             }
         }
 
@@ -129,8 +134,8 @@ class CacheWarmer
     /**
      * Execute GraphQL query
      *
-     * @param string $query
-     * @param int $storeId
+     * @param  string $query
+     * @param  int    $storeId
      * @return void
      */
     private function executeQuery(string $query, int $storeId): void
@@ -148,7 +153,7 @@ class CacheWarmer
     /**
      * Get custom queries from configuration
      *
-     * @param int $storeId
+     * @param  int $storeId
      * @return array
      */
     private function getCustomQueries(int $storeId): array

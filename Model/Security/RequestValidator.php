@@ -15,14 +15,15 @@ class RequestValidator
     public function __construct(
         private readonly Config $config,
         private readonly RateLimiter $rateLimiter
-    ) {}
+    ) {
+    }
 
     /**
      * Validate GraphQL request
      *
-     * @param RequestInterface $request
-     * @param string $query
-     * @param array $variables
+     * @param  RequestInterface $request
+     * @param  string           $query
+     * @param  array            $variables
      * @throws LocalizedException
      */
     public function validate(RequestInterface $request, string $query, array $variables = []): void
@@ -37,7 +38,7 @@ class RequestValidator
     /**
      * Validate query size
      *
-     * @param string $query
+     * @param  string $query
      * @throws LocalizedException
      */
     private function validateQuerySize(string $query): void
@@ -52,7 +53,7 @@ class RequestValidator
     /**
      * Validate forbidden patterns
      *
-     * @param string $query
+     * @param  string $query
      * @throws LocalizedException
      */
     private function validateForbiddenPatterns(string $query): void
@@ -71,31 +72,34 @@ class RequestValidator
     /**
      * Validate variables
      *
-     * @param array $variables
+     * @param  array $variables
      * @throws LocalizedException
      */
     private function validateVariables(array $variables): void
     {
-        array_walk_recursive($variables, function ($value, $key) {
-            // Validate variable names
-            if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
-                throw new LocalizedException(
-                    __('Invalid variable name: %1', $key)
-                );
-            }
+        array_walk_recursive(
+            $variables,
+            function ($value, $key) {
+                // Validate variable names
+                if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
+                    throw new LocalizedException(
+                        __('Invalid variable name: %1', $key)
+                    );
+                }
 
-            // Validate string values
-            if (is_string($value)) {
-                $this->validateStringValue($value, $key);
+                // Validate string values
+                if (is_string($value)) {
+                    $this->validateStringValue($value, $key);
+                }
             }
-        });
+        );
     }
 
     /**
      * Validate string value
      *
-     * @param string $value
-     * @param string $key
+     * @param  string $value
+     * @param  string $key
      * @throws LocalizedException
      */
     private function validateStringValue(string $value, string $key): void
@@ -118,7 +122,7 @@ class RequestValidator
     /**
      * Validate rate limit
      *
-     * @param RequestInterface $request
+     * @param  RequestInterface $request
      * @throws LocalizedException
      */
     private function validateRateLimit(RequestInterface $request): void
@@ -133,7 +137,7 @@ class RequestValidator
     /**
      * Validate authentication
      *
-     * @param RequestInterface $request
+     * @param  RequestInterface $request
      * @throws LocalizedException
      */
     private function validateAuthentication(RequestInterface $request): void

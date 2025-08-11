@@ -22,12 +22,13 @@ class ComplexityValidator
         private readonly ComplexityCalculator $complexityCalculator,
         private readonly int $maxComplexity = self::DEFAULT_MAX_COMPLEXITY,
         private readonly int $maxDepth = self::DEFAULT_MAX_DEPTH
-    ) {}
+    ) {
+    }
 
     /**
      * Validate query complexity
      *
-     * @param ResolveInfo $info
+     * @param  ResolveInfo $info
      * @throws GraphQlInputException
      */
     public function validate(ResolveInfo $info): void
@@ -64,7 +65,7 @@ class ComplexityValidator
     /**
      * Calculate query depth
      *
-     * @param \GraphQL\Language\AST\OperationDefinitionNode $operation
+     * @param  \GraphQL\Language\AST\OperationDefinitionNode $operation
      * @return int
      */
     private function calculateQueryDepth($operation): int
@@ -75,7 +76,7 @@ class ComplexityValidator
     /**
      * Get selection set depth
      *
-     * @param \GraphQL\Language\AST\SelectionSetNode $selectionSet
+     * @param  \GraphQL\Language\AST\SelectionSetNode $selectionSet
      * @return int
      */
     private function getSelectionSetDepth($selectionSet): int

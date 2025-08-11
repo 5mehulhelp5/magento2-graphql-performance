@@ -59,7 +59,7 @@ class ComplexityCalculator
     /**
      * Calculate query complexity
      *
-     * @param ResolveInfo $info
+     * @param  ResolveInfo $info
      * @return int
      */
     public function calculateComplexity(ResolveInfo $info): int
@@ -77,9 +77,9 @@ class ComplexityCalculator
     /**
      * Calculate complexity for a selection
      *
-     * @param \GraphQL\Language\AST\SelectionNode $selection
-     * @param ResolveInfo $info
-     * @param int $depth
+     * @param  \GraphQL\Language\AST\SelectionNode $selection
+     * @param  ResolveInfo                         $info
+     * @param  int                                 $depth
      * @return int
      */
     private function calculateSelectionComplexity($selection, ResolveInfo $info, int $depth = 0): int
@@ -123,7 +123,7 @@ class ComplexityCalculator
     /**
      * Get base complexity for a field
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return int
      */
     private function getFieldBaseComplexity(string $fieldName): int
@@ -144,7 +144,7 @@ class ComplexityCalculator
     /**
      * Calculate complexity added by arguments
      *
-     * @param \GraphQL\Language\AST\ArgumentNode $argument
+     * @param  \GraphQL\Language\AST\ArgumentNode $argument
      * @return int
      */
     private function getArgumentComplexity($argument): int
@@ -175,7 +175,7 @@ class ComplexityCalculator
     /**
      * Get argument value
      *
-     * @param \GraphQL\Language\AST\ValueNode $value
+     * @param  \GraphQL\Language\AST\ValueNode $value
      * @return mixed
      */
     private function getArgumentValue($value)
@@ -196,8 +196,8 @@ class ComplexityCalculator
     /**
      * Check if field returns a list
      *
-     * @param string $fieldName
-     * @param ResolveInfo $info
+     * @param  string      $fieldName
+     * @param  ResolveInfo $info
      * @return bool
      */
     private function isListField(string $fieldName, ResolveInfo $info): bool

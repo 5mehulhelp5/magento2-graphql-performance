@@ -32,13 +32,14 @@ class QueryTimer
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly int $slowQueryThreshold = 1000 // milliseconds
-    ) {}
+    ) {
+    }
 
     /**
      * Start timing a query
      *
-     * @param string $operationName
-     * @param string $query
+     * @param  string $operationName
+     * @param  string $query
      * @return void
      */
     public function start(string $operationName, string $query): void
@@ -54,9 +55,9 @@ class QueryTimer
     /**
      * Stop timing a query and record results
      *
-     * @param string $operationName
-     * @param string $query
-     * @param bool $cached
+     * @param  string $operationName
+     * @param  string $query
+     * @param  bool   $cached
      * @return void
      */
     public function stop(string $operationName, string $query, bool $cached = false): void
@@ -78,13 +79,16 @@ class QueryTimer
 
         // Log if query exceeds threshold
         if ($duration * 1000 > $this->slowQueryThreshold) {
-            $this->logger->warning('Slow GraphQL query detected', [
+            $this->logger->warning(
+                'Slow GraphQL query detected',
+                [
                 'operation' => $operationName,
                 'duration' => $duration,
                 'threshold' => $this->slowQueryThreshold / 1000,
                 'cached' => $cached,
                 'query' => $query
-            ]);
+                ]
+            );
         }
 
         unset($this->timers[$key]);
@@ -140,8 +144,8 @@ class QueryTimer
     /**
      * Generate unique key for operation/query combination
      *
-     * @param string $operationName
-     * @param string $query
+     * @param  string $operationName
+     * @param  string $query
      * @return string
      */
     private function getKey(string $operationName, string $query): string
@@ -152,8 +156,8 @@ class QueryTimer
     /**
      * Update metrics when query completes
      *
-     * @param float $duration Duration in seconds
-     * @param bool $cached Whether result was from cache
+     * @param  float $duration Duration in seconds
+     * @param  bool  $cached   Whether result was from cache
      * @return void
      */
     private function updateMetrics(float $duration, bool $cached): void

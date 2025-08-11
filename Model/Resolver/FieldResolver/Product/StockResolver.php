@@ -15,16 +15,17 @@ class StockResolver implements BatchResolverInterface
 
     public function __construct(
         private readonly StockRegistryInterface $stockRegistry
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve product stock status
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -34,14 +35,21 @@ class StockResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var ProductInterface[] $products */
+        /**
+ * @var ProductInterface[] $products
+*/
         $products = $value['products'] ?? [];
         $result = [];
 
         // Batch load stock data
-        $stockData = $this->getStockData(array_map(function ($product) {
-            return $product->getId();
-        }, $products));
+        $stockData = $this->getStockData(
+            array_map(
+                function ($product) {
+                    return $product->getId();
+                },
+                $products
+            )
+        );
 
         foreach ($products as $product) {
             $stockItem = $stockData[$product->getId()] ?? null;
@@ -63,7 +71,7 @@ class StockResolver implements BatchResolverInterface
     /**
      * Get stock data for multiple products
      *
-     * @param array $productIds
+     * @param  array $productIds
      * @return array
      */
     private function getStockData(array $productIds): array
@@ -93,8 +101,8 @@ class StockResolver implements BatchResolverInterface
     /**
      * Get stock status
      *
-     * @param \Magento\CatalogInventory\Api\Data\StockItemInterface $stockItem
-     * @param string $typeId
+     * @param  \Magento\CatalogInventory\Api\Data\StockItemInterface $stockItem
+     * @param  string                                                $typeId
      * @return string
      */
     private function getStockStatus($stockItem, string $typeId): string

@@ -21,16 +21,17 @@ class CreditMemoItemsResolver implements BatchResolverInterface
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache,
         private readonly ProductDataLoader $productDataLoader
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve credit memo items
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -40,10 +41,15 @@ class CreditMemoItemsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $creditMemoIds */
-        $creditMemoIds = array_map(function ($item) {
-            return $item['id'] ?? null;
-        }, $value);
+        /**
+ * @var array $creditMemoIds
+*/
+        $creditMemoIds = array_map(
+            function ($item) {
+                return $item['id'] ?? null;
+            },
+            $value
+        );
         $creditMemoIds = array_filter($creditMemoIds);
 
         if (empty($creditMemoIds)) {
@@ -78,8 +84,8 @@ class CreditMemoItemsResolver implements BatchResolverInterface
     /**
      * Load credit memo items in batch
      *
-     * @param array $creditMemoIds
-     * @param int $storeId
+     * @param  array $creditMemoIds
+     * @param  int   $storeId
      * @return void
      */
     private function loadCreditMemoItems(array $creditMemoIds, int $storeId): void
@@ -140,7 +146,7 @@ class CreditMemoItemsResolver implements BatchResolverInterface
     /**
      * Load products for credit memo items
      *
-     * @param array $itemsByMemo
+     * @param  array $itemsByMemo
      * @return void
      */
     private function loadProducts(array $itemsByMemo): void
@@ -172,8 +178,8 @@ class CreditMemoItemsResolver implements BatchResolverInterface
     /**
      * Transform credit memo item data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\CreditmemoItemInterface $item
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\CreditmemoItemInterface $item
+     * @param  array                                           $fields
      * @return array
      */
     private function transformCreditMemoItemData($item, array $fields): array
@@ -225,7 +231,7 @@ class CreditMemoItemsResolver implements BatchResolverInterface
     /**
      * Get credit memo item discounts
      *
-     * @param \Magento\Sales\Api\Data\CreditmemoItemInterface $item
+     * @param  \Magento\Sales\Api\Data\CreditmemoItemInterface $item
      * @return array
      */
     private function getItemDiscounts($item): array
@@ -248,8 +254,8 @@ class CreditMemoItemsResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $creditMemoId
-     * @param int $storeId
+     * @param  int $creditMemoId
+     * @param  int $storeId
      * @return string
      */
     private function generateCacheKey(int $creditMemoId, int $storeId): string

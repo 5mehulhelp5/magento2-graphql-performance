@@ -32,8 +32,8 @@ class QueryCache extends \Magento\Framework\Cache\Frontend\Decorator\TagScope
     /**
      * Get cached query result
      *
-     * @param string $query
-     * @param array $variables
+     * @param  string $query
+     * @param  array  $variables
      * @return array|null
      */
     public function getQueryResult(string $query, array $variables = []): ?array
@@ -55,11 +55,11 @@ class QueryCache extends \Magento\Framework\Cache\Frontend\Decorator\TagScope
     /**
      * Save query result to cache
      *
-     * @param string $query
-     * @param array $variables
-     * @param array $result
-     * @param array $tags
-     * @param int|null $lifetime
+     * @param  string   $query
+     * @param  array    $variables
+     * @param  array    $result
+     * @param  array    $tags
+     * @param  int|null $lifetime
      * @return bool
      */
     public function saveQueryResult(
@@ -83,8 +83,8 @@ class QueryCache extends \Magento\Framework\Cache\Frontend\Decorator\TagScope
     /**
      * Generate cache key for query
      *
-     * @param string $query
-     * @param array $variables
+     * @param  string $query
+     * @param  array  $variables
      * @return string
      */
     private function generateCacheKey(string $query, array $variables): string
@@ -102,7 +102,7 @@ class QueryCache extends \Magento\Framework\Cache\Frontend\Decorator\TagScope
     /**
      * Normalize query for consistent cache keys
      *
-     * @param string $query
+     * @param  string $query
      * @return string
      */
     private function normalizeQuery(string $query): string

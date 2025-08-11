@@ -19,16 +19,17 @@ class PaymentMethodsResolver implements BatchResolverInterface
         private readonly PaymentMethodListInterface $paymentMethodList,
         private readonly CartRepositoryInterface $cartRepository,
         private readonly StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve payment methods
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -38,7 +39,9 @@ class PaymentMethodsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Quote\Api\Data\CartInterface[] $carts */
+        /**
+ * @var \Magento\Quote\Api\Data\CartInterface[] $carts
+*/
         $carts = $value['carts'] ?? [];
         $result = [];
 
@@ -49,9 +52,14 @@ class PaymentMethodsResolver implements BatchResolverInterface
         $storeId = $this->storeManager->getStore()->getId();
 
         // Load all carts in batch
-        $this->loadCarts(array_map(function ($cart) {
-            return $cart->getId();
-        }, $carts));
+        $this->loadCarts(
+            array_map(
+                function ($cart) {
+                    return $cart->getId();
+                },
+                $carts
+            )
+        );
 
         // Load payment methods if not cached
         if (!isset($this->methodsCache[$storeId])) {
@@ -79,7 +87,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Load carts in batch
      *
-     * @param array $cartIds
+     * @param  array $cartIds
      * @return void
      */
     private function loadCarts(array $cartIds): void
@@ -110,7 +118,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Load payment methods for store
      *
-     * @param int $storeId
+     * @param  int $storeId
      * @return array
      */
     private function loadPaymentMethods(int $storeId): array
@@ -136,8 +144,8 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Filter methods for specific cart
      *
-     * @param array $methods
-     * @param \Magento\Quote\Api\Data\CartInterface $cart
+     * @param  array                                 $methods
+     * @param  \Magento\Quote\Api\Data\CartInterface $cart
      * @return array
      */
     private function filterMethodsForCart(array $methods, $cart): array
@@ -145,26 +153,29 @@ class PaymentMethodsResolver implements BatchResolverInterface
         $grandTotal = $cart->getGrandTotal();
         $currency = $cart->getQuoteCurrencyCode();
 
-        return array_filter($methods, function ($method) use ($grandTotal, $currency) {
-            // Check minimum amount
-            if ($method['minimum_amount'] && $grandTotal < $method['minimum_amount']) {
-                return false;
-            }
+        return array_filter(
+            $methods,
+            function ($method) use ($grandTotal, $currency) {
+                // Check minimum amount
+                if ($method['minimum_amount'] && $grandTotal < $method['minimum_amount']) {
+                    return false;
+                }
 
-            // Check maximum amount
-            if ($method['maximum_amount'] && $grandTotal > $method['maximum_amount']) {
-                return false;
-            }
+                // Check maximum amount
+                if ($method['maximum_amount'] && $grandTotal > $method['maximum_amount']) {
+                    return false;
+                }
 
-            // Add more filtering logic here if needed
-            return true;
-        });
+                // Add more filtering logic here if needed
+                return true;
+            }
+        );
     }
 
     /**
      * Check if payment method is deferred
      *
-     * @param string $code
+     * @param  string $code
      * @return bool
      */
     private function isMethodDeferred(string $code): bool
@@ -176,7 +187,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Get available issuers for payment method
      *
-     * @param string $code
+     * @param  string $code
      * @return array
      */
     private function getAvailableIssuers(string $code): array
@@ -196,7 +207,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Check if payment method supports 3DS
      *
-     * @param string $code
+     * @param  string $code
      * @return bool
      */
     private function supports3DS(string $code): bool
@@ -208,7 +219,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Get minimum amount for payment method
      *
-     * @param string $code
+     * @param  string $code
      * @return float|null
      */
     private function getMinimumAmount(string $code): ?float
@@ -224,7 +235,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Get maximum amount for payment method
      *
-     * @param string $code
+     * @param  string $code
      * @return float|null
      */
     private function getMaximumAmount(string $code): ?float
@@ -240,7 +251,7 @@ class PaymentMethodsResolver implements BatchResolverInterface
     /**
      * Build search criteria
      *
-     * @param array $filters
+     * @param  array $filters
      * @return \Magento\Framework\Api\SearchCriteria
      */
     private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria

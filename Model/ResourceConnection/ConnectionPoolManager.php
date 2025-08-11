@@ -16,7 +16,8 @@ class ConnectionPoolManager
             'active' => [],
             'idle' => []
         ]
-    ) {}
+    ) {
+    }
 
     /**
      * Get connection from pool
@@ -47,7 +48,7 @@ class ConnectionPoolManager
     /**
      * Release connection back to pool
      *
-     * @param AdapterInterface $connection
+     * @param  AdapterInterface $connection
      * @return void
      */
     public function releaseConnection(AdapterInterface $connection): void
@@ -147,7 +148,7 @@ class ConnectionPoolManager
     /**
      * Check connections in a specific pool
      *
-     * @param string $poolType
+     * @param  string $poolType
      * @return void
      */
     private function checkConnections(string $poolType): void

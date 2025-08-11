@@ -18,16 +18,17 @@ class InvoicesResolver implements BatchResolverInterface
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve order invoices
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -37,10 +38,15 @@ class InvoicesResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $orderIds */
-        $orderIds = array_map(function ($item) {
-            return $item['id'] ?? null;
-        }, $value);
+        /**
+ * @var array $orderIds
+*/
+        $orderIds = array_map(
+            function ($item) {
+                return $item['id'] ?? null;
+            },
+            $value
+        );
         $orderIds = array_filter($orderIds);
 
         if (empty($orderIds)) {
@@ -72,8 +78,8 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Load invoices in batch
      *
-     * @param array $orderIds
-     * @param int $storeId
+     * @param  array $orderIds
+     * @param  int   $storeId
      * @return void
      */
     private function loadInvoices(array $orderIds, int $storeId): void
@@ -134,8 +140,8 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Transform invoice data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\InvoiceInterface $invoice
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\InvoiceInterface $invoice
+     * @param  array                                    $fields
      * @return array
      */
     private function transformInvoiceData($invoice, array $fields): array
@@ -191,7 +197,7 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Get invoice state label
      *
-     * @param int $state
+     * @param  int $state
      * @return string
      */
     private function getInvoiceState(int $state): string
@@ -208,7 +214,7 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Get invoice discounts
      *
-     * @param \Magento\Sales\Api\Data\InvoiceInterface $invoice
+     * @param  \Magento\Sales\Api\Data\InvoiceInterface $invoice
      * @return array
      */
     private function getInvoiceDiscounts($invoice): array
@@ -231,7 +237,7 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Get invoice items
      *
-     * @param \Magento\Sales\Api\Data\InvoiceInterface $invoice
+     * @param  \Magento\Sales\Api\Data\InvoiceInterface $invoice
      * @return array
      */
     private function getInvoiceItems($invoice): array
@@ -265,7 +271,7 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Get invoice item discounts
      *
-     * @param \Magento\Sales\Api\Data\InvoiceItemInterface $item
+     * @param  \Magento\Sales\Api\Data\InvoiceItemInterface $item
      * @return array
      */
     private function getItemDiscounts($item): array
@@ -288,7 +294,7 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Get invoice comments
      *
-     * @param \Magento\Sales\Api\Data\InvoiceInterface $invoice
+     * @param  \Magento\Sales\Api\Data\InvoiceInterface $invoice
      * @return array
      */
     private function getInvoiceComments($invoice): array
@@ -308,8 +314,8 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $orderId
-     * @param int $storeId
+     * @param  int $orderId
+     * @param  int $storeId
      * @return string
      */
     private function generateCacheKey(int $orderId, int $storeId): string

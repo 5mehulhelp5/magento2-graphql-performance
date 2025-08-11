@@ -11,14 +11,15 @@ class Config
 {
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
-    ) {}
+    ) {
+    }
 
     /**
      * Get cache configuration
      *
-     * @param string $field
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $field
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return mixed
      */
     public function getCacheConfig(
@@ -36,9 +37,9 @@ class Config
     /**
      * Get query configuration
      *
-     * @param string $field
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $field
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return mixed
      */
     public function getQueryConfig(
@@ -56,9 +57,9 @@ class Config
     /**
      * Get connection pool configuration
      *
-     * @param string $field
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $field
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return mixed
      */
     public function getConnectionPoolConfig(
@@ -76,9 +77,9 @@ class Config
     /**
      * Get monitoring configuration
      *
-     * @param string $field
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $field
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return mixed
      */
     public function getMonitoringConfig(
@@ -96,10 +97,10 @@ class Config
     /**
      * Get field resolver configuration
      *
-     * @param string $resolver
-     * @param string $field
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $resolver
+     * @param  string     $field
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return mixed
      */
     public function getFieldResolverConfig(
@@ -118,8 +119,8 @@ class Config
     /**
      * Get cache lifetime
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getCacheLifetime(
@@ -132,8 +133,8 @@ class Config
     /**
      * Is full page cache enabled
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return bool
      */
     public function isFullPageCacheEnabled(
@@ -146,8 +147,8 @@ class Config
     /**
      * Is Redis cache enabled
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return bool
      */
     public function isRedisCacheEnabled(
@@ -160,8 +161,8 @@ class Config
     /**
      * Get maximum query complexity
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getMaxQueryComplexity(
@@ -174,8 +175,8 @@ class Config
     /**
      * Get maximum query depth
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getMaxQueryDepth(
@@ -188,8 +189,8 @@ class Config
     /**
      * Get batch size
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getBatchSize(
@@ -202,8 +203,8 @@ class Config
     /**
      * Get maximum connections
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getMaxConnections(
@@ -216,8 +217,8 @@ class Config
     /**
      * Get minimum connections
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getMinConnections(
@@ -230,8 +231,8 @@ class Config
     /**
      * Get idle timeout
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getIdleTimeout(
@@ -244,8 +245,8 @@ class Config
     /**
      * Is query logging enabled
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return bool
      */
     public function isQueryLoggingEnabled(
@@ -258,8 +259,8 @@ class Config
     /**
      * Get slow query threshold
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getSlowQueryThreshold(
@@ -272,8 +273,8 @@ class Config
     /**
      * Is performance monitoring enabled
      *
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return bool
      */
     public function isPerformanceMonitoringEnabled(
@@ -286,9 +287,9 @@ class Config
     /**
      * Get resolver specific cache lifetime
      *
-     * @param string $resolver
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $resolver
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return int
      */
     public function getResolverCacheLifetime(
@@ -303,10 +304,10 @@ class Config
     /**
      * Is batch loading enabled for resolver
      *
-     * @param string $resolver
-     * @param string $batchType
-     * @param string $scope
-     * @param mixed|null $scopeCode
+     * @param  string     $resolver
+     * @param  string     $batchType
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
      * @return bool
      */
     public function isBatchLoadingEnabled(

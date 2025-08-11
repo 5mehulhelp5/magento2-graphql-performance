@@ -5,6 +5,9 @@ namespace Sterk\GraphQlPerformance\Block\Adminhtml\Metrics\Button;
 
 use Magento\Framework\UrlInterface;
 
+/**
+ * Button to refresh GraphQL performance metrics
+ */
 class RefreshButton extends AbstractButton
 {
     public function __construct(

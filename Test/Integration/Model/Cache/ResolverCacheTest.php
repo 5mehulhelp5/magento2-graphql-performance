@@ -151,4 +151,3 @@ class ResolverCacheTest extends TestCase
         $this->assertNull($this->cache->get($wrongPrefixKey));
     }
 }
-

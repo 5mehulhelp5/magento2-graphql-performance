@@ -17,37 +17,44 @@ class CacheDirectiveManager
 
     public function __construct(
         private readonly Config $config
-    ) {}
+    ) {
+    }
 
     /**
      * Check if query has cache directives
      *
-     * @param Node $ast
+     * @param  Node $ast
      * @return bool
      */
     public function hasCacheDirectives(Node $ast): bool
     {
         $hasDirectives = false;
-        Visitor::visit($ast, [
+        Visitor::visit(
+            $ast,
+            [
             'enter' => function (Node $node) use (&$hasDirectives) {
-                if ($node->kind === NodeKind::DIRECTIVE &&
-                    $node->name->value === 'cache') {
+                if ($node->kind === NodeKind::DIRECTIVE
+                    && $node->name->value === 'cache'
+                ) {
                     $hasDirectives = true;
                 }
             }
-        ]);
+            ]
+        );
         return $hasDirectives;
     }
 
     /**
      * Add cache directives to query
      *
-     * @param Node $ast
+     * @param  Node $ast
      * @return Node
      */
     public function addCacheDirectives(Node $ast): Node
     {
-        return Visitor::visit($ast, [
+        return Visitor::visit(
+            $ast,
+            [
             'leave' => function (Node $node) {
                 if ($node->kind === NodeKind::FIELD) {
                     $fieldName = $node->name->value;
@@ -57,13 +64,14 @@ class CacheDirectiveManager
                 }
                 return $node;
             }
-        ]);
+            ]
+        );
     }
 
     /**
      * Check if field is cacheable
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return bool
      */
     private function isCacheableField(string $fieldName): bool
@@ -74,39 +82,49 @@ class CacheDirectiveManager
     /**
      * Create cache directive
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return Node
      */
     private function createCacheDirective(string $fieldName): Node
     {
         $ttl = $this->getFieldCacheTtl($fieldName);
 
-        return new Node([
+        return new Node(
+            [
             'kind' => NodeKind::DIRECTIVE,
-            'name' => new Node([
+            'name' => new Node(
+                [
                 'kind' => NodeKind::NAME,
                 'value' => 'cache'
-            ]),
+                ]
+            ),
             'arguments' => [
-                new Node([
+                new Node(
+                    [
                     'kind' => NodeKind::ARGUMENT,
-                    'name' => new Node([
+                    'name' => new Node(
+                        [
                         'kind' => NodeKind::NAME,
                         'value' => 'ttl'
-                    ]),
-                    'value' => new Node([
+                        ]
+                    ),
+                    'value' => new Node(
+                        [
                         'kind' => NodeKind::INT,
                         'value' => (string)$ttl
-                    ])
-                ])
+                        ]
+                    )
+                    ]
+                )
             ]
-        ]);
+            ]
+        );
     }
 
     /**
      * Get field cache TTL
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return int
      */
     private function getFieldCacheTtl(string $fieldName): int
@@ -119,7 +137,7 @@ class CacheDirectiveManager
     /**
      * Add non-cacheable field
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return void
      */
     public function addNonCacheableField(string $fieldName): void

@@ -17,16 +17,17 @@ abstract class AbstractResolver implements BatchServiceContractResolverInterface
     public function __construct(
         protected readonly ResolverCache $cache,
         protected readonly QueryTimer $queryTimer
-    ) {}
+    ) {
+    }
 
     /**
      * Resolve GraphQL field
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -71,11 +72,11 @@ abstract class AbstractResolver implements BatchServiceContractResolverInterface
     /**
      * Generate cache key
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return string
      */
     protected function generateCacheKey(
@@ -130,11 +131,11 @@ abstract class AbstractResolver implements BatchServiceContractResolverInterface
     /**
      * Resolve data
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     abstract protected function resolveData(

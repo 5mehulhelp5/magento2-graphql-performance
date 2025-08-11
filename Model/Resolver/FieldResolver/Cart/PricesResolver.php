@@ -18,16 +18,17 @@ class PricesResolver implements BatchResolverInterface
         private readonly CartTotalRepositoryInterface $cartTotalRepository,
         private readonly PriceCurrencyInterface $priceCurrency,
         private readonly StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve cart prices
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -37,7 +38,9 @@ class PricesResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Quote\Api\Data\CartInterface[] $carts */
+        /**
+ * @var \Magento\Quote\Api\Data\CartInterface[] $carts
+*/
         $carts = $value['carts'] ?? [];
         $result = [];
 
@@ -46,9 +49,12 @@ class PricesResolver implements BatchResolverInterface
         }
 
         // Get all cart IDs
-        $cartIds = array_map(function ($cart) {
-            return $cart->getId();
-        }, $carts);
+        $cartIds = array_map(
+            function ($cart) {
+                return $cart->getId();
+            },
+            $carts
+        );
 
         // Load totals for all carts in batch
         $this->loadCartTotals($cartIds);
@@ -73,7 +79,7 @@ class PricesResolver implements BatchResolverInterface
     /**
      * Load cart totals in batch
      *
-     * @param array $cartIds
+     * @param  array $cartIds
      * @return void
      */
     private function loadCartTotals(array $cartIds): void
@@ -97,8 +103,8 @@ class PricesResolver implements BatchResolverInterface
     /**
      * Transform cart totals to prices format
      *
-     * @param \Magento\Quote\Api\Data\TotalsInterface $totals
-     * @param string $currency
+     * @param  \Magento\Quote\Api\Data\TotalsInterface $totals
+     * @param  string                                  $currency
      * @return array
      */
     private function transformPrices($totals, string $currency): array
@@ -136,16 +142,19 @@ class PricesResolver implements BatchResolverInterface
 
         // Add applied taxes
         $appliedTaxes = $totals->getAppliedTaxes() ?: [];
-        $prices['applied_taxes'] = array_map(function ($tax) use ($currency) {
-            return [
+        $prices['applied_taxes'] = array_map(
+            function ($tax) use ($currency) {
+                return [
                 'amount' => [
                     'value' => $this->formatPrice($tax['amount']),
                     'currency' => $currency
                 ],
                 'label' => $tax['title'],
                 'rate' => $tax['percent']
-            ];
-        }, $appliedTaxes);
+                ];
+            },
+            $appliedTaxes
+        );
 
         // Add shipping information if available
         if ($totals->getShippingAmount() > 0) {
@@ -158,15 +167,18 @@ class PricesResolver implements BatchResolverInterface
                     'value' => $this->formatPrice($totals->getShippingInclTax()),
                     'currency' => $currency
                 ],
-                'taxes' => array_map(function ($tax) use ($currency) {
-                    return [
+                'taxes' => array_map(
+                    function ($tax) use ($currency) {
+                        return [
                         'amount' => [
                             'value' => $this->formatPrice($tax['amount']),
                             'currency' => $currency
                         ],
                         'rate' => $tax['percent']
-                    ];
-                }, $totals->getShippingTaxes() ?: [])
+                        ];
+                    },
+                    $totals->getShippingTaxes() ?: []
+                )
             ];
         }
 
@@ -176,7 +188,7 @@ class PricesResolver implements BatchResolverInterface
     /**
      * Format price
      *
-     * @param float $price
+     * @param  float $price
      * @return float
      */
     private function formatPrice(float $price): float

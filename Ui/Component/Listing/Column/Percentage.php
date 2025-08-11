@@ -8,7 +8,7 @@ class Percentage extends AbstractMetricColumn
     /**
      * Format percentage value
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return string
      */
     protected function formatValue($value): string

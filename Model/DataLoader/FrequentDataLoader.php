@@ -59,7 +59,7 @@ abstract class FrequentDataLoader extends BatchDataLoader
     /**
      * Load data from database in batch
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     abstract protected function loadFromDatabase(array $ids): array;
@@ -67,7 +67,7 @@ abstract class FrequentDataLoader extends BatchDataLoader
     /**
      * Generate cache key for an ID
      *
-     * @param string $id
+     * @param  string $id
      * @return string
      */
     abstract protected function generateCacheKey(string $id): string;
@@ -75,7 +75,7 @@ abstract class FrequentDataLoader extends BatchDataLoader
     /**
      * Get cache tags for an item
      *
-     * @param mixed $item
+     * @param  mixed $item
      * @return array
      */
     abstract protected function getCacheTags(mixed $item): array;

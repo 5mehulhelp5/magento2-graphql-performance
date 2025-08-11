@@ -89,14 +89,16 @@ class MetricsDataProvider extends DataProvider
             return $items;
         }
 
-        return array_filter($items, function ($item) {
-            foreach ($this->filters as $filter) {
-                if (!$this->matchesFilter($item, $filter)) {
-                    return false;
+        return array_filter(
+            $items, function ($item) {
+                foreach ($this->filters as $filter) {
+                    if (!$this->matchesFilter($item, $filter)) {
+                        return false;
+                    }
                 }
+                return true;
             }
-            return true;
-        });
+        );
     }
 
     private function matchesFilter(array $item, array $filter): bool
@@ -107,18 +109,18 @@ class MetricsDataProvider extends DataProvider
         }
 
         switch ($filter['condition']) {
-            case 'eq':
-                return $value == $filter['value'];
-            case 'neq':
-                return $value != $filter['value'];
-            case 'like':
-                return stripos($value, trim($filter['value'], '%')) !== false;
-            case 'gt':
-                return $value > $filter['value'];
-            case 'lt':
-                return $value < $filter['value'];
-            default:
-                return false;
+        case 'eq':
+            return $value == $filter['value'];
+        case 'neq':
+            return $value != $filter['value'];
+        case 'like':
+            return stripos($value, trim($filter['value'], '%')) !== false;
+        case 'gt':
+            return $value > $filter['value'];
+        case 'lt':
+            return $value < $filter['value'];
+        default:
+            return false;
         }
     }
 }

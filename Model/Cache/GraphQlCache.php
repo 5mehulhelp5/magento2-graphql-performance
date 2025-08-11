@@ -28,7 +28,7 @@ class GraphQlCache extends TagScope
     private readonly SerializerInterface $serializer;
 
     /**
-     * @param FrontendPool $cacheFrontendPool
+     * @param FrontendPool        $cacheFrontendPool
      * @param SerializerInterface $serializer
      */
     public function __construct(
@@ -45,10 +45,10 @@ class GraphQlCache extends TagScope
     /**
      * Save data to cache
      *
-     * @param mixed $data
-     * @param string $identifier
-     * @param array $tags
-     * @param int|null $lifeTime
+     * @param  mixed    $data
+     * @param  string   $identifier
+     * @param  array    $tags
+     * @param  int|null $lifeTime
      * @return bool
      */
     public function save($data, $identifier, array $tags = [], $lifeTime = null): bool
@@ -60,7 +60,7 @@ class GraphQlCache extends TagScope
     /**
      * Load data from cache
      *
-     * @param string $identifier
+     * @param  string $identifier
      * @return mixed
      */
     public function load($identifier)

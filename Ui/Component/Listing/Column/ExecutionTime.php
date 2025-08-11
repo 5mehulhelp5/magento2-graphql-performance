@@ -8,7 +8,7 @@ class ExecutionTime extends AbstractMetricColumn
     /**
      * Format execution time
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return string
      */
     protected function formatValue($value): string

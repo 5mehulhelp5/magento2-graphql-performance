@@ -30,11 +30,11 @@ class ProductsResolver extends AbstractResolver
     /**
      * Batch resolve products
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     protected function getEntityType(): string
@@ -67,11 +67,11 @@ class ProductsResolver extends AbstractResolver
     /**
      * Generate cache key
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return string
      */
     private function generateCacheKey(
@@ -102,7 +102,7 @@ class ProductsResolver extends AbstractResolver
     /**
      * Build search criteria from GraphQL arguments
      *
-     * @param array $args
+     * @param  array $args
      * @return \Magento\Framework\Api\SearchCriteria
      */
     private function buildSearchCriteria(array $args): \Magento\Framework\Api\SearchCriteria
@@ -134,8 +134,8 @@ class ProductsResolver extends AbstractResolver
     /**
      * Transform products to GraphQL format
      *
-     * @param array $products
-     * @param ResolveInfo $info
+     * @param  array       $products
+     * @param  ResolveInfo $info
      * @return array
      */
     private function transformProductsToGraphQL(array $products, ResolveInfo $info, array $args): array
@@ -185,9 +185,7 @@ class ProductsResolver extends AbstractResolver
             'name' => $product->getName(),
             'sku' => $product->getSku(),
             'url_key' => $product->getUrlKey(),
-            'stock_status' => $product->getExtensionAttributes()
-                ->getStockItem()
-                ->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK',
+            'stock_status' => $this->getStockStatus($product),
             '__typename' => 'SimpleProduct', // Add logic for different product types
         ];
     }
@@ -195,7 +193,7 @@ class ProductsResolver extends AbstractResolver
     /**
      * Get price range data
      *
-     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param  \Magento\Catalog\Api\Data\ProductInterface $product
      * @return array
      */
     private function getPriceRange($product): array
@@ -223,10 +221,23 @@ class ProductsResolver extends AbstractResolver
     /**
      * Get attribute value and label
      *
-     * @param \Magento\Catalog\Api\Data\ProductInterface $product
-     * @param string $attributeCode
+     * @param  \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param  string                                     $attributeCode
      * @return array
      */
+    /**
+     * Get stock status for a product
+     *
+     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @return string
+     */
+    private function getStockStatus($product): string
+    {
+        return $product->getExtensionAttributes()
+            ->getStockItem()
+            ->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK';
+    }
+
     private function getAttributeValueLabel($product, string $attributeCode): array
     {
         $attribute = $product->getResource()->getAttribute($attributeCode);

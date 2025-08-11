@@ -7,6 +7,9 @@ use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
 use Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface;
 
+/**
+ * Block class for displaying GraphQL performance metrics chart
+ */
 class Chart extends Template
 {
     public function __construct(
@@ -17,11 +20,25 @@ class Chart extends Template
         parent::__construct($context, $data);
     }
 
+    /**
+     * Get raw performance metrics data
+     *
+     * @return array
+     */
     public function getMetrics(): array
     {
         return $this->performanceMetrics->getMetrics();
     }
 
+    /**
+     * Get formatted data for chart display
+     *
+     * @return array{
+     *     labels: array<string>,
+     *     responseTimes: array<float>,
+     *     cacheHitRates: array<float>
+     * }
+     */
     public function getChartData(): array
     {
         $metrics = $this->getMetrics();

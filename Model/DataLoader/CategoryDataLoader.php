@@ -18,7 +18,7 @@ class CategoryDataLoader extends BatchDataLoader
     /**
      * Batch load categories by IDs
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     protected function batchLoad(array $ids): array

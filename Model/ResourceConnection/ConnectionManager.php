@@ -24,30 +24,32 @@ class ConnectionManager
     private array $readConnections = [];
 
     /**
-     * @param ConnectionPool $connectionPool Connection pool instance
-     * @param ResourceConnection $resourceConnection Resource connection instance
-     * @param DeploymentConfig $deploymentConfig Deployment configuration
-     * @param LoggerInterface|null $logger Logger instance
+     * @param ConnectionPool       $connectionPool     Connection pool instance
+     * @param ResourceConnection   $resourceConnection Resource connection instance
+     * @param DeploymentConfig     $deploymentConfig   Deployment configuration
+     * @param LoggerInterface|null $logger             Logger instance
      */
     public function __construct(
         private readonly ConnectionPool $connectionPool,
         private readonly ResourceConnection $resourceConnection,
         private readonly DeploymentConfig $deploymentConfig,
         private readonly ?LoggerInterface $logger = null
-    ) {}
+    ) {
+    }
 
     /**
      * Get connection for read operations
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return AdapterInterface
      */
     /**
      * Get connection for read operations
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return AdapterInterface
-     * @deprecated Use getConnection() instead
+     * @deprecated This method is deprecated in favor of using getConnection() for better connection management.
+     * @see getConnection() Use this method instead with forWrite=false
      */
     public function getReadConnection(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): AdapterInterface
     {
@@ -57,9 +59,10 @@ class ConnectionManager
     /**
      * Get connection for write operations
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return AdapterInterface
-     * @deprecated Use getConnection() instead
+     * @deprecated This method is deprecated in favor of using getConnection() for better connection management.
+     * @see getConnection() Use this method instead with forWrite=true
      */
     public function getWriteConnection(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): AdapterInterface
     {
@@ -69,8 +72,8 @@ class ConnectionManager
     /**
      * Get database connection
      *
-     * @param string $connectionName
-     * @param bool $forWrite Whether the connection is for write operations
+     * @param  string $connectionName
+     * @param  bool   $forWrite       Whether the connection is for write operations
      * @return AdapterInterface
      */
     public function getConnection(
@@ -102,7 +105,7 @@ class ConnectionManager
     /**
      * Commit transaction and release connection
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return void
      */
     public function commitAndRelease(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): void
@@ -125,7 +128,7 @@ class ConnectionManager
     /**
      * Rollback transaction and release connection
      *
-     * @param string $connectionName
+     * @param  string $connectionName
      * @return void
      */
     public function rollbackAndRelease(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): void
@@ -148,7 +151,7 @@ class ConnectionManager
     /**
      * Release read connections
      *
-     * @param string|null $connectionName
+     * @param  string|null $connectionName
      * @return void
      */
     public function releaseReadConnections(?string $connectionName = null): void

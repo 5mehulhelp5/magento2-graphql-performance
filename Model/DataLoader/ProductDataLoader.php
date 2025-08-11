@@ -18,7 +18,7 @@ class ProductDataLoader extends BatchDataLoader
     /**
      * Batch load products by IDs
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     protected function batchLoad(array $ids): array

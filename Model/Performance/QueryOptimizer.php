@@ -17,12 +17,13 @@ class QueryOptimizer
         private readonly ComplexityCalculator $complexityCalculator,
         private readonly FieldUsageAnalyzer $fieldUsageAnalyzer,
         private readonly CacheDirectiveManager $cacheDirectiveManager
-    ) {}
+    ) {
+    }
 
     /**
      * Optimize GraphQL query
      *
-     * @param string $query
+     * @param  string $query
      * @return string
      */
     public function optimize(string $query): string
@@ -53,12 +54,14 @@ class QueryOptimizer
     /**
      * Remove unused fields from query
      *
-     * @param Node $ast
+     * @param  Node $ast
      * @return Node
      */
     private function removeUnusedFields(Node $ast): Node
     {
-        return Visitor::visit($ast, [
+        return Visitor::visit(
+            $ast,
+            [
             'leave' => function (Node $node) {
                 if ($node->kind === NodeKind::FIELD) {
                     $fieldName = $node->name->value;
@@ -70,13 +73,14 @@ class QueryOptimizer
                 }
                 return $node;
             }
-        ]);
+            ]
+        );
     }
 
     /**
      * Print AST as string
      *
-     * @param Node $ast
+     * @param  Node $ast
      * @return string
      */
     private function printAst(Node $ast): string

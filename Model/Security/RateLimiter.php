@@ -17,12 +17,13 @@ class RateLimiter
         private readonly Config $config,
         private readonly CacheConfig $cache,
         private readonly RequestInterface $request
-    ) {}
+    ) {
+    }
 
     /**
      * Check if request should be rate limited
      *
-     * @param string $identifier
+     * @param  string $identifier
      * @return bool
      * @throws LocalizedException
      */
@@ -48,7 +49,7 @@ class RateLimiter
     /**
      * Generate cache key for rate limiting
      *
-     * @param string $identifier
+     * @param  string $identifier
      * @return string
      */
     private function generateCacheKey(string $identifier = ''): string
@@ -89,8 +90,8 @@ class RateLimiter
     /**
      * Increment request counter
      *
-     * @param string $key
-     * @param int $currentCount
+     * @param  string $key
+     * @param  int    $currentCount
      * @return void
      */
     private function incrementCounter(string $key, int $currentCount): void
@@ -126,7 +127,7 @@ class RateLimiter
     /**
      * Reset rate limit for identifier
      *
-     * @param string $identifier
+     * @param  string $identifier
      * @return bool
      */
     public function resetLimit(string $identifier = ''): bool
@@ -138,7 +139,7 @@ class RateLimiter
     /**
      * Get current request count
      *
-     * @param string $identifier
+     * @param  string $identifier
      * @return int
      */
     public function getCurrentCount(string $identifier = ''): int
@@ -150,7 +151,7 @@ class RateLimiter
     /**
      * Get remaining requests allowed
      *
-     * @param string $identifier
+     * @param  string $identifier
      * @return int
      */
     public function getRemainingRequests(string $identifier = ''): int
@@ -170,4 +171,3 @@ class RateLimiter
         return self::WINDOW_SIZE - (time() % self::WINDOW_SIZE);
     }
 }
-

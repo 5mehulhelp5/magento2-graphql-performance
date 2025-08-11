@@ -39,11 +39,11 @@ class BillingAddressResolver implements BatchResolverInterface
     /**
      * Batch resolve billing addresses
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -53,7 +53,9 @@ class BillingAddressResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Quote\Api\Data\CartInterface[] $carts */
+        /**
+ * @var \Magento\Quote\Api\Data\CartInterface[] $carts
+*/
         $carts = $value['carts'] ?? [];
         $result = [];
 
@@ -62,9 +64,14 @@ class BillingAddressResolver implements BatchResolverInterface
         }
 
         // Load all carts in batch
-        $this->loadCarts(array_map(function ($cart) {
-            return $cart->getId();
-        }, $carts));
+        $this->loadCarts(
+            array_map(
+                function ($cart) {
+                    return $cart->getId();
+                },
+                $carts
+            )
+        );
 
         foreach ($carts as $cart) {
             $cartId = $cart->getId();
@@ -84,7 +91,7 @@ class BillingAddressResolver implements BatchResolverInterface
     /**
      * Load carts in batch
      *
-     * @param array $cartIds
+     * @param  array $cartIds
      * @return void
      */
     private function loadCarts(array $cartIds): void
@@ -106,17 +113,20 @@ class BillingAddressResolver implements BatchResolverInterface
         } catch (\Exception $e) {
             // Silently handle cart loading errors to avoid breaking the GraphQL response
             // Individual cart errors will be reflected in the result array
-            $this->logger?->error('Error loading carts: ' . $e->getMessage(), [
+            $this->logger?->error(
+                'Error loading carts: ' . $e->getMessage(),
+                [
                 'cart_ids' => $uncachedIds,
                 'exception' => $e
-            ]);
+                ]
+            );
         }
     }
 
     /**
      * Transform billing address to GraphQL format
      *
-     * @param \Magento\Quote\Api\Data\AddressInterface $address
+     * @param  \Magento\Quote\Api\Data\AddressInterface $address
      * @return array
      */
     private function transformBillingAddress($address): array
@@ -143,7 +153,7 @@ class BillingAddressResolver implements BatchResolverInterface
     /**
      * Get country data
      *
-     * @param string $countryId
+     * @param  string $countryId
      * @return array
      */
     private function getCountryData(string $countryId): array
@@ -162,8 +172,8 @@ class BillingAddressResolver implements BatchResolverInterface
     /**
      * Get region data
      *
-     * @param int|null $regionId
-     * @param string $countryId
+     * @param  int|null $regionId
+     * @param  string   $countryId
      * @return array
      */
     private function getRegionData(?int $regionId, string $countryId): array
@@ -192,7 +202,7 @@ class BillingAddressResolver implements BatchResolverInterface
     /**
      * Build search criteria
      *
-     * @param array $filters
+     * @param  array $filters
      * @return \Magento\Framework\Api\SearchCriteria
      */
     private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria

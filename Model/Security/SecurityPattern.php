@@ -16,7 +16,7 @@ enum SecurityPattern: string
      */
     public function getDescription(): string
     {
-        return match($this) {
+        return match ($this) {
             self::INTROSPECTION => 'Introspection queries are not allowed',
             self::DANGEROUS_FIELDS => 'Query contains sensitive field names',
             self::SYSTEM_QUERIES => 'System-level queries are not allowed'

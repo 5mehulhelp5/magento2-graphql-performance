@@ -18,14 +18,15 @@ class PerformancePlugin
         private readonly QueryTimer $queryTimer,
         private readonly ResolverCache $cache,
         private readonly CacheKeyGenerator $cacheKeyGenerator
-    ) {}
+    ) {
+    }
 
     /**
      * Optimize query before processing
      *
-     * @param QueryProcessor $subject
-     * @param string $query
-     * @param array|null $variables
+     * @param  QueryProcessor $subject
+     * @param  string         $query
+     * @param  array|null     $variables
      * @return array
      */
     public function beforeProcess(
@@ -50,10 +51,10 @@ class PerformancePlugin
     /**
      * Process result after query execution
      *
-     * @param QueryProcessor $subject
-     * @param array $result
-     * @param string $query
-     * @param array|null $variables
+     * @param  QueryProcessor $subject
+     * @param  array          $result
+     * @param  string         $query
+     * @param  array|null     $variables
      * @return array
      */
     public function afterProcess(
@@ -74,8 +75,8 @@ class PerformancePlugin
     /**
      * Try to get result from cache
      *
-     * @param string $query
-     * @param array|null $variables
+     * @param  string     $query
+     * @param  array|null $variables
      * @return array|null
      */
     private function tryGetFromCache(string $query, ?array $variables): ?array
@@ -94,8 +95,8 @@ class PerformancePlugin
     /**
      * Optimize query
      *
-     * @param string $query
-     * @param array|null $variables
+     * @param  string     $query
+     * @param  array|null $variables
      * @return array
      */
     private function optimizeQuery(string $query, ?array $variables): array
@@ -107,9 +108,9 @@ class PerformancePlugin
     /**
      * Cache result if valid
      *
-     * @param array $result
-     * @param string $query
-     * @param array|null $variables
+     * @param  array      $result
+     * @param  string     $query
+     * @param  array|null $variables
      * @return void
      */
     private function cacheResultIfValid(array $result, string $query, ?array $variables): void

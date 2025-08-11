@@ -8,7 +8,7 @@ trait CacheKeyGeneratorTrait
     /**
      * Generate cache key for an ID
      *
-     * @param string $id
+     * @param  string $id
      * @return string
      */
     protected function generateCacheKey(string $id): string
@@ -19,7 +19,7 @@ trait CacheKeyGeneratorTrait
     /**
      * Get cache tags for an item
      *
-     * @param mixed $item
+     * @param  mixed $item
      * @return array
      */
     protected function getCacheTags(mixed $item): array

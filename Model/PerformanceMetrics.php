@@ -14,7 +14,8 @@ class PerformanceMetrics implements PerformanceMetricsInterface
         private readonly QueryTimer $queryTimer,
         private readonly ResolverCache $cache,
         private readonly ConnectionPoolManager $connectionPool
-    ) {}
+    ) {
+    }
 
     /**
      * Get performance metrics

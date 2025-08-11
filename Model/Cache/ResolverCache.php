@@ -13,12 +13,13 @@ class ResolverCache
     public function __construct(
         private readonly CacheInterface $cache,
         private readonly SerializerInterface $serializer
-    ) {}
+    ) {
+    }
 
     /**
      * Get cached data
      *
-     * @param string $key
+     * @param  string $key
      * @return mixed|null
      */
     public function get(string $key)
@@ -34,10 +35,10 @@ class ResolverCache
     /**
      * Save data to cache
      *
-     * @param string $key
-     * @param mixed $data
-     * @param array $tags
-     * @param int|null $lifetime
+     * @param  string   $key
+     * @param  mixed    $data
+     * @param  array    $tags
+     * @param  int|null $lifetime
      * @return bool
      */
     public function set(string $key, $data, array $tags = [], ?int $lifetime = null): bool
@@ -54,7 +55,7 @@ class ResolverCache
     /**
      * Generate cache key
      *
-     * @param string $key
+     * @param  string $key
      * @return string
      */
     private function getCacheKey(string $key): string

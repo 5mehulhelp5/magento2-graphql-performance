@@ -8,10 +8,9 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Resolver\Products\ProductsResolver;
 
+/**
+ * Plugin for optimizing product resolver
+ */
 class ProductResolverPlugin extends AbstractResolverPlugin
 {
-    public function __construct(ProductsResolver $optimizedResolver)
-    {
-        parent::__construct($optimizedResolver);
-    }
 }

@@ -26,7 +26,7 @@ class MetricsActions extends Column
     /**
      * Prepare Data Source
      *
-     * @param array $dataSource
+     * @param  array $dataSource
      * @return array
      */
     public function prepareDataSource(array $dataSource): array
@@ -45,7 +45,7 @@ class MetricsActions extends Column
     /**
      * Get actions array
      *
-     * @param array $item
+     * @param  array $item
      * @return array
      */
     private function getActions(array $item): array

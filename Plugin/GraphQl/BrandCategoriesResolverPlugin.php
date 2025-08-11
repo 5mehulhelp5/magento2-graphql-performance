@@ -8,10 +8,9 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Resolver\BrandCategories\BrandCategoriesResolver;
 
+/**
+ * Plugin for optimizing brand categories resolver
+ */
 class BrandCategoriesResolverPlugin extends AbstractResolverPlugin
 {
-    public function __construct(BrandCategoriesResolver $optimizedResolver)
-    {
-        parent::__construct($optimizedResolver);
-    }
 }

@@ -10,8 +10,8 @@ trait FieldSelectionTrait
     /**
      * Check if field is requested in GraphQL query
      *
-     * @param ResolveInfo $info
-     * @param string $field
+     * @param  ResolveInfo $info
+     * @param  string      $field
      * @return bool
      */
     protected function isFieldRequested(ResolveInfo $info, string $field): bool
@@ -23,8 +23,8 @@ trait FieldSelectionTrait
     /**
      * Get requested fields from GraphQL query
      *
-     * @param ResolveInfo $info
-     * @param array $defaultFields
+     * @param  ResolveInfo $info
+     * @param  array       $defaultFields
      * @return array
      */
     protected function getRequestedFields(ResolveInfo $info, array $defaultFields = []): array
@@ -36,10 +36,10 @@ trait FieldSelectionTrait
     /**
      * Add field to result if requested
      *
-     * @param array $result
-     * @param ResolveInfo $info
-     * @param string $field
-     * @param mixed $value
+     * @param  array       $result
+     * @param  ResolveInfo $info
+     * @param  string      $field
+     * @param  mixed       $value
      * @return array
      */
     protected function addFieldIfRequested(array $result, ResolveInfo $info, string $field, $value): array

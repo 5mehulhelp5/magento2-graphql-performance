@@ -28,13 +28,14 @@ class QueryValidator
     public function __construct(
         private readonly Config $config,
         private readonly Schema $schema
-    ) {}
+    ) {
+    }
 
     /**
      * Validate GraphQL query
      *
-     * @param string $query
-     * @param array $variables
+     * @param  string $query
+     * @param  array  $variables
      * @throws GraphQlInputException
      */
     public function validate(string $query, array $variables = []): void
@@ -50,7 +51,7 @@ class QueryValidator
     /**
      * Validate query length
      *
-     * @param string $query
+     * @param  string $query
      * @throws GraphQlInputException
      */
     private function validateQueryLength(string $query): void
@@ -65,7 +66,7 @@ class QueryValidator
     /**
      * Validate query syntax
      *
-     * @param string $query
+     * @param  string $query
      * @throws GraphQlInputException
      */
     private function validateQuerySyntax(string $query): void
@@ -80,7 +81,7 @@ class QueryValidator
     /**
      * Validate query complexity
      *
-     * @param string $query
+     * @param  string $query
      * @throws GraphQlInputException
      */
     private function validateComplexity(string $query): void
@@ -97,7 +98,8 @@ class QueryValidator
 
         if (!empty($errors)) {
             throw new GraphQlInputException(
-                __('Query complexity of %1 exceeds maximum allowed complexity of %2', 
+                __(
+                    'Query complexity of %1 exceeds maximum allowed complexity of %2',
                     $complexity->getComplexity(),
                     $maxComplexity
                 )
@@ -108,7 +110,7 @@ class QueryValidator
     /**
      * Validate query depth
      *
-     * @param string $query
+     * @param  string $query
      * @throws GraphQlInputException
      */
     private function validateDepth(string $query): void
@@ -132,7 +134,7 @@ class QueryValidator
     /**
      * Validate for restricted fields
      *
-     * @param string $query
+     * @param  string $query
      * @throws GraphQlInputException
      */
     private function validateRestrictedFields(string $query): void
@@ -142,7 +144,9 @@ class QueryValidator
         $restrictedFieldFound = false;
         $foundField = '';
 
-        Visitor::visit($ast, [
+        Visitor::visit(
+            $ast,
+            [
             'enter' => function (Node $node) use (&$restrictedFieldFound, &$foundField) {
                 if ($node instanceof Node && $node->kind === NodeKind::FIELD) {
                     foreach (self::RESTRICTED_FIELDS as $restrictedField) {
@@ -155,7 +159,8 @@ class QueryValidator
                 }
                 return null;
             }
-        ]);
+            ]
+        );
 
         if ($restrictedFieldFound) {
             throw new GraphQlInputException(
@@ -167,7 +172,7 @@ class QueryValidator
     /**
      * Validate variables
      *
-     * @param array $variables
+     * @param  array $variables
      * @throws GraphQlInputException
      */
     private function validateVariables(array $variables): void
@@ -188,8 +193,8 @@ class QueryValidator
     /**
      * Validate variable value
      *
-     * @param string $name
-     * @param mixed $value
+     * @param  string $name
+     * @param  mixed  $value
      * @throws GraphQlInputException
      */
     private function validateVariableValue(string $name, mixed $value): void
@@ -218,4 +223,3 @@ class QueryValidator
         }
     }
 }
-

@@ -12,6 +12,7 @@ require_once $autoloadFile;
 
 /**
  * Define the __ function if it doesn't exist
+ *
  * @SuppressWarnings(PHPMD.ShortMethodName)
  */
 if (!function_exists('__')) {
@@ -27,4 +28,3 @@ if (!function_exists('__')) {
         return new \Magento\Framework\Phrase($text, $argc);
     }
 }
-

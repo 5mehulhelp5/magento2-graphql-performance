@@ -21,7 +21,7 @@ class ComplexityCalculator
     /**
      * Calculate field complexity
      *
-     * @param Node $node
+     * @param  Node $node
      * @return int
      */
     public function calculate(Node $node): int
@@ -43,7 +43,7 @@ class ComplexityCalculator
     /**
      * Calculate base complexity
      *
-     * @param Node $node
+     * @param  Node $node
      * @return int
      */
     private function calculateBaseComplexity(Node $node): int
@@ -55,7 +55,7 @@ class ComplexityCalculator
     /**
      * Calculate arguments complexity
      *
-     * @param Node $node
+     * @param  Node $node
      * @return int
      */
     private function calculateArgumentsComplexity(Node $node): int
@@ -80,7 +80,7 @@ class ComplexityCalculator
     /**
      * Calculate selections complexity
      *
-     * @param Node $node
+     * @param  Node $node
      * @return int
      */
     private function calculateSelectionsComplexity(Node $node): int

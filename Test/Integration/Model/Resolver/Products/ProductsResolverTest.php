@@ -211,4 +211,3 @@ QUERY;
         $this->assertEquals(2, $response['products']['page_info']['page_size']);
     }
 }
-

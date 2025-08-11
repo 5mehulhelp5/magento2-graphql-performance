@@ -22,7 +22,7 @@ enum CacheTagStrategy: string
     /**
      * Check if strategy is valid
      *
-     * @param string $strategy
+     * @param  string $strategy
      * @return bool
      */
     public static function isValid(string $strategy): bool

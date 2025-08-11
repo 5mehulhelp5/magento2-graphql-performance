@@ -24,16 +24,17 @@ class BreadcrumbsResolver implements BatchResolverInterface
     public function __construct(
         private readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve category breadcrumbs
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -43,7 +44,9 @@ class BreadcrumbsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories */
+        /**
+ * @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories
+*/
         $categories = $value['categories'] ?? [];
         $result = [];
 
@@ -80,7 +83,7 @@ class BreadcrumbsResolver implements BatchResolverInterface
     /**
      * Load categories by IDs
      *
-     * @param array $categoryIds
+     * @param  array $categoryIds
      * @return void
      */
     private function loadCategories(array $categoryIds): void
@@ -102,7 +105,7 @@ class BreadcrumbsResolver implements BatchResolverInterface
     /**
      * Build breadcrumbs for a category
      *
-     * @param \Magento\Catalog\Api\Data\CategoryInterface $category
+     * @param  \Magento\Catalog\Api\Data\CategoryInterface $category
      * @return array
      */
     private function buildBreadcrumbs($category): array

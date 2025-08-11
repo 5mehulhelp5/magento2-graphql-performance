@@ -15,15 +15,16 @@ class FieldResolverManager
 
     public function __construct(
         private readonly ResolverCache $cache
-    ) {}
+    ) {
+    }
 
     /**
      * Register a field resolver
      *
-     * @param string $type
-     * @param string $field
-     * @param callable $resolver
-     * @param bool $batchable
+     * @param  string   $type
+     * @param  string   $field
+     * @param  callable $resolver
+     * @param  bool     $batchable
      * @return void
      */
     public function registerResolver(string $type, string $field, callable $resolver, bool $batchable = false): void
@@ -37,13 +38,13 @@ class FieldResolverManager
     /**
      * Resolve a field
      *
-     * @param string $type
-     * @param string $field
-     * @param mixed $source
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  string      $type
+     * @param  string      $field
+     * @param  mixed       $source
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return mixed
      */
     public function resolveField(
@@ -84,13 +85,13 @@ class FieldResolverManager
     /**
      * Handle batchable field
      *
-     * @param string $type
-     * @param string $field
-     * @param mixed $source
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  string      $type
+     * @param  string      $field
+     * @param  mixed       $source
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return mixed
      */
     private function handleBatchableField(
@@ -120,20 +121,22 @@ class FieldResolverManager
         $this->pendingResolvers[$key]['sources'][] = $source;
 
         // Return a promise that will be resolved when batch is executed
-        return new \GraphQL\Deferred(function () use ($key, $source) {
-            if (!isset($this->pendingResolvers[$key])) {
-                return null;
-            }
+        return new \GraphQL\Deferred(
+            function () use ($key, $source) {
+                if (!isset($this->pendingResolvers[$key])) {
+                    return null;
+                }
 
-            $data = $this->executeBatchResolver($key);
-            return $data[$source->getId()] ?? null;
-        });
+                $data = $this->executeBatchResolver($key);
+                return $data[$source->getId()] ?? null;
+            }
+        );
     }
 
     /**
      * Execute batch resolver
      *
-     * @param string $key
+     * @param  string $key
      * @return array
      */
     private function executeBatchResolver(string $key): array
@@ -173,13 +176,13 @@ class FieldResolverManager
     /**
      * Execute resolver
      *
-     * @param string $type
-     * @param string $field
-     * @param mixed $source
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  string      $type
+     * @param  string      $field
+     * @param  mixed       $source
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return mixed
      */
     private function executeResolver(
@@ -201,13 +204,13 @@ class FieldResolverManager
     /**
      * Generate cache key for field
      *
-     * @param string $type
-     * @param string $field
-     * @param mixed $source
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  string      $type
+     * @param  string      $field
+     * @param  mixed       $source
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return string
      */
     private function generateCacheKey(
@@ -241,14 +244,17 @@ class FieldResolverManager
     /**
      * Generate cache key for batch
      *
-     * @param array $pending
+     * @param  array $pending
      * @return string
      */
     private function generateBatchCacheKey(array $pending): string
     {
-        $sourceIds = array_map(function ($source) {
-            return $source->getId();
-        }, $pending['sources']);
+        $sourceIds = array_map(
+            function ($source) {
+                return $source->getId();
+            },
+            $pending['sources']
+        );
 
         sort($sourceIds);
 
@@ -274,9 +280,9 @@ class FieldResolverManager
     /**
      * Get cache tags for field
      *
-     * @param string $type
-     * @param string $field
-     * @param mixed $source
+     * @param  string $type
+     * @param  string $field
+     * @param  mixed  $source
      * @return array
      */
     private function getCacheTags(string $type, string $field, $source): array
@@ -293,7 +299,7 @@ class FieldResolverManager
     /**
      * Get cache tags for batch
      *
-     * @param array $pending
+     * @param  array $pending
      * @return array
      */
     private function getBatchCacheTags(array $pending): array
@@ -312,9 +318,9 @@ class FieldResolverManager
     /**
      * Get batch key
      *
-     * @param string $type
-     * @param string $field
-     * @param mixed $source
+     * @param  string $type
+     * @param  string $field
+     * @param  mixed  $source
      * @return string
      */
     private function getBatchKey(string $type, string $field, $source): string

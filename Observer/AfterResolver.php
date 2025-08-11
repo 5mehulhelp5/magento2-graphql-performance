@@ -11,7 +11,8 @@ class AfterResolver implements ObserverInterface
 {
     public function __construct(
         private readonly QueryTimer $queryTimer
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

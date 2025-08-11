@@ -22,25 +22,28 @@ class FieldUsageAnalyzer
     /**
      * Analyze field usage in query
      *
-     * @param Node $ast
+     * @param  Node $ast
      * @return void
      */
     public function analyze(Node $ast): void
     {
-        Visitor::visit($ast, [
+        Visitor::visit(
+            $ast,
+            [
             'enter' => function (Node $node) {
                 if ($node->kind === NodeKind::FIELD) {
                     $fieldName = $node->name->value;
                     $this->fieldUsageMap[$fieldName] = ($this->fieldUsageMap[$fieldName] ?? 0) + 1;
                 }
             }
-        ]);
+            ]
+        );
     }
 
     /**
      * Check if field is required
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return bool
      */
     public function isRequiredField(string $fieldName): bool
@@ -51,7 +54,7 @@ class FieldUsageAnalyzer
     /**
      * Get field usage count
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return int
      */
     public function getFieldUsageCount(string $fieldName): int
@@ -62,7 +65,7 @@ class FieldUsageAnalyzer
     /**
      * Add required field
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return void
      */
     public function addRequiredField(string $fieldName): void

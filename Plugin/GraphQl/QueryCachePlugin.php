@@ -15,7 +15,8 @@ class QueryCachePlugin
         private readonly QueryCache $queryCache,
         private readonly Config $config,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function aroundProcess(
         QueryProcessor $subject,
@@ -34,10 +35,13 @@ class QueryCachePlugin
         // Try to get from cache
         $cachedResult = $this->queryCache->getQueryResult($query, $variables ?? []);
         if ($cachedResult !== null) {
-            $this->logger->debug('GraphQL query cache hit', [
+            $this->logger->debug(
+                'GraphQL query cache hit',
+                [
                 'query' => $query,
                 'variables' => $variables
-            ]);
+                ]
+            );
             return $cachedResult;
         }
 
@@ -57,12 +61,15 @@ class QueryCachePlugin
                 $lifetime
             );
 
-            $this->logger->debug('GraphQL query cached', [
+            $this->logger->debug(
+                'GraphQL query cached',
+                [
                 'query' => $query,
                 'variables' => $variables,
                 'lifetime' => $lifetime,
                 'tags' => $tags
-            ]);
+                ]
+            );
         }
 
         return $result;
@@ -71,7 +78,7 @@ class QueryCachePlugin
     /**
      * Check if query is a mutation
      *
-     * @param string $query
+     * @param  string $query
      * @return bool
      */
     private function isMutation(string $query): bool
@@ -82,7 +89,7 @@ class QueryCachePlugin
     /**
      * Get cache lifetime for query
      *
-     * @param string $query
+     * @param  string $query
      * @return int
      */
     private function getCacheLifetime(string $query): int
@@ -106,7 +113,7 @@ class QueryCachePlugin
     /**
      * Get cache tags from result
      *
-     * @param array $result
+     * @param  array $result
      * @return array
      */
     private function getCacheTags(array $result): array

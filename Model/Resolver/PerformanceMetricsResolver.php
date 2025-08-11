@@ -16,7 +16,8 @@ class PerformanceMetricsResolver implements ResolverInterface
         private readonly QueryTimer $queryTimer,
         private readonly ResolverCache $cache,
         private readonly ConnectionPool $connectionPool
-    ) {}
+    ) {
+    }
 
     public function resolve(
         Field $field,

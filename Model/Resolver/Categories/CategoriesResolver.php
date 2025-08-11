@@ -34,11 +34,11 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Batch resolve categories
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     protected function getEntityType(): string
@@ -68,7 +68,7 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Get optimized category collection
      *
-     * @param array $args
+     * @param  array $args
      * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
      */
     private function getCategoryCollection(array $args): \Magento\Catalog\Model\ResourceModel\Category\Collection
@@ -116,8 +116,8 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Transform categories to GraphQL format
      *
-     * @param \Magento\Catalog\Model\ResourceModel\Category\Collection $collection
-     * @param ResolveInfo $info
+     * @param  \Magento\Catalog\Model\ResourceModel\Category\Collection $collection
+     * @param  ResolveInfo                                              $info
      * @return array
      */
     private function transformCategoriesToGraphQL($collection, ResolveInfo $info, array $args): array
@@ -148,10 +148,14 @@ class CategoriesResolver extends AbstractResolver
             $items[] = $categoryData;
         }
 
-        return $this->getPaginatedResult($items, $collection->getSize(), [
+        return $this->getPaginatedResult(
+            $items,
+            $collection->getSize(),
+            [
             'pageSize' => $collection->getPageSize() ?: 20,
             'currentPage' => $collection->getCurPage()
-        ]);
+            ]
+        );
     }
 
     private function getBaseCategoryData($category): array
@@ -175,7 +179,7 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Get image URL
      *
-     * @param string $image
+     * @param  string $image
      * @return string|null
      */
     private function getImageUrl(string $image): ?string
@@ -191,7 +195,7 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Get category breadcrumbs
      *
-     * @param \Magento\Catalog\Model\Category $category
+     * @param  \Magento\Catalog\Model\Category $category
      * @return array
      */
     private function getBreadcrumbs($category): array
@@ -224,11 +228,11 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Generate cache key
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return string
      */
     private function generateCacheKey(

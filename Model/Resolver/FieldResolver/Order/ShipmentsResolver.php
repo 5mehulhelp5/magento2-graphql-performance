@@ -21,16 +21,17 @@ class ShipmentsResolver implements BatchResolverInterface
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache,
         private readonly StatusFactory $trackingStatusFactory
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve order shipments
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -40,10 +41,15 @@ class ShipmentsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $orderIds */
-        $orderIds = array_map(function ($item) {
-            return $item['id'] ?? null;
-        }, $value);
+        /**
+ * @var array $orderIds
+*/
+        $orderIds = array_map(
+            function ($item) {
+                return $item['id'] ?? null;
+            },
+            $value
+        );
         $orderIds = array_filter($orderIds);
 
         if (empty($orderIds)) {
@@ -75,8 +81,8 @@ class ShipmentsResolver implements BatchResolverInterface
     /**
      * Load shipments in batch
      *
-     * @param array $orderIds
-     * @param int $storeId
+     * @param  array $orderIds
+     * @param  int   $storeId
      * @return void
      */
     private function loadShipments(array $orderIds, int $storeId): void
@@ -140,7 +146,7 @@ class ShipmentsResolver implements BatchResolverInterface
     /**
      * Cache tracking information for shipment
      *
-     * @param \Magento\Sales\Api\Data\ShipmentInterface $shipment
+     * @param  \Magento\Sales\Api\Data\ShipmentInterface $shipment
      * @return void
      */
     private function cacheTrackingInfo($shipment): void
@@ -177,8 +183,8 @@ class ShipmentsResolver implements BatchResolverInterface
     /**
      * Transform shipment data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\ShipmentInterface $shipment
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\ShipmentInterface $shipment
+     * @param  array                                     $fields
      * @return array
      */
     private function transformShipmentData($shipment, array $fields): array
@@ -207,7 +213,7 @@ class ShipmentsResolver implements BatchResolverInterface
     /**
      * Get tracking information for shipment
      *
-     * @param \Magento\Sales\Api\Data\ShipmentInterface $shipment
+     * @param  \Magento\Sales\Api\Data\ShipmentInterface $shipment
      * @return array
      */
     private function getTrackingInfo($shipment): array
@@ -232,7 +238,7 @@ class ShipmentsResolver implements BatchResolverInterface
     /**
      * Get shipment items
      *
-     * @param \Magento\Sales\Api\Data\ShipmentInterface $shipment
+     * @param  \Magento\Sales\Api\Data\ShipmentInterface $shipment
      * @return array
      */
     private function getShipmentItems($shipment): array
@@ -258,8 +264,8 @@ class ShipmentsResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $orderId
-     * @param int $storeId
+     * @param  int $orderId
+     * @param  int $storeId
      * @return string
      */
     private function generateCacheKey(int $orderId, int $storeId): string

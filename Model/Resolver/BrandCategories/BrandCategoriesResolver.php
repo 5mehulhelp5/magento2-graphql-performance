@@ -16,16 +16,17 @@ class BrandCategoriesResolver implements ResolverInterface
         private readonly BrandCategoryDataLoader $brandCategoryDataLoader,
         private readonly ResolverCache $cache,
         private readonly QueryTimer $queryTimer
-    ) {}
+    ) {
+    }
 
     /**
      * Resolve brand categories
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return array
      */
     public function resolve(
@@ -77,9 +78,9 @@ class BrandCategoriesResolver implements ResolverInterface
     /**
      * Process categories and apply pagination
      *
-     * @param array $categories
-     * @param int $pageSize
-     * @param int $currentPage
+     * @param  array $categories
+     * @param  int   $pageSize
+     * @param  int   $currentPage
      * @return array
      */
     private function processCategories(array $categories, int $pageSize, int $currentPage): array
@@ -102,9 +103,12 @@ class BrandCategoriesResolver implements ResolverInterface
         }
 
         // Sort categories by name
-        usort($processedCategories, function ($a, $b) {
-            return strcasecmp($a['name'], $b['name']);
-        });
+        usort(
+            $processedCategories,
+            function ($a, $b) {
+                return strcasecmp($a['name'], $b['name']);
+            }
+        );
 
         // Sort letters
         ksort($letters);
@@ -132,11 +136,11 @@ class BrandCategoriesResolver implements ResolverInterface
     /**
      * Generate cache key
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array|null $value
-     * @param array|null $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array|null  $value
+     * @param  array|null  $args
      * @return string
      */
     private function generateCacheKey(

@@ -11,7 +11,8 @@ class CleanCache implements ObserverInterface
 {
     public function __construct(
         private readonly ResolverCache $cache
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

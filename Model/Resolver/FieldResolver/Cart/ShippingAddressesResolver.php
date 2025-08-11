@@ -17,16 +17,17 @@ class ShippingAddressesResolver implements BatchResolverInterface
     public function __construct(
         private readonly ShippingMethodManagementInterface $shippingMethodManagement,
         private readonly CountryFactory $countryFactory
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve shipping addresses
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -36,7 +37,9 @@ class ShippingAddressesResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var \Magento\Quote\Api\Data\CartInterface[] $carts */
+        /**
+ * @var \Magento\Quote\Api\Data\CartInterface[] $carts
+*/
         $carts = $value['carts'] ?? [];
         $result = [];
 
@@ -82,7 +85,7 @@ class ShippingAddressesResolver implements BatchResolverInterface
     /**
      * Get country data
      *
-     * @param string $countryId
+     * @param  string $countryId
      * @return array
      */
     private function getCountryData(string $countryId): array
@@ -101,8 +104,8 @@ class ShippingAddressesResolver implements BatchResolverInterface
     /**
      * Get available shipping methods
      *
-     * @param int $cartId
-     * @param array $fields
+     * @param  int   $cartId
+     * @param  array $fields
      * @return array
      */
     private function getShippingMethods(int $cartId, array $fields): array
@@ -114,8 +117,9 @@ class ShippingAddressesResolver implements BatchResolverInterface
         if (!isset($this->methodsCache[$cartId])) {
             try {
                 $methods = $this->shippingMethodManagement->getList($cartId);
-                $this->methodsCache[$cartId] = array_map(function ($method) {
-                    return [
+                $this->methodsCache[$cartId] = array_map(
+                    function ($method) {
+                        return [
                         'carrier_code' => $method->getCarrierCode(),
                         'carrier_title' => $method->getCarrierTitle(),
                         'method_code' => $method->getMethodCode(),
@@ -132,8 +136,10 @@ class ShippingAddressesResolver implements BatchResolverInterface
                             'value' => $method->getPriceInclTax(),
                             'currency' => $method->getCurrencyCode()
                         ]
-                    ];
-                }, $methods);
+                        ];
+                    },
+                    $methods
+                );
             } catch (\Exception $e) {
                 $this->methodsCache[$cartId] = [];
             }
@@ -145,7 +151,7 @@ class ShippingAddressesResolver implements BatchResolverInterface
     /**
      * Get selected shipping method
      *
-     * @param \Magento\Quote\Api\Data\AddressInterface $address
+     * @param  \Magento\Quote\Api\Data\AddressInterface $address
      * @return array|null
      */
     private function getSelectedShippingMethod($address): ?array

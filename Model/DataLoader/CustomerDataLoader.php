@@ -8,7 +8,11 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
+use Psr\Log\LoggerInterface;
 
+/**
+ * Data loader for customer entities with batch loading support
+ */
 class CustomerDataLoader extends FrequentDataLoader
 {
     private const BATCH_SIZE = 50;
@@ -18,6 +22,7 @@ class CustomerDataLoader extends FrequentDataLoader
         ResolverCache $cache,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly ?LoggerInterface $logger = null,
         int $cacheLifetime = 3600
     ) {
         parent::__construct($promiseAdapter, $cache, $cacheLifetime);
@@ -40,7 +45,12 @@ class CustomerDataLoader extends FrequentDataLoader
                     $result[$customer->getId()] = $customer;
                 }
             } catch (NoSuchEntityException $e) {
-                // Log error if needed
+                // Silently handle missing customers to avoid breaking the GraphQL response
+                // Missing customers will be reflected in the result array
+                $this->logger?->warning('Customer(s) not found: ' . $e->getMessage(), [
+                    'customer_ids' => $batchIds,
+                    'exception' => $e
+                ]);
             }
         }
 

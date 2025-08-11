@@ -12,18 +12,19 @@ class QueryComplexityValidatorPlugin
 {
     public function __construct(
         private readonly ComplexityValidator $complexityValidator
-    ) {}
+    ) {
+    }
 
     /**
      * Validate query complexity before processing
      *
-     * @param QueryProcessor $subject
-     * @param callable $proceed
-     * @param Schema $schema
-     * @param string $source
-     * @param ContextInterface|null $contextValue
-     * @param array|null $variableValues
-     * @param string|null $operationName
+     * @param  QueryProcessor        $subject
+     * @param  callable              $proceed
+     * @param  Schema                $schema
+     * @param  string                $source
+     * @param  ContextInterface|null $contextValue
+     * @param  array|null            $variableValues
+     * @param  string|null           $operationName
      * @return array
      */
     public function aroundExecute(

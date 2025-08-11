@@ -62,9 +62,12 @@ class CmsDataLoader extends FrequentDataLoader
     private function loadPages(array $pageIds, int $storeId): array
     {
         $result = [];
-        $pageIds = array_map(function ($id) {
-            return str_replace('page_', '', $id);
-        }, $pageIds);
+        $pageIds = array_map(
+            function ($id) {
+                return str_replace('page_', '', $id);
+            },
+            $pageIds
+        );
 
         $searchCriteria = $this->searchCriteriaBuilder
             ->addFilter('page_id', $pageIds, 'in')
@@ -98,9 +101,12 @@ class CmsDataLoader extends FrequentDataLoader
     private function loadBlocks(array $blockIds, int $storeId): array
     {
         $result = [];
-        $blockIds = array_map(function ($id) {
-            return str_replace('block_', '', $id);
-        }, $blockIds);
+        $blockIds = array_map(
+            function ($id) {
+                return str_replace('block_', '', $id);
+            },
+            $blockIds
+        );
 
         $searchCriteria = $this->searchCriteriaBuilder
             ->addFilter('block_id', $blockIds, 'in')

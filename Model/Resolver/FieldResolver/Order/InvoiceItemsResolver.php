@@ -21,16 +21,17 @@ class InvoiceItemsResolver implements BatchResolverInterface
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache,
         private readonly ProductDataLoader $productDataLoader
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve invoice items
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -40,10 +41,15 @@ class InvoiceItemsResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $invoiceIds */
-        $invoiceIds = array_map(function ($item) {
-            return $item['id'] ?? null;
-        }, $value);
+        /**
+ * @var array $invoiceIds
+*/
+        $invoiceIds = array_map(
+            function ($item) {
+                return $item['id'] ?? null;
+            },
+            $value
+        );
         $invoiceIds = array_filter($invoiceIds);
 
         if (empty($invoiceIds)) {
@@ -78,8 +84,8 @@ class InvoiceItemsResolver implements BatchResolverInterface
     /**
      * Load invoice items in batch
      *
-     * @param array $invoiceIds
-     * @param int $storeId
+     * @param  array $invoiceIds
+     * @param  int   $storeId
      * @return void
      */
     private function loadInvoiceItems(array $invoiceIds, int $storeId): void
@@ -140,7 +146,7 @@ class InvoiceItemsResolver implements BatchResolverInterface
     /**
      * Load products for invoice items
      *
-     * @param array $itemsByInvoice
+     * @param  array $itemsByInvoice
      * @return void
      */
     private function loadProducts(array $itemsByInvoice): void
@@ -172,8 +178,8 @@ class InvoiceItemsResolver implements BatchResolverInterface
     /**
      * Transform invoice item data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\InvoiceItemInterface $item
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\InvoiceItemInterface $item
+     * @param  array                                        $fields
      * @return array
      */
     private function transformInvoiceItemData($item, array $fields): array
@@ -221,7 +227,7 @@ class InvoiceItemsResolver implements BatchResolverInterface
     /**
      * Get invoice item discounts
      *
-     * @param \Magento\Sales\Api\Data\InvoiceItemInterface $item
+     * @param  \Magento\Sales\Api\Data\InvoiceItemInterface $item
      * @return array
      */
     private function getItemDiscounts($item): array
@@ -244,8 +250,8 @@ class InvoiceItemsResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $invoiceId
-     * @param int $storeId
+     * @param  int $invoiceId
+     * @param  int $storeId
      * @return string
      */
     private function generateCacheKey(int $invoiceId, int $storeId): string

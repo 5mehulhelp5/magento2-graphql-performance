@@ -16,16 +16,17 @@ class PriceResolver implements BatchResolverInterface
     public function __construct(
         private readonly PriceCurrencyInterface $priceCurrency,
         private readonly StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve product prices
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -35,7 +36,9 @@ class PriceResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var ProductInterface[] $products */
+        /**
+ * @var ProductInterface[] $products
+*/
         $products = $value['products'] ?? [];
         $store = $this->storeManager->getStore();
         $currency = $store->getCurrentCurrencyCode();
@@ -88,7 +91,7 @@ class PriceResolver implements BatchResolverInterface
     /**
      * Get final price for product
      *
-     * @param ProductInterface $product
+     * @param  ProductInterface $product
      * @return float
      */
     private function getFinalPrice(ProductInterface $product): float
@@ -104,9 +107,9 @@ class PriceResolver implements BatchResolverInterface
                 $specialToDate = $product->getSpecialToDate();
                 $now = time();
 
-                if ($specialPrice > 0 &&
-                    (!$specialFromDate || strtotime($specialFromDate) <= $now) &&
-                    (!$specialToDate || strtotime($specialToDate) >= $now)
+                if ($specialPrice > 0
+                    && (!$specialFromDate || strtotime($specialFromDate) <= $now)
+                    && (!$specialToDate || strtotime($specialToDate) >= $now)
                 ) {
                     $finalPrice = min($finalPrice, $specialPrice);
                 }
@@ -130,7 +133,7 @@ class PriceResolver implements BatchResolverInterface
     /**
      * Format price value
      *
-     * @param float $price
+     * @param  float $price
      * @return float
      */
     private function formatPrice(float $price): float

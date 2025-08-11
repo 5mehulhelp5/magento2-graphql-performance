@@ -10,7 +10,7 @@ abstract class AbstractMetricColumn extends Column
     /**
      * Format value for display
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return string
      */
     abstract protected function formatValue($value): string;
@@ -18,7 +18,7 @@ abstract class AbstractMetricColumn extends Column
     /**
      * Prepare Data Source
      *
-     * @param array $dataSource
+     * @param  array $dataSource
      * @return array
      */
     public function prepareDataSource(array $dataSource): array

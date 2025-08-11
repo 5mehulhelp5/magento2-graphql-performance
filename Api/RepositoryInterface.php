@@ -11,7 +11,7 @@ interface RepositoryInterface
     /**
      * Get list of items by search criteria
      *
-     * @param SearchCriteriaInterface $searchCriteria
+     * @param  SearchCriteriaInterface $searchCriteria
      * @return SearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface;
@@ -19,7 +19,7 @@ interface RepositoryInterface
     /**
      * Get item by ID
      *
-     * @param int $id
+     * @param  int $id
      * @return mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */

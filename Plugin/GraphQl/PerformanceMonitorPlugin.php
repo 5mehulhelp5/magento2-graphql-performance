@@ -10,16 +10,17 @@ class PerformanceMonitorPlugin
 {
     public function __construct(
         private readonly QueryTimer $queryTimer
-    ) {}
+    ) {
+    }
 
     /**
      * Monitor GraphQL query performance
      *
-     * @param QueryProcessor $subject
-     * @param callable $proceed
-     * @param string $query
-     * @param string|null $operationName
-     * @param array $variables
+     * @param  QueryProcessor $subject
+     * @param  callable       $proceed
+     * @param  string         $query
+     * @param  string|null    $operationName
+     * @param  array          $variables
      * @return array
      */
     public function aroundProcess(

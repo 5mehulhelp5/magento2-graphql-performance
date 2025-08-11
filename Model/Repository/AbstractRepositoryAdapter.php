@@ -13,12 +13,13 @@ abstract class AbstractRepositoryAdapter implements RepositoryInterface
     public function __construct(
         protected readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         protected readonly RepositoryInterface $repository
-    ) {}
+    ) {
+    }
 
     /**
      * Get list of items by search criteria
      *
-     * @param SearchCriteriaInterface $searchCriteria
+     * @param  SearchCriteriaInterface $searchCriteria
      * @return SearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
@@ -29,7 +30,7 @@ abstract class AbstractRepositoryAdapter implements RepositoryInterface
     /**
      * Get item by ID
      *
-     * @param int $id
+     * @param  int $id
      * @return mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
@@ -51,7 +52,7 @@ abstract class AbstractRepositoryAdapter implements RepositoryInterface
     /**
      * Get items by IDs
      *
-     * @param array $ids
+     * @param  array $ids
      * @return array
      */
     public function getByIds(array $ids): array

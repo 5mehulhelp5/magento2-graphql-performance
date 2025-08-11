@@ -8,8 +8,8 @@ trait PaginationTrait
     /**
      * Get page size from arguments
      *
-     * @param array $args
-     * @param int $default
+     * @param  array $args
+     * @param  int   $default
      * @return int
      */
     protected function getPageSize(array $args, int $default = 20): int
@@ -20,8 +20,8 @@ trait PaginationTrait
     /**
      * Get current page from arguments
      *
-     * @param array $args
-     * @param int $default
+     * @param  array $args
+     * @param  int   $default
      * @return int
      */
     protected function getCurrentPage(array $args, int $default = 1): int
@@ -32,9 +32,9 @@ trait PaginationTrait
     /**
      * Get page info
      *
-     * @param int $totalCount
-     * @param int $pageSize
-     * @param int $currentPage
+     * @param  int $totalCount
+     * @param  int $pageSize
+     * @param  int $currentPage
      * @return array
      */
     protected function getPageInfo(int $totalCount, int $pageSize, int $currentPage): array
@@ -49,9 +49,9 @@ trait PaginationTrait
     /**
      * Get result with pagination
      *
-     * @param array $items
-     * @param int $totalCount
-     * @param array $args
+     * @param  array $items
+     * @param  int   $totalCount
+     * @param  array $args
      * @return array
      */
     protected function getPaginatedResult(array $items, int $totalCount, array $args): array

@@ -176,4 +176,3 @@ class ConfigTest extends TestCase
         $this->assertEquals('100', $result);
     }
 }
-

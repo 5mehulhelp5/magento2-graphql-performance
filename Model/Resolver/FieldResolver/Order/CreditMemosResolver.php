@@ -18,16 +18,17 @@ class CreditMemosResolver implements BatchResolverInterface
         private readonly CreditmemoRepositoryInterface $creditMemoRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ResolverCache $cache
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve credit memos
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -37,10 +38,15 @@ class CreditMemosResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var array $orderIds */
-        $orderIds = array_map(function ($item) {
-            return $item['id'] ?? null;
-        }, $value);
+        /**
+ * @var array $orderIds
+*/
+        $orderIds = array_map(
+            function ($item) {
+                return $item['id'] ?? null;
+            },
+            $value
+        );
         $orderIds = array_filter($orderIds);
 
         if (empty($orderIds)) {
@@ -72,8 +78,8 @@ class CreditMemosResolver implements BatchResolverInterface
     /**
      * Load credit memos in batch
      *
-     * @param array $orderIds
-     * @param int $storeId
+     * @param  array $orderIds
+     * @param  int   $storeId
      * @return void
      */
     private function loadCreditMemos(array $orderIds, int $storeId): void
@@ -134,8 +140,8 @@ class CreditMemosResolver implements BatchResolverInterface
     /**
      * Transform credit memo data to GraphQL format
      *
-     * @param \Magento\Sales\Api\Data\CreditmemoInterface $creditMemo
-     * @param array $fields
+     * @param  \Magento\Sales\Api\Data\CreditmemoInterface $creditMemo
+     * @param  array                                       $fields
      * @return array
      */
     private function transformCreditMemoData($creditMemo, array $fields): array
@@ -191,7 +197,7 @@ class CreditMemosResolver implements BatchResolverInterface
     /**
      * Get credit memo state label
      *
-     * @param int $state
+     * @param  int $state
      * @return string
      */
     private function getCreditMemoState(int $state): string
@@ -208,7 +214,7 @@ class CreditMemosResolver implements BatchResolverInterface
     /**
      * Get credit memo comments
      *
-     * @param \Magento\Sales\Api\Data\CreditmemoInterface $creditMemo
+     * @param  \Magento\Sales\Api\Data\CreditmemoInterface $creditMemo
      * @return array
      */
     private function getCreditMemoComments($creditMemo): array
@@ -228,7 +234,7 @@ class CreditMemosResolver implements BatchResolverInterface
     /**
      * Get credit memo discounts
      *
-     * @param \Magento\Sales\Api\Data\CreditmemoInterface $creditMemo
+     * @param  \Magento\Sales\Api\Data\CreditmemoInterface $creditMemo
      * @return array
      */
     private function getCreditMemoDiscounts($creditMemo): array
@@ -251,8 +257,8 @@ class CreditMemosResolver implements BatchResolverInterface
     /**
      * Generate cache key
      *
-     * @param int $orderId
-     * @param int $storeId
+     * @param  int $orderId
+     * @param  int $storeId
      * @return string
      */
     private function generateCacheKey(int $orderId, int $storeId): string

@@ -15,16 +15,17 @@ class AttributeResolver implements BatchResolverInterface
 
     public function __construct(
         private readonly AttributeRepositoryInterface $attributeRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Batch resolve product attributes
      *
-     * @param Field $field
-     * @param mixed $context
-     * @param ResolveInfo $info
-     * @param array $value
-     * @param array $args
+     * @param  Field       $field
+     * @param  mixed       $context
+     * @param  ResolveInfo $info
+     * @param  array       $value
+     * @param  array       $args
      * @return array
      */
     public function resolve(
@@ -34,7 +35,9 @@ class AttributeResolver implements BatchResolverInterface
         array $value = [],
         array $args = []
     ): array {
-        /** @var ProductInterface[] $products */
+        /**
+ * @var ProductInterface[] $products
+*/
         $products = $value['products'] ?? [];
         $attributeCode = $field->getName();
 
@@ -61,7 +64,7 @@ class AttributeResolver implements BatchResolverInterface
     /**
      * Get attribute metadata with caching
      *
-     * @param string $attributeCode
+     * @param  string $attributeCode
      * @return \Magento\Catalog\Api\Data\ProductAttributeInterface|null
      */
     private function getAttributeMetadata(string $attributeCode)

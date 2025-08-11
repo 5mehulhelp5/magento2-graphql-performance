@@ -10,7 +10,7 @@ class Memory extends AbstractMetricColumn
     /**
      * Format memory value
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return string
      */
     protected function formatValue($value): string

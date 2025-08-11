@@ -1,5 +1,14 @@
 <?php
-require_once realpath(__DIR__ . '/../../../../vendor/autoload.php');
+$vendorDir = __DIR__ . '/../../../vendor';
+$autoloadFile = $vendorDir . '/autoload.php';
+
+if (!file_exists($autoloadFile)) {
+    throw new RuntimeException(
+        'Vendor directory not found. Please run "composer install" first.'
+    );
+}
+
+require_once $autoloadFile;
 
 /**
  * Define the __ function if it doesn't exist

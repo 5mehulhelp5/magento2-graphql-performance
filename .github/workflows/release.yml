@@ -25,33 +25,17 @@ jobs:
           tools: composer
           ini-values: memory_limit=2G
 
-      - name: Setup Composer Authentication
-        env:
-          COMPOSER_HOME: /home/runner/.composer
-          MAGENTO_PUBLIC_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
-          MAGENTO_PRIVATE_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
-        run: |
-          # Create Composer home directory
-          mkdir -p "$COMPOSER_HOME"
-
-          # Create auth.json in Composer home
-          echo "{\"http-basic\":{\"repo.magento.com\":{\"username\":\"$MAGENTO_PUBLIC_KEY\",\"password\":\"$MAGENTO_PRIVATE_KEY\"}}}" > "$COMPOSER_HOME/auth.json"
-
-          # Set proper permissions
-          chmod 600 "$COMPOSER_HOME/auth.json"
-
-          # Show auth.json contents (masked)
-          echo "Auth.json contents (masked):"
-          cat "$COMPOSER_HOME/auth.json" | sed 's/"username":"[^"]*"/"username":"****"/g; s/"password":"[^"]*"/"password":"****"/g'
-
-          # Verify Composer can read the auth.json
-          echo "Composer auth config:"
-          composer config --global --list | grep -v password
-
       - name: Install Dependencies
         env:
-          COMPOSER_HOME: /home/runner/.composer
+          COMPOSER_AUTH: '{"http-basic":{"repo.magento.com":{"username":"${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}","password":"${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"}}}'
         run: |
+          # Configure Magento repository
+          composer config repositories.magento composer https://repo.magento.com/
+
+          # Show Composer configuration
+          echo "Composer configuration:"
+          composer config --list | grep -v password
+
           # Install dependencies with verbose output
           composer -vvv install --prefer-dist --no-progress
 

@@ -29,7 +29,13 @@ jobs:
         run: |
           # Test authentication directly with curl
           echo "Testing Magento authentication..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json)
+
+          # If that fails, try getting more info
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Detailed response:"
+            curl -v -u "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json
+          fi
           echo "HTTP response code: $HTTP_CODE"
 
           if [ "$HTTP_CODE" = "200" ]; then

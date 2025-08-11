@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2024-03-21
+### Fixed
+- Fixed empty catch blocks with proper error logging
+- Improved array performance by removing array_merge in loops
+- Fixed lines exceeding maximum length
+- Added missing PHP DocBlocks for better code documentation
+- Fixed closing brace formatting issues
+- Replaced deprecated getReadConnection/getWriteConnection methods
+
 ## [1.1.0] - 2024-03-21
 ### Added
 - Full PHP 8.1 compatibility

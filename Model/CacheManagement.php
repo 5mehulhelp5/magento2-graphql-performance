@@ -12,7 +12,8 @@ class CacheManagement implements CacheManagementInterface
     public function __construct(
         private readonly ResolverCache $cache,
         private readonly CacheWarmer $cacheWarmer
-    ) {}
+    ) {
+    }
 
     /**
      * Clean GraphQL cache

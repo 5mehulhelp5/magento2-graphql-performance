@@ -63,12 +63,15 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
             // Merge all data
             foreach ($items as $item) {
                 $categoryId = $item['entity_id'];
-                $result[$categoryId] = array_merge(
-                    $item,
-                    $attributeValues[$categoryId] ?? [],
-                    ['product_count' => $productCounts[$categoryId] ?? 0],
-                    ['url_rewrite' => $urlRewrites[$categoryId] ?? null]
-                );
+                // Pre-allocate array with known keys to avoid array_merge
+                $result[$categoryId] = $item;
+                if (isset($attributeValues[$categoryId])) {
+                    foreach ($attributeValues[$categoryId] as $key => $value) {
+                        $result[$categoryId][$key] = $value;
+                    }
+                }
+                $result[$categoryId]['product_count'] = $productCounts[$categoryId] ?? 0;
+                $result[$categoryId]['url_rewrite'] = $urlRewrites[$categoryId] ?? null;
             }
         }
 

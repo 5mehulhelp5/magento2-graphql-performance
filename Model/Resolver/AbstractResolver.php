@@ -11,7 +11,7 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Resolver\OptimizedFieldTrait;
 
-abstract class AbstractResolver implements BatchServiceContractResolverInterface&OptimizedFieldInterface
+abstract class AbstractResolver implements BatchServiceContractResolverInterface, OptimizedFieldInterface
 {
     use OptimizedFieldTrait;
     public function __construct(

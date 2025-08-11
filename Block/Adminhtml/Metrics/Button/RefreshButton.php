@@ -9,7 +9,8 @@ class RefreshButton extends AbstractButton
 {
     public function __construct(
         private readonly UrlInterface $urlBuilder
-    ) {}
+    ) {
+    }
 
     /**
      * Get button label

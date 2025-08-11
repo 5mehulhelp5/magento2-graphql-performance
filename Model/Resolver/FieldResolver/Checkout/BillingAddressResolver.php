@@ -9,18 +9,32 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Directory\Model\RegionFactory;
+use Psr\Log\LoggerInterface;
 
 class BillingAddressResolver implements BatchResolverInterface
 {
+    /**
+     * @var array Cart objects cache
+     */
     private array $cartCache = [];
+
+    /**
+     * @var array Country data cache
+     */
     private array $countryCache = [];
+
+    /**
+     * @var array Region data cache
+     */
     private array $regionCache = [];
 
     public function __construct(
         private readonly CartRepositoryInterface $cartRepository,
         private readonly CountryFactory $countryFactory,
-        private readonly RegionFactory $regionFactory
-    ) {}
+        private readonly RegionFactory $regionFactory,
+        private readonly ?LoggerInterface $logger = null
+    ) {
+    }
 
     /**
      * Batch resolve billing addresses
@@ -90,7 +104,12 @@ class BillingAddressResolver implements BatchResolverInterface
                 $this->cartCache[$cart->getId()] = $cart;
             }
         } catch (\Exception $e) {
-            // Log error if needed
+            // Silently handle cart loading errors to avoid breaking the GraphQL response
+            // Individual cart errors will be reflected in the result array
+            $this->logger?->error('Error loading carts: ' . $e->getMessage(), [
+                'cart_ids' => $uncachedIds,
+                'exception' => $e
+            ]);
         }
     }
 

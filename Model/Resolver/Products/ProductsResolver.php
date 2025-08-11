@@ -155,7 +155,13 @@ class ProductsResolver extends AbstractResolver
             }
 
             // Add custom attributes if requested
-            $customAttributes = ['es_saat_mekanizma', 'es_kasa_capi', 'es_kasa_cinsi', 'es_kordon_tipi', 'manufacturer'];
+            $customAttributes = [
+                'es_saat_mekanizma',
+                'es_kasa_capi',
+                'es_kasa_cinsi',
+                'es_kordon_tipi',
+                'manufacturer'
+            ];
             foreach ($customAttributes as $attribute) {
                 $productData = $this->addFieldIfRequested(
                     $productData,
@@ -179,7 +185,9 @@ class ProductsResolver extends AbstractResolver
             'name' => $product->getName(),
             'sku' => $product->getSku(),
             'url_key' => $product->getUrlKey(),
-            'stock_status' => $product->getExtensionAttributes()->getStockItem()->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK',
+            'stock_status' => $product->getExtensionAttributes()
+                ->getStockItem()
+                ->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK',
             '__typename' => 'SimpleProduct', // Add logic for different product types
         ];
     }

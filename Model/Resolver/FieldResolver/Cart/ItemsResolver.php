@@ -10,18 +10,28 @@ use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class ItemsResolver implements BatchResolverInterface
 {
+    /**
+     * @var array Cart item objects cache
+     */
     private array $itemCache = [];
+
+    /**
+     * @var array Product objects cache
+     */
     private array $productCache = [];
 
     public function __construct(
         private readonly CartItemRepositoryInterface $cartItemRepository,
         private readonly ProductRepositoryInterface $productRepository,
         private readonly PriceCurrencyInterface $priceCurrency,
-        private readonly StoreManagerInterface $storeManager
-    ) {}
+        private readonly StoreManagerInterface $storeManager,
+        private readonly ?LoggerInterface $logger = null
+    ) {
+    }
 
     /**
      * Batch resolve cart items
@@ -127,7 +137,12 @@ class ItemsResolver implements BatchResolverInterface
                 $this->productCache[$product->getId()] = $product;
             }
         } catch (\Exception $e) {
-            // Log error if needed
+            // Silently handle product loading errors to avoid breaking the GraphQL response
+            // Individual product errors will be reflected in the result array
+            $this->logger?->error('Error loading products: ' . $e->getMessage(), [
+                'product_ids' => $productIds,
+                'exception' => $e
+            ]);
         }
     }
 

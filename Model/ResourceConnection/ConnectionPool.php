@@ -9,11 +9,29 @@ use Magento\Framework\DB\Adapter\Pdo\Mysql;
 use Magento\Framework\DB\LoggerInterface;
 use Magento\Framework\App\DeploymentConfig;
 
+/**
+ * Manages a pool of database connections with optimization and cleanup capabilities
+ */
 class ConnectionPool
 {
+    /**
+     * @var array Array of connection objects with metadata
+     */
     private array $connections = [];
+
+    /**
+     * @var array Array of active connection timestamps
+     */
     private array $activeConnections = [];
 
+    /**
+     * @param ResourceConnection $resourceConnection Resource connection instance
+     * @param DeploymentConfig $deploymentConfig Deployment configuration
+     * @param LoggerInterface|null $logger Logger instance
+     * @param int $maxConnections Maximum number of connections in the pool
+     * @param int $minConnections Minimum number of connections to maintain
+     * @param int $idleTimeout Time in seconds before idle connections are cleaned up
+     */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly DeploymentConfig $deploymentConfig,

@@ -60,12 +60,15 @@ class FrequentProductDataLoader extends FrequentDataLoader
             // Merge all data
             foreach ($items as $item) {
                 $productId = $item['entity_id'];
-                $result[$productId] = array_merge(
-                    $item,
-                    $attributeValues[$productId] ?? [],
-                    ['stock_status' => $stockStatus[$productId] ?? false],
-                    ['price_data' => $prices[$productId] ?? []]
-                );
+                // Pre-allocate array with known keys to avoid array_merge
+                $result[$productId] = $item;
+                if (isset($attributeValues[$productId])) {
+                    foreach ($attributeValues[$productId] as $key => $value) {
+                        $result[$productId][$key] = $value;
+                    }
+                }
+                $result[$productId]['stock_status'] = $stockStatus[$productId] ?? false;
+                $result[$productId]['price_data'] = $prices[$productId] ?? [];
             }
         }
 

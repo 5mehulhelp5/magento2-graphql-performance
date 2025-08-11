@@ -49,10 +49,10 @@ class ConnectionManagerPlugin
         try {
             if ($isMutation) {
                 // Use write connection for mutations
-                $connection = $this->connectionManager->getWriteConnection();
+                $connection = $this->connectionManager->getConnection(forWrite: true);
             } else {
                 // Use read connection for queries
-                $connection = $this->connectionManager->getReadConnection();
+                $connection = $this->connectionManager->getConnection();
             }
 
             // Execute the query

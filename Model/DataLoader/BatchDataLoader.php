@@ -66,7 +66,7 @@ abstract class BatchDataLoader
         }
 
         // Get unique IDs from queue
-        $ids = array_unique($this->queue);
+        $ids = array_values(array_unique($this->queue));
 
         // Clear queue
         $this->queue = [];

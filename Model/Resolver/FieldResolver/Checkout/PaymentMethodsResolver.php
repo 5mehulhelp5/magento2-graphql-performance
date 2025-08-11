@@ -99,7 +99,11 @@ class PaymentMethodsResolver implements BatchResolverInterface
                 $this->cartCache[$cart->getId()] = $cart;
             }
         } catch (\Exception $e) {
-            // Log error if needed
+            // If cart loading fails, we'll return empty results for those carts
+            // This prevents the entire request from failing due to individual cart issues
+            foreach ($uncachedIds as $cartId) {
+                $this->cartCache[$cartId] = null;
+            }
         }
     }
 

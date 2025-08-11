@@ -41,14 +41,18 @@ class CmsDataLoader extends FrequentDataLoader
             $pageIds = array_filter($batchIds, fn($id) => strpos($id, 'page_') === 0);
             if (!empty($pageIds)) {
                 $pages = $this->loadPages($pageIds, $storeId);
-                $result = array_merge($result, $pages);
+                foreach ($pages as $id => $page) {
+                    $result[$id] = $page;
+                }
             }
 
             // Load blocks
             $blockIds = array_filter($batchIds, fn($id) => strpos($id, 'block_') === 0);
             if (!empty($blockIds)) {
                 $blocks = $this->loadBlocks($blockIds, $storeId);
-                $result = array_merge($result, $blocks);
+                foreach ($blocks as $id => $block) {
+                    $result[$id] = $block;
+                }
             }
         }
 
@@ -76,7 +80,16 @@ class CmsDataLoader extends FrequentDataLoader
                 $this->pageCache[$id] = $page;
             }
         } catch (\Exception $e) {
-            // Log error if needed
+            // If page loading fails, we'll return empty results for those pages
+            // This prevents the entire request from failing due to individual page issues
+            foreach ($pageIds as $pageId) {
+                $id = 'page_' . $pageId;
+                $result[$id] = [
+                    'id' => $pageId,
+                    'type' => 'page',
+                    'error' => 'Failed to load page'
+                ];
+            }
         }
 
         return $result;
@@ -103,7 +116,16 @@ class CmsDataLoader extends FrequentDataLoader
                 $this->blockCache[$id] = $block;
             }
         } catch (\Exception $e) {
-            // Log error if needed
+            // If block loading fails, we'll return empty results for those blocks
+            // This prevents the entire request from failing due to individual block issues
+            foreach ($blockIds as $blockId) {
+                $id = 'block_' . $blockId;
+                $result[$id] = [
+                    'id' => $blockId,
+                    'type' => 'block',
+                    'error' => 'Failed to load block'
+                ];
+            }
         }
 
         return $result;

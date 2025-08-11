@@ -12,12 +12,12 @@ class GraphQlCache extends TagScope
     /**
      * Cache type code unique among all cache types
      */
-    const TYPE_IDENTIFIER = 'graphql';
+    public const TYPE_IDENTIFIER = 'graphql';
 
     /**
      * Cache tag used to distinguish the cache type from all other cache
      */
-    const CACHE_TAG = 'GRAPHQL';
+    public const CACHE_TAG = 'GRAPHQL';
 
     /**
      * @param FrontendPool $cacheFrontendPool

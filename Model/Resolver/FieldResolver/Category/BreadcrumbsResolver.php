@@ -11,7 +11,14 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class BreadcrumbsResolver implements BatchResolverInterface
 {
+    /**
+     * @var array Cache for category breadcrumb paths
+     */
     private array $pathCache = [];
+
+    /**
+     * @var array Cache for loaded category objects
+     */
     private array $categoryCache = [];
 
     public function __construct(
@@ -54,6 +61,7 @@ class BreadcrumbsResolver implements BatchResolverInterface
             foreach ($ids as $id) {
                 $pathIds[] = $id;
             }
+        }
 
         // Load all parent categories in batch
         if (!empty($pathIds)) {

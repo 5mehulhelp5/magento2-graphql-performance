@@ -98,7 +98,7 @@ class ConnectionPool
      * @param string $connectionName
      * @return AdapterInterface
      */
-    private function waitForAvailableConnection(string $connectionName): never
+    private function waitForAvailableConnection(string $connectionName): AdapterInterface
     {
         $maxWaitTime = 30; // Maximum wait time in seconds
         $startTime = time();

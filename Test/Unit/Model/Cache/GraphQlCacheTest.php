@@ -5,6 +5,7 @@ namespace Sterk\GraphQlPerformance\Test\Unit\Model\Cache;
 
 use Magento\Framework\App\Cache\Type\FrontendPool;
 use Magento\Framework\Cache\FrontendInterface;
+use Magento\Framework\Serialize\SerializerInterface;
 use PHPUnit\Framework\TestCase;
 use Sterk\GraphQlPerformance\Model\Cache\GraphQlCache;
 
@@ -21,6 +22,11 @@ class GraphQlCacheTest extends TestCase
     private $cacheFrontend;
 
     /**
+     * @var SerializerInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private $serializer;
+
+    /**
      * @var GraphQlCache
      */
     private $cache;
@@ -29,13 +35,14 @@ class GraphQlCacheTest extends TestCase
     {
         $this->frontendPool = $this->createMock(FrontendPool::class);
         $this->cacheFrontend = $this->createMock(FrontendInterface::class);
+        $this->serializer = $this->createMock(SerializerInterface::class);
 
         $this->frontendPool->expects($this->once())
             ->method('get')
             ->with(GraphQlCache::TYPE_IDENTIFIER)
             ->willReturn($this->cacheFrontend);
 
-        $this->cache = new GraphQlCache($this->frontendPool);
+        $this->cache = new GraphQlCache($this->frontendPool, $this->serializer);
     }
 
     public function testSave(): void
@@ -57,14 +64,25 @@ class GraphQlCacheTest extends TestCase
             )
             ->willReturn(true);
 
-        $result = $this->cache->save(serialize($data), $identifier, $tags, $lifeTime);
+        $this->serializer->expects($this->once())
+            ->method('serialize')
+            ->with($data)
+            ->willReturn('serialized_data');
+
+        $result = $this->cache->save('serialized_data', $identifier, $tags, $lifeTime);
         $this->assertTrue($result);
     }
 
     public function testLoad(): void
     {
         $identifier = 'test_id';
-        $data = serialize(['test' => 'data']);
+        $data = ['test' => 'data'];
+        $serializedData = 'serialized_data';
+
+        $this->serializer->expects($this->once())
+            ->method('serialize')
+            ->with($data)
+            ->willReturn($serializedData);
 
         $this->cacheFrontend->expects($this->once())
             ->method('load')

@@ -100,16 +100,6 @@ class ComplexityCalculator
     }
 
     /**
-     * Reset complexity map
-     *
-     * @return void
-     */
-    public function reset(): void
-    {
-        $this->complexityMap = [];
-    }
-
-    /**
      * Get complexity map
      *
      * @return array

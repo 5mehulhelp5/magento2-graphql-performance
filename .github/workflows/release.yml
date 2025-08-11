@@ -25,26 +25,44 @@ jobs:
           tools: composer
           ini-values: memory_limit=2G
 
+      - name: Test Magento Authentication
+        run: |
+          # Test authentication directly with curl
+          echo "Testing Magento authentication..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json)
+          echo "HTTP response code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "Authentication successful!"
+          else
+            echo "Authentication failed with code $HTTP_CODE"
+            exit 1
+          fi
+
       - name: Install Dependencies
         run: |
-          # Create auth.json directly (temporary for testing)
-          echo '{
-            "http-basic": {
-              "repo.magento.com": {
-                "username": "c8d9ce19441e64daf6c2ca0ea01c6d8b",
-                "password": "e3f7b4c0e8275ecf85e73e0223377b44"
+          # Create auth.json with environment variables
+          echo "{
+            \"http-basic\": {
+              \"repo.magento.com\": {
+                \"username\": \"${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}\",
+                \"password\": \"${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}\"
               }
             }
-          }' > auth.json
+          }" > auth.json
 
-          # Show auth.json was created
+          # Show auth.json was created (without showing contents)
           ls -la auth.json
+
+          # Move auth.json to composer home
+          mkdir -p ~/.composer
+          cp auth.json ~/.composer/
 
           # Configure Magento repository
           composer config repositories.magento composer https://repo.magento.com/
 
           # Install dependencies with verbose output
-          composer -vvv install --prefer-dist --no-progress --no-interaction
+          COMPOSER_AUTH=$(cat auth.json) composer -vvv install --prefer-dist --no-progress --no-interaction
 
       - name: Run tests
         run: |

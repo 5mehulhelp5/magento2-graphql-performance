@@ -24,31 +24,37 @@ jobs:
           coverage: none
 
       - name: Setup Composer Authentication
-        env:
-          MAGENTO_USERNAME: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
-          MAGENTO_PASSWORD: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
         run: |
-          echo "Creating auth.json in project directory"
-          cat > auth.json << EOF
-          {
+          # Debug secrets (masked)
+          echo "Public key length: ${#PUBLIC_KEY}"
+          echo "Private key length: ${#PRIVATE_KEY}"
+
+          # Create auth.json
+          echo '{
             "http-basic": {
               "repo.magento.com": {
-                "username": "$MAGENTO_USERNAME",
-                "password": "$MAGENTO_PASSWORD"
+                "username": "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}",
+                "password": "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
               }
             }
-          }
-          EOF
+          }' > auth.json
 
-          echo "Verifying auth.json exists and has content"
-          ls -l auth.json
-          cat auth.json | grep -v password | grep -v username
+          # Verify auth.json
+          echo "Auth.json contents (sensitive data masked):"
+          cat auth.json | sed 's/"username": "[^"]*"/"username": "****"/g' | sed 's/"password": "[^"]*"/"password": "****"/g'
+
+          # Set permissions
+          chmod 600 auth.json
+
+          # Copy to global location
+          mkdir -p ~/.composer
+          cp auth.json ~/.composer/
+
+          # Test auth directly
+          curl -I --user "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json
 
       - name: Install Dependencies
-        env:
-          COMPOSER_AUTH: '{"http-basic":{"repo.magento.com":{"username":"${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}","password":"${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"}}}'
         run: |
-          echo "Using COMPOSER_AUTH environment variable"
           composer install --prefer-dist --no-progress -vvv
 
       - name: Run tests

@@ -35,79 +35,22 @@ jobs:
           echo "Get these from https://marketplace.magento.com/customer/accessKeys/"
           exit 1
 
-      - name: Test Magento Authentication
-        env:
-          PUBLIC_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
-          PRIVATE_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
+      - name: Configure Composer
         run: |
-          # Debug key info (safely)
-          if [ -z "$PUBLIC_KEY" ] || [ -z "$PRIVATE_KEY" ]; then
-            echo "::error::One or both keys are empty!"
-            exit 1
-          fi
-          echo "Keys are present and not empty"
+          # Configure Magento repository
+          composer config --no-interaction repositories.magento composer https://repo.magento.com/
 
-          # Create test auth.json
-          echo "{
-            \"http-basic\": {
-              \"repo.magento.com\": {
-                \"username\": \"${PUBLIC_KEY}\",
-                \"password\": \"${PRIVATE_KEY}\"
-              }
-            }
-          }" > test-auth.json
+          # Configure authentication
+          composer config --no-interaction http-basic.repo.magento.com "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}" "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
 
-          # Show auth.json (masked)
-          echo "Auth file contents (masked):"
-          sed 's/"username": "[^"]*"/"username": "****"/g; s/"password": "[^"]*"/"password": "****"/g' test-auth.json
-
-          # Test with curl
-          echo "Testing Magento authentication..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --netrc-file test-auth.json https://repo.magento.com/packages.json)
-
-          # If that fails, try getting more info
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Detailed response:"
-            curl -v --netrc-file test-auth.json https://repo.magento.com/packages.json
-          fi
-          echo "HTTP response code: $HTTP_CODE"
-
-          if [ "$HTTP_CODE" = "200" ]; then
-            echo "Authentication successful!"
-          else
-            echo "Authentication failed with code $HTTP_CODE"
-            echo "Please verify your Magento Marketplace keys in GitHub Secrets:"
-            echo "1. Go to your repository settings"
-            echo "2. Click on Secrets and variables > Actions"
-            echo "3. Check MAGENTO_MARKETPLACE_PUBLIC_KEY and MAGENTO_MARKETPLACE_PRIVATE_KEY"
-            echo "4. Make sure they match your keys from https://marketplace.magento.com/customer/accessKeys/"
-            exit 1
-          fi
+          # Verify configuration
+          echo "Composer configuration (masked):"
+          composer config --list | grep -v password
 
       - name: Install Dependencies
         run: |
-          # Create auth.json with environment variables
-          echo "{
-            \"http-basic\": {
-              \"repo.magento.com\": {
-                \"username\": \"${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}\",
-                \"password\": \"${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}\"
-              }
-            }
-          }" > auth.json
-
-          # Show auth.json was created (without showing contents)
-          ls -la auth.json
-
-          # Move auth.json to composer home
-          mkdir -p ~/.composer
-          cp auth.json ~/.composer/
-
-          # Configure Magento repository
-          composer config repositories.magento composer https://repo.magento.com/
-
           # Install dependencies with verbose output
-          COMPOSER_AUTH=$(cat auth.json) composer -vvv install --prefer-dist --no-progress --no-interaction
+          composer -vvv install --prefer-dist --no-progress --no-interaction
 
       - name: Run tests
         run: |

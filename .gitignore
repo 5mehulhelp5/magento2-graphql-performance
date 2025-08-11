@@ -1,42 +1,8 @@
-# IDE
-.idea
-.vscode
-*.sublime-workspace
-*.sublime-project
-
-# Composer
 /vendor/
-composer.lock
-
-# Testing
+/composer.lock
+/auth.json
+/.idea/
+/.vscode/
 /coverage/
-/test-reports/
-.phpunit.result.cache
-coverage.xml
-coverage.txt
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Magento
-/var/
-/generated/
-/pub/static/
-/app/etc/env.php
-/app/etc/config.php
-
-# Node
-/node_modules/
-package-lock.json
-
-# Logs
+*.cache
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build
-/build/
-/dist/
-*.zip

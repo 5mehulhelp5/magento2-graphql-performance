@@ -74,7 +74,8 @@ jobs:
 
       - name: Run Code Style Check
         run: |
-          vendor/bin/phpcs
+          # Run PHPCS on all PHP files
+          vendor/bin/phpcs --standard=Magento2 --extensions=php Api/ Block/ Console/ Controller/ Cron/ Model/ Observer/ Plugin/ Test/
           vendor/bin/phpstan analyse
           vendor/bin/psalm
           vendor/bin/phpmd src text cleancode,codesize,controversial,design,naming,unusedcode

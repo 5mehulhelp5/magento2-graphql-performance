@@ -23,6 +23,10 @@ jobs:
           extensions: json, gd, mysql, zip, intl, pdo_mysql
           coverage: none
 
+      - name: Configure Composer auth
+        run: |
+          composer config -g http-basic.repo.magento.com ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }} ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 

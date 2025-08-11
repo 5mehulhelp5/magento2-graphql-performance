@@ -64,6 +64,12 @@
         "optimization"
     ],
     "homepage": "https://github.com/veysiyildiz/magento2-graphql-performance",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ],
     "funding": [
         {
             "type": "github",

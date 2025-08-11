@@ -135,7 +135,7 @@ class QueryTimer
      */
     private function getKey(string $operationName, string $query): string
     {
-        return md5($operationName . $query);
+        return hash('sha256', $operationName . $query);
     }
 
     /**

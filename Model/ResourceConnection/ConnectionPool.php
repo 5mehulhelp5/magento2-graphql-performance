@@ -9,7 +9,7 @@ use Magento\Framework\DB\Adapter\Pdo\Mysql;
 use Magento\Framework\DB\LoggerInterface;
 use Magento\Framework\App\DeploymentConfig;
 
-final class ConnectionPool
+class ConnectionPool
 {
     private array $connections = [];
     private array $activeConnections = [];

@@ -57,7 +57,7 @@ class RateLimiter
             $identifier = $this->getClientIdentifier();
         }
 
-        return self::CACHE_KEY_PREFIX . md5($identifier . '_' . floor(time() / self::WINDOW_SIZE));
+        return self::CACHE_KEY_PREFIX . hash('sha256', $identifier . '_' . floor(time() / self::WINDOW_SIZE));
     }
 
     /**

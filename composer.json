@@ -54,7 +54,14 @@
         "psalm": "psalm"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "magento/composer-dependency-version-audit-plugin": true,
+            "magento/inventory-composer-installer": true,
+            "magento/composer-root-update-plugin": true,
+            "magento/magento-composer-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "support": {
         "issues": "https://github.com/veysiyildiz/magento2-graphql-performance/issues",

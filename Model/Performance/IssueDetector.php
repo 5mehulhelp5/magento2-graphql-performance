@@ -5,7 +5,7 @@ namespace Sterk\GraphQlPerformance\Model\Performance;
 
 use Psr\Log\LoggerInterface;
 
-final class IssueDetector
+class IssueDetector
 {
     private const THRESHOLDS = [
         'cache_hit_rate' => 0.8,

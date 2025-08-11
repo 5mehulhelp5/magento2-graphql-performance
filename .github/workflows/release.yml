@@ -24,37 +24,41 @@ jobs:
           coverage: none
 
       - name: Setup Composer Authentication
+        env:
+          MAGENTO_PUBLIC_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
+          MAGENTO_PRIVATE_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
         run: |
-          # Debug secrets (masked)
-          echo "Public key length: ${#PUBLIC_KEY}"
-          echo "Private key length: ${#PRIVATE_KEY}"
+          # Debug environment
+          echo "Current directory: $(pwd)"
+          echo "Public key length: ${#MAGENTO_PUBLIC_KEY}"
+          echo "Private key length: ${#MAGENTO_PRIVATE_KEY}"
 
-          # Create auth.json
+          # Create auth.json with jq for proper JSON formatting
           echo '{
             "http-basic": {
               "repo.magento.com": {
-                "username": "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}",
-                "password": "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
+                "username": "'"${MAGENTO_PUBLIC_KEY}"'",
+                "password": "'"${MAGENTO_PRIVATE_KEY}"'"
               }
             }
           }' > auth.json
 
           # Verify auth.json
-          echo "Auth.json contents (sensitive data masked):"
-          cat auth.json | sed 's/"username": "[^"]*"/"username": "****"/g' | sed 's/"password": "[^"]*"/"password": "****"/g'
-
-          # Set permissions
-          chmod 600 auth.json
-
-          # Copy to global location
-          mkdir -p ~/.composer
-          cp auth.json ~/.composer/
+          echo "Auth.json exists: $(test -f auth.json && echo yes || echo no)"
+          echo "Auth.json permissions: $(ls -l auth.json)"
+          echo "Auth.json contents (masked):"
+          sed 's/"username": "[^"]*"/"username": "****"/g; s/"password": "[^"]*"/"password": "****"/g' auth.json
 
           # Test auth directly
-          curl -I --user "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json
+          echo "Testing authentication with curl..."
+          curl -v --user "${MAGENTO_PUBLIC_KEY}:${MAGENTO_PRIVATE_KEY}" https://repo.magento.com/packages.json || true
 
       - name: Install Dependencies
+        env:
+          COMPOSER_AUTH: '{"http-basic":{"repo.magento.com":{"username":"'"${MAGENTO_PUBLIC_KEY}"'","password":"'"${MAGENTO_PRIVATE_KEY}"'"}}}'
         run: |
+          echo "COMPOSER_AUTH is set: $(test -n "$COMPOSER_AUTH" && echo yes || echo no)"
+          composer config --list --global
           composer install --prefer-dist --no-progress -vvv
 
       - name: Run tests

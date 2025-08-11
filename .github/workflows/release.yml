@@ -54,11 +54,16 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # Allow Magento plugins
+          # Allow required plugins
           composer config --no-plugins allow-plugins.magento/composer-dependency-version-audit-plugin true
           composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
           composer config --no-plugins allow-plugins.magento/composer-root-update-plugin true
           composer config --no-plugins allow-plugins.magento/magento-composer-installer true
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+
+          # Show allowed plugins
+          echo "Allowed plugins:"
+          composer config --list | grep allow-plugins
 
           # Install dependencies with verbose output
           composer -vvv install --prefer-dist --no-progress --no-interaction

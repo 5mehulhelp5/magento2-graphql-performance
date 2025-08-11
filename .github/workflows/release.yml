@@ -24,33 +24,31 @@ jobs:
           coverage: none
 
       - name: Setup Composer Authentication
+        env:
+          MAGENTO_USERNAME: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
+          MAGENTO_PASSWORD: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
         run: |
-          # Create auth.json with explicit values
-          PUBLIC_KEY="${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}"
-          PRIVATE_KEY="${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
-
-          echo "Setting up auth.json with public key: ${PUBLIC_KEY:0:4}..."
-
-          mkdir -p ~/.composer
-          cat > ~/.composer/auth.json << EOF
+          echo "Creating auth.json in project directory"
+          cat > auth.json << EOF
           {
             "http-basic": {
               "repo.magento.com": {
-                "username": "${PUBLIC_KEY}",
-                "password": "${PRIVATE_KEY}"
+                "username": "$MAGENTO_USERNAME",
+                "password": "$MAGENTO_PASSWORD"
               }
             }
           }
           EOF
 
-          chmod 600 ~/.composer/auth.json
-
-          # Verify auth.json contents (masking sensitive data)
-          echo "Auth.json contents:"
-          sed 's/\("username": "\)[^"]*\(".*\)/\1****\2/g; s/\("password": "\)[^"]*\(".*\)/\1****\2/g' ~/.composer/auth.json
+          echo "Verifying auth.json exists and has content"
+          ls -l auth.json
+          cat auth.json | grep -v password | grep -v username
 
       - name: Install Dependencies
+        env:
+          COMPOSER_AUTH: ${{ toJson({"http-basic": {"repo.magento.com": {"username": "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}", "password": "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"}}}) }}
         run: |
+          echo "Using COMPOSER_AUTH environment variable"
           composer install --prefer-dist --no-progress -vvv
 
       - name: Run tests

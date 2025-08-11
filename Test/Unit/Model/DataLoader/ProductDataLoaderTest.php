@@ -42,9 +42,6 @@ class ProductDataLoaderTest extends TestCase
         $products = [];
         foreach ($productIds as $id) {
             $product = $this->createMock(ProductInterface::class);
-            $product->expects($this->once())
-                ->method('getId')
-                ->willReturn($id);
             $products[] = $product;
         }
 
@@ -52,7 +49,7 @@ class ProductDataLoaderTest extends TestCase
         // Setup product repository
         $this->repository->expects($this->once())
             ->method('getByIds')
-            ->with($productIds)
+            ->with(array_values($productIds))
             ->willReturn(array_combine($productIds, $products));
 
         // Call the method through reflection since it's protected
@@ -72,9 +69,7 @@ class ProductDataLoaderTest extends TestCase
         $productId = '1';
         $product = $this->createMock(ProductInterface::class);
 
-        $product->expects($this->once())
-            ->method('getId')
-            ->willReturn($productId);
+        // No need to mock getId as we're using array keys
 
         // Setup repository mock
         $this->repository->expects($this->once())
@@ -97,16 +92,13 @@ class ProductDataLoaderTest extends TestCase
         // Create mock products
         foreach ($productIds as $id) {
             $product = $this->createMock(ProductInterface::class);
-            $product->expects($this->once())
-                ->method('getId')
-                ->willReturn($id);
             $products[] = $product;
         }
 
         // Setup repository mock
         $this->repository->expects($this->once())
             ->method('getByIds')
-            ->with($productIds)
+            ->with(array_values($productIds))
             ->willReturn(array_combine($productIds, $products));
 
         $result = $this->dataLoader->loadMany($productIds);

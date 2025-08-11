@@ -27,28 +27,22 @@ jobs:
 
       - name: Setup Composer Authentication
         run: |
-          # Create auth.json in project root
-          cat > auth.json << 'EOL'
-          {
-              "http-basic": {
-                  "repo.magento.com": {
-                      "username": "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}",
-                      "password": "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
-                  }
+          # Create auth.json with direct variable substitution
+          echo '{
+            "http-basic": {
+              "repo.magento.com": {
+                "username": "'${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}'",
+                "password": "'${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}'"
               }
-          }
-          EOL
-
-          # Replace secrets in auth.json
-          sed -i "s/\${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}/${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}/g" auth.json
-          sed -i "s/\${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}/${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}/g" auth.json
+            }
+          }' > auth.json
 
           # Set proper permissions
           chmod 600 auth.json
 
           # Show auth.json contents (masked)
           echo "Auth.json contents (masked):"
-          sed 's/"username": "[^"]*"/"username": "****"/g; s/"password": "[^"]*"/"password": "****"/g' auth.json
+          cat auth.json | tr -d '\n' | sed 's/\("username": *"\)[^"]*\(".*\)/\1****\2/' | sed 's/\("password": *"\)[^"]*\(".*\)/\1****\2/'
 
       - name: Install Dependencies
         run: |

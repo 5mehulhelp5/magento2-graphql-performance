@@ -6,11 +6,14 @@ namespace Sterk\GraphQlPerformance\Model\Resolver;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\BatchServiceContractResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
+use Sterk\GraphQlPerformance\Api\OptimizedFieldInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
+use Sterk\GraphQlPerformance\Model\Resolver\OptimizedFieldTrait;
 
-abstract class AbstractResolver implements BatchServiceContractResolverInterface
+abstract class AbstractResolver implements BatchServiceContractResolverInterface&OptimizedFieldInterface
 {
+    use OptimizedFieldTrait;
     public function __construct(
         protected readonly ResolverCache $cache,
         protected readonly QueryTimer $queryTimer

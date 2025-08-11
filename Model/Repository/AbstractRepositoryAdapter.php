@@ -31,8 +31,9 @@ abstract class AbstractRepositoryAdapter implements RepositoryInterface
      *
      * @param int $id
      * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getById(int $id)
+    public function getById(int $id): mixed
     {
         return $this->repository->getById($id);
     }

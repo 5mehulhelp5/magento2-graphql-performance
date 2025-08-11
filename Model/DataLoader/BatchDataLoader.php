@@ -12,7 +12,7 @@ abstract class BatchDataLoader
     private bool $loading = false;
 
     public function __construct(
-        protected ObjectManagerInterface $objectManager
+        protected readonly ObjectManagerInterface $objectManager
     ) {}
 
     /**
@@ -67,7 +67,7 @@ abstract class BatchDataLoader
 
         // Get unique IDs from queue
         $ids = array_unique($this->queue);
-        
+
         // Clear queue
         $this->queue = [];
 

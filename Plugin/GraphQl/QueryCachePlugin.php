@@ -25,7 +25,7 @@ class QueryCachePlugin
         ?array $variables = null,
         ?array $contextValue = null,
         ?array $rootValue = null
-    ) {
+    ): array {
         // Skip caching for mutations
         if ($this->isMutation($query)) {
             return $proceed($schema, $query, $variables, $contextValue, $rootValue);

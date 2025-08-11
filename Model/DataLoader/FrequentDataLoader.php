@@ -10,8 +10,8 @@ use Magento\Framework\App\ResourceConnection;
 
 abstract class FrequentDataLoader extends BatchDataLoader
 {
-    protected array $loadedData = [];
-    protected array $cacheKeys = [];
+    private array $loadedData = [];
+    private array $cacheKeys = [];
 
     public function __construct(
         PromiseAdapter $promiseAdapter,

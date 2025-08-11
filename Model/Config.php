@@ -5,15 +5,10 @@ namespace Sterk\GraphQlPerformance\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use Sterk\GraphQlPerformance\Model\Config\ConfigPath;
 
 class Config
 {
-    private const XML_PATH_CACHE = 'graphql_performance/cache/';
-    private const XML_PATH_QUERY = 'graphql_performance/query/';
-    private const XML_PATH_CONNECTION_POOL = 'graphql_performance/connection_pool/';
-    private const XML_PATH_MONITORING = 'graphql_performance/monitoring/';
-    private const XML_PATH_FIELD_RESOLVERS = 'graphql_performance/field_resolvers/';
-
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
     ) {}
@@ -32,7 +27,7 @@ class Config
         mixed $scopeCode = null
     ): mixed {
         return $this->scopeConfig->getValue(
-            self::XML_PATH_CACHE . $field,
+            ConfigPath::CACHE->getPath($field),
             $scope,
             $scopeCode
         );
@@ -52,7 +47,7 @@ class Config
         mixed $scopeCode = null
     ): mixed {
         return $this->scopeConfig->getValue(
-            self::XML_PATH_QUERY . $field,
+            ConfigPath::QUERY->getPath($field),
             $scope,
             $scopeCode
         );
@@ -72,7 +67,7 @@ class Config
         mixed $scopeCode = null
     ): mixed {
         return $this->scopeConfig->getValue(
-            self::XML_PATH_CONNECTION_POOL . $field,
+            ConfigPath::CONNECTION_POOL->getPath($field),
             $scope,
             $scopeCode
         );

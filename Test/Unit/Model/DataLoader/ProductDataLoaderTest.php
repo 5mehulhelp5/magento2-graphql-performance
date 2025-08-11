@@ -14,36 +14,18 @@ use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 
 class ProductDataLoaderTest extends TestCase
 {
-    /**
-     * @var ObjectManagerInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $objectManager;
-
-    /**
-     * @var ProductRepositoryInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $productRepository;
-
-    /**
-     * @var SearchCriteriaBuilder|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $searchCriteriaBuilder;
-
-    /**
-     * @var ProductDataLoader
-     */
-    private $dataLoader;
+    private readonly ObjectManagerInterface $objectManager;
+    private readonly ProductRepositoryAdapter $repository;
+    private readonly ProductDataLoader $dataLoader;
 
     protected function setUp(): void
     {
         $this->objectManager = $this->createMock(ObjectManagerInterface::class);
-        $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
-        $this->searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
+        $this->repository = $this->createMock(ProductRepositoryAdapter::class);
 
         $this->dataLoader = new ProductDataLoader(
             $this->objectManager,
-            $this->productRepository,
-            $this->searchCriteriaBuilder
+            $this->repository
         );
     }
 
@@ -52,7 +34,7 @@ class ProductDataLoaderTest extends TestCase
         $productIds = ['1', '2', '3'];
         $searchCriteria = $this->createMock(SearchCriteria::class);
         $searchResults = $this->createMock(ProductSearchResultsInterface::class);
-        
+
         // Create mock products
         $products = [];
         foreach ($productIds as $id) {
@@ -99,7 +81,7 @@ class ProductDataLoaderTest extends TestCase
     {
         $productId = '1';
         $product = $this->createMock(ProductInterface::class);
-        
+
         // Setup expectations for batch loading a single product
         $searchCriteria = $this->createMock(SearchCriteria::class);
         $searchResults = $this->createMock(ProductSearchResultsInterface::class);
@@ -127,7 +109,7 @@ class ProductDataLoaderTest extends TestCase
             ->willReturn($searchResults);
 
         $result = $this->dataLoader->load($productId);
-        
+
         $this->assertSame($product, $result);
     }
 

@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2024-03-21
+### Added
+- Full PHP 8.1 compatibility
+- Constructor property promotion for cleaner code
+- Intersection types for optimized fields
+- Readonly properties for better immutability
+- Never return type for improved error handling
+- Enums for configuration paths, cache strategies, and security patterns
+- Final classes for better inheritance control
+- Enhanced static analysis configuration
+- Improved type safety throughout the codebase
+
+### Changed
+- Updated all dev dependencies to latest versions
+- Improved error handling in connection pools
+- Enhanced type declarations across the module
+- Optimized cache key generation
+- Strengthened security validations
+
+### Developer Experience
+- Better IDE support through enhanced type hints
+- Clearer code organization with PHP 8.1 features
+- Improved static analysis coverage
+- More maintainable and self-documenting code
+
 ## [1.0.0] - 2024-03-20
 ### Added
 - Initial release

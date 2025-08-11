@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['7.4', '8.1']
-        magento-version: ['2.4.4', '2.4.5']
+        php-version: ['8.1']
+        magento-version: ['2.4.4', '2.4.5', '2.4.6']
 
     steps:
       - uses: actions/checkout@v2
@@ -30,6 +30,8 @@ jobs:
         run: |
           vendor/bin/phpunit
           vendor/bin/phpcs
+          vendor/bin/phpstan analyse
+          vendor/bin/psalm
           vendor/bin/phpmd src text cleancode,codesize,controversial,design,naming,unusedcode
 
   build:

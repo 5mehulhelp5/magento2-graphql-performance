@@ -6,15 +6,11 @@ namespace Sterk\GraphQlPerformance\Model\Security;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Sterk\GraphQlPerformance\Model\Config;
+use Sterk\GraphQlPerformance\Model\Security\SecurityPattern;
 
 class RequestValidator
 {
     private const MAX_QUERY_SIZE = 8000;
-    private const FORBIDDEN_PATTERNS = [
-        'introspection' => '__schema|__type',
-        'dangerous_fields' => 'password|token|secret|key',
-        'system_queries' => 'system\.|\$where|eval\('
-    ];
 
     public function __construct(
         private readonly Config $config,
@@ -63,10 +59,10 @@ class RequestValidator
     {
         $normalizedQuery = strtolower(preg_replace('/\s+/', ' ', $query));
 
-        foreach (self::FORBIDDEN_PATTERNS as $type => $pattern) {
-            if (preg_match('/' . $pattern . '/i', $normalizedQuery)) {
+        foreach (SecurityPattern::cases() as $pattern) {
+            if (preg_match('/' . $pattern->value . '/i', $normalizedQuery)) {
                 throw new LocalizedException(
-                    __('Query contains forbidden pattern: %1', $type)
+                    __($pattern->getDescription())
                 );
             }
         }

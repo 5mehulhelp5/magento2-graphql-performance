@@ -7,16 +7,15 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Sterk\GraphQlPerformance\Model\Config;
 
-class ConnectionPoolManager
+final class ConnectionPoolManager
 {
-    private array $connections = [
-        'active' => [],
-        'idle' => []
-    ];
-
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
-        private readonly Config $config
+        private readonly Config $config,
+        private array $connections = [
+            'active' => [],
+            'idle' => []
+        ]
     ) {}
 
     /**
@@ -78,7 +77,7 @@ class ConnectionPoolManager
      *
      * @return AdapterInterface
      */
-    private function waitForConnection(): AdapterInterface
+    private function waitForConnection(): never
     {
         $retryCount = 0;
         $maxRetries = $this->config->getConnectionPoolConfig('retry_limit') ?? 3;

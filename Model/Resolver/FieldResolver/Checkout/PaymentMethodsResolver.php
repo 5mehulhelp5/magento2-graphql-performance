@@ -210,7 +210,11 @@ class PaymentMethodsResolver implements BatchResolverInterface
     private function getMinimumAmount(string $code): ?float
     {
         // Add logic to get minimum amount for payment method
-        return null;
+        return match ($code) {
+            'nkolaypos' => 10.0,
+            'paytr' => 5.0,
+            default => null
+        };
     }
 
     /**
@@ -222,7 +226,11 @@ class PaymentMethodsResolver implements BatchResolverInterface
     private function getMaximumAmount(string $code): ?float
     {
         // Add logic to get maximum amount for payment method
-        return null;
+        return match ($code) {
+            'nkolaypos' => 50000.0,
+            'paytr' => 25000.0,
+            default => null
+        };
     }
 
     /**

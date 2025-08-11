@@ -8,7 +8,7 @@ use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPoolManager;
 
-class PerformanceMetrics implements PerformanceMetricsInterface
+final class PerformanceMetrics implements PerformanceMetricsInterface
 {
     public function __construct(
         private readonly QueryTimer $queryTimer,

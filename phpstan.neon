@@ -1,14 +1,21 @@
 parameters:
-    level: 8
+    level: max
+    phpVersion: 80100 # PHP 8.1
     paths:
         - Model
         - Plugin
         - Observer
+        - Block
+        - Console
+        - Controller
+        - Cron
     excludePaths:
         - Test/*
         - vendor/*
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    checkUninitializedProperties: true
+    treatPhpDocTypesAsCertain: true
     ignoreErrors:
         - '#Method .* has parameter .* with no value type specified in iterable type array#'
         - '#Property .* type has no value type specified in iterable type array#'

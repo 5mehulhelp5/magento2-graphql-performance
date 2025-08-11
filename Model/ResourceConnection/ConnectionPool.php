@@ -9,26 +9,19 @@ use Magento\Framework\DB\Adapter\Pdo\Mysql;
 use Magento\Framework\DB\LoggerInterface;
 use Magento\Framework\App\DeploymentConfig;
 
-class ConnectionPool
+final class ConnectionPool
 {
     private array $connections = [];
     private array $activeConnections = [];
-    private int $maxConnections;
-    private int $minConnections;
-    private int $idleTimeout;
 
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly DeploymentConfig $deploymentConfig,
         private readonly ?LoggerInterface $logger = null,
-        int $maxConnections = 50,
-        int $minConnections = 5,
-        int $idleTimeout = 300 // 5 minutes
-    ) {
-        $this->maxConnections = $maxConnections;
-        $this->minConnections = $minConnections;
-        $this->idleTimeout = $idleTimeout;
-    }
+        private readonly int $maxConnections = 50,
+        private readonly int $minConnections = 5,
+        private readonly int $idleTimeout = 300 // 5 minutes
+    ) {}
 
     /**
      * Get a connection from the pool
@@ -105,7 +98,7 @@ class ConnectionPool
      * @param string $connectionName
      * @return AdapterInterface
      */
-    private function waitForAvailableConnection(string $connectionName): AdapterInterface
+    private function waitForAvailableConnection(string $connectionName): never
     {
         $maxWaitTime = 30; // Maximum wait time in seconds
         $startTime = time();
@@ -124,9 +117,8 @@ class ConnectionPool
             usleep(100000); // 100ms
         }
 
-        // If we still can't get a connection, create a new one (emergency case)
-        $this->logger?->warning('Connection pool reached maximum size, creating emergency connection');
-        return $this->createNewConnection($connectionName);
+        $this->logger?->error('Connection pool exhausted, no connections available');
+        throw new \RuntimeException('Connection pool exhausted, no connections available');
     }
 
     /**

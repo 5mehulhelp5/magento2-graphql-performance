@@ -11,6 +11,14 @@ class ComplexityCalculator
     private array $complexityMap = [];
 
     /**
+     * Reset complexity map
+     */
+    public function reset(): void
+    {
+        $this->complexityMap = [];
+    }
+
+    /**
      * Calculate field complexity
      *
      * @param Node $node

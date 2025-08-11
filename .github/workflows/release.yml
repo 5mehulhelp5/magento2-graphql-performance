@@ -25,19 +25,23 @@ jobs:
           tools: composer
           ini-values: memory_limit=2G
 
-      - name: Setup Composer Authentication
-        run: |
-          # Configure global authentication
-          composer config --global --no-interaction http-basic.repo.magento.com "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}" "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
-
-          # Verify authentication is set
-          echo "Composer configuration:"
-          composer config --global --list | grep -v password
-
       - name: Install Dependencies
         run: |
+          # Create auth.json directly (temporary for testing)
+          echo '{
+            "http-basic": {
+              "repo.magento.com": {
+                "username": "c8d9ce19441e64daf6c2ca0ea01c6d8b",
+                "password": "e3f7b4c0e8275ecf85e73e0223377b44"
+              }
+            }
+          }' > auth.json
+
+          # Show auth.json was created
+          ls -la auth.json
+
           # Configure Magento repository
-          composer config --no-interaction repositories.magento composer https://repo.magento.com/
+          composer config repositories.magento composer https://repo.magento.com/
 
           # Install dependencies with verbose output
           composer -vvv install --prefer-dist --no-progress --no-interaction

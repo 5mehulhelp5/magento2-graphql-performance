@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sterk\GraphQlPerformance\Test\Unit\Model\Cache;
 
-use Magento\Framework\App\Cache\Frontend\Pool as FrontendPool;
+use Magento\Framework\App\Cache\Type\FrontendPool;
 use Magento\Framework\Cache\FrontendInterface;
 use PHPUnit\Framework\TestCase;
 use Sterk\GraphQlPerformance\Model\Cache\GraphQlCache;

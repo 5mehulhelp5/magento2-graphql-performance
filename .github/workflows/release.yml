@@ -71,7 +71,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd Test/Unit && ../../vendor/bin/phpunit
-          
+
       - name: Run Code Style Check
         run: |
           vendor/bin/phpcs

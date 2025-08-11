@@ -11,17 +11,20 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\ObjectManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
+use Sterk\GraphQlPerformance\Model\Repository\ProductRepositoryAdapter;
 
 class ProductDataLoaderTest extends TestCase
 {
-    private readonly ObjectManagerInterface $objectManager;
-    private readonly ProductRepositoryAdapter $repository;
-    private readonly ProductDataLoader $dataLoader;
+    private ObjectManagerInterface $objectManager;
+    private ProductRepositoryAdapter $repository;
+    private ProductDataLoader $dataLoader;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
 
     protected function setUp(): void
     {
         $this->objectManager = $this->createMock(ObjectManagerInterface::class);
         $this->repository = $this->createMock(ProductRepositoryAdapter::class);
+        $this->searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
 
         $this->dataLoader = new ProductDataLoader(
             $this->objectManager,
@@ -46,24 +49,11 @@ class ProductDataLoaderTest extends TestCase
         }
 
         // Setup search criteria builder
-        $this->searchCriteriaBuilder->expects($this->once())
-            ->method('addFilter')
-            ->with('entity_id', $productIds, 'in')
-            ->willReturnSelf();
-
-        $this->searchCriteriaBuilder->expects($this->once())
-            ->method('create')
-            ->willReturn($searchCriteria);
-
         // Setup product repository
-        $searchResults->expects($this->once())
-            ->method('getItems')
-            ->willReturn($products);
-
-        $this->productRepository->expects($this->once())
-            ->method('getList')
-            ->with($searchCriteria)
-            ->willReturn($searchResults);
+        $this->repository->expects($this->once())
+            ->method('getByIds')
+            ->with($productIds)
+            ->willReturn(array_combine($productIds, $products));
 
         // Call the method through reflection since it's protected
         $method = new \ReflectionMethod(ProductDataLoader::class, 'batchLoad');
@@ -82,31 +72,15 @@ class ProductDataLoaderTest extends TestCase
         $productId = '1';
         $product = $this->createMock(ProductInterface::class);
 
-        // Setup expectations for batch loading a single product
-        $searchCriteria = $this->createMock(SearchCriteria::class);
-        $searchResults = $this->createMock(ProductSearchResultsInterface::class);
-
         $product->expects($this->once())
             ->method('getId')
             ->willReturn($productId);
 
-        $this->searchCriteriaBuilder->expects($this->once())
-            ->method('addFilter')
-            ->with('entity_id', [$productId], 'in')
-            ->willReturnSelf();
-
-        $this->searchCriteriaBuilder->expects($this->once())
-            ->method('create')
-            ->willReturn($searchCriteria);
-
-        $searchResults->expects($this->once())
-            ->method('getItems')
-            ->willReturn([$product]);
-
-        $this->productRepository->expects($this->once())
-            ->method('getList')
-            ->with($searchCriteria)
-            ->willReturn($searchResults);
+        // Setup repository mock
+        $this->repository->expects($this->once())
+            ->method('getByIds')
+            ->with([$productId])
+            ->willReturn([$productId => $product]);
 
         $result = $this->dataLoader->load($productId);
 
@@ -129,23 +103,11 @@ class ProductDataLoaderTest extends TestCase
             $products[] = $product;
         }
 
-        $this->searchCriteriaBuilder->expects($this->once())
-            ->method('addFilter')
-            ->with('entity_id', $productIds, 'in')
-            ->willReturnSelf();
-
-        $this->searchCriteriaBuilder->expects($this->once())
-            ->method('create')
-            ->willReturn($searchCriteria);
-
-        $searchResults->expects($this->once())
-            ->method('getItems')
-            ->willReturn($products);
-
-        $this->productRepository->expects($this->once())
-            ->method('getList')
-            ->with($searchCriteria)
-            ->willReturn($searchResults);
+        // Setup repository mock
+        $this->repository->expects($this->once())
+            ->method('getByIds')
+            ->with($productIds)
+            ->willReturn(array_combine($productIds, $products));
 
         $result = $this->dataLoader->loadMany($productIds);
 

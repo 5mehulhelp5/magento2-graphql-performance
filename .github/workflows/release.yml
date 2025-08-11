@@ -26,15 +26,36 @@ jobs:
           ini-values: memory_limit=2G
 
       - name: Test Magento Authentication
+        env:
+          PUBLIC_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
+          PRIVATE_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
         run: |
-          # Test authentication directly with curl
+          # Debug key lengths
+          echo "Public key length: ${#PUBLIC_KEY}"
+          echo "Private key length: ${#PRIVATE_KEY}"
+
+          # Create test auth.json
+          echo "{
+            \"http-basic\": {
+              \"repo.magento.com\": {
+                \"username\": \"${PUBLIC_KEY}\",
+                \"password\": \"${PRIVATE_KEY}\"
+              }
+            }
+          }" > test-auth.json
+
+          # Show auth.json (masked)
+          echo "Auth file contents (masked):"
+          sed 's/"username": "[^"]*"/"username": "****"/g; s/"password": "[^"]*"/"password": "****"/g' test-auth.json
+
+          # Test with curl
           echo "Testing Magento authentication..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --netrc-file test-auth.json https://repo.magento.com/packages.json)
 
           # If that fails, try getting more info
           if [ "$HTTP_CODE" != "200" ]; then
             echo "Detailed response:"
-            curl -v -u "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json
+            curl -v --netrc-file test-auth.json https://repo.magento.com/packages.json
           fi
           echo "HTTP response code: $HTTP_CODE"
 
@@ -42,6 +63,11 @@ jobs:
             echo "Authentication successful!"
           else
             echo "Authentication failed with code $HTTP_CODE"
+            echo "Please verify your Magento Marketplace keys in GitHub Secrets:"
+            echo "1. Go to your repository settings"
+            echo "2. Click on Secrets and variables > Actions"
+            echo "3. Check MAGENTO_MARKETPLACE_PUBLIC_KEY and MAGENTO_MARKETPLACE_PRIVATE_KEY"
+            echo "4. Make sure they match your keys from https://marketplace.magento.com/customer/accessKeys/"
             exit 1
           fi
 

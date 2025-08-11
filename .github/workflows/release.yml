@@ -26,14 +26,19 @@ jobs:
           ini-values: memory_limit=2G
 
       - name: Verify Secrets
-        if: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY == '' || secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY == '' }}
+        env:
+          PUBLIC_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
+          PRIVATE_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
         run: |
-          echo "::error::Missing required secrets!"
-          echo "Please add the following secrets in your repository settings:"
-          echo "- MAGENTO_MARKETPLACE_PUBLIC_KEY"
-          echo "- MAGENTO_MARKETPLACE_PRIVATE_KEY"
-          echo "Get these from https://marketplace.magento.com/customer/accessKeys/"
-          exit 1
+          if [ -z "$PUBLIC_KEY" ] || [ -z "$PRIVATE_KEY" ]; then
+            echo "::error::Missing required secrets!"
+            echo "Please add the following secrets in your repository settings:"
+            echo "- MAGENTO_MARKETPLACE_PUBLIC_KEY"
+            echo "- MAGENTO_MARKETPLACE_PRIVATE_KEY"
+            echo "Get these from https://marketplace.magento.com/customer/accessKeys/"
+            exit 1
+          fi
+          echo "Secrets are properly set"
 
       - name: Configure Composer
         run: |

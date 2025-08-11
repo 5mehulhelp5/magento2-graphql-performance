@@ -26,10 +26,24 @@ jobs:
           ini-values: memory_limit=2G
 
       - name: Install Dependencies
-        env:
-          COMPOSER_AUTH: '{"http-basic": {"repo.magento.com": {"username": "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}", "password": "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"}}}'
         run: |
-          # Install dependencies with authentication
+          # Create auth.json
+          cat > auth.json << EOL
+          {
+              "http-basic": {
+                  "repo.magento.com": {
+                      "username": "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}",
+                      "password": "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
+                  }
+              }
+          }
+          EOL
+
+          # Verify auth.json
+          echo "Auth.json contents (masked):"
+          sed 's/"username": "[^"]*"/"username": "****"/g; s/"password": "[^"]*"/"password": "****"/g' auth.json
+
+          # Install dependencies
           composer install --prefer-dist --no-progress
 
       - name: Run tests

@@ -68,9 +68,12 @@ jobs:
           # Install dependencies with verbose output
           composer -vvv install --prefer-dist --no-progress --no-interaction
 
-      - name: Run tests
+      - name: Run Unit Tests
         run: |
-          vendor/bin/phpunit
+          cd Test/Unit && ../../vendor/bin/phpunit
+          
+      - name: Run Code Style Check
+        run: |
           vendor/bin/phpcs
           vendor/bin/phpstan analyse
           vendor/bin/psalm

@@ -26,7 +26,7 @@ jobs:
           ini-values: memory_limit=2G
 
       - name: Verify Secrets
-        if: ${{ !secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY || !secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
+        if: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY == '' || secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY == '' }}
         run: |
           echo "::error::Missing required secrets!"
           echo "Please add the following secrets in your repository settings:"

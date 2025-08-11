@@ -54,6 +54,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          # Allow Magento plugins
+          composer config --no-plugins allow-plugins.magento/composer-dependency-version-audit-plugin true
+          composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
+          composer config --no-plugins allow-plugins.magento/composer-root-update-plugin true
+          composer config --no-plugins allow-plugins.magento/magento-composer-installer true
+
           # Install dependencies with verbose output
           composer -vvv install --prefer-dist --no-progress --no-interaction
 

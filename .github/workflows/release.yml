@@ -25,18 +25,34 @@ jobs:
           tools: composer
           ini-values: memory_limit=2G
 
+      - name: Setup Composer Authentication
+        run: |
+          # Create ~/.composer directory
+          mkdir -p ~/.composer
+
+          # Create global auth.json
+          echo '{"http-basic":{"repo.magento.com":{"username":"${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}","password":"${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"}}}' > ~/.composer/auth.json
+
+          # Set proper permissions
+          chmod 600 ~/.composer/auth.json
+
+          # Verify auth.json
+          echo "Auth file exists: $(test -f ~/.composer/auth.json && echo yes || echo no)"
+          echo "Auth file permissions: $(ls -l ~/.composer/auth.json)"
+
+          # Configure global Composer authentication
+          composer config --global http-basic.repo.magento.com "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}" "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
+
+          # Test authentication
+          curl -s -I -H "Accept: application/json" --user "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}:${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}" https://repo.magento.com/packages.json
+
       - name: Install Dependencies
         run: |
-          # Configure Composer authentication
-          composer config --auth http-basic.repo.magento.com "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}" "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
-
-          # Verify configuration
+          # Show Composer configuration
           echo "Composer configuration:"
-          composer config --list | grep -v password
+          composer config --list --global | grep -v password
 
           # Install dependencies
-          echo "COMPOSER_AUTH is set: $(test -n "$COMPOSER_AUTH" && echo yes || echo no)"
-          composer config --list --global
           composer install --prefer-dist --no-progress -vvv
 
       - name: Run tests

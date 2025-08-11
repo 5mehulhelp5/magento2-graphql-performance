@@ -49,9 +49,24 @@ abstract class BatchDataLoader
      */
     public function loadMany(array $ids): array
     {
+        // Add all IDs to queue
+        foreach ($ids as $id) {
+            if (!isset($this->loadedItems[$id])) {
+                $this->queue[$id] = $id;
+            }
+        }
+
+        // Load all queued items at once
+        if (!empty($this->queue) && !$this->loading) {
+            $this->loading = true;
+            $this->loadQueue();
+            $this->loading = false;
+        }
+
+        // Return requested items
         $result = [];
         foreach ($ids as $id) {
-            $result[$id] = $this->load($id);
+            $result[$id] = $this->loadedItems[$id] ?? null;
         }
         return $result;
     }

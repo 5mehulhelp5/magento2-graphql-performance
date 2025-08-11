@@ -69,7 +69,7 @@ class GraphQlCacheTest extends TestCase
             ->with($data)
             ->willReturn('serialized_data');
 
-        $result = $this->cache->save('serialized_data', $identifier, $tags, $lifeTime);
+        $result = $this->cache->save($data, $identifier, $tags, $lifeTime);
         $this->assertTrue($result);
     }
 
@@ -79,14 +79,14 @@ class GraphQlCacheTest extends TestCase
         $data = ['test' => 'data'];
         $serializedData = 'serialized_data';
 
-        $this->serializer->expects($this->once())
-            ->method('serialize')
-            ->with($data)
-            ->willReturn($serializedData);
-
         $this->cacheFrontend->expects($this->once())
             ->method('load')
             ->with($identifier)
+            ->willReturn($serializedData);
+
+        $this->serializer->expects($this->once())
+            ->method('unserialize')
+            ->with($serializedData)
             ->willReturn($data);
 
         $result = $this->cache->load($identifier);

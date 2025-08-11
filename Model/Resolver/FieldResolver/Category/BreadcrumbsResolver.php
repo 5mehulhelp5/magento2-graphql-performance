@@ -51,8 +51,9 @@ class BreadcrumbsResolver implements BatchResolverInterface
             $ids = explode('/', $path);
             array_shift($ids); // Remove root category
             array_pop($ids); // Remove current category
-            $pathIds = array_merge($pathIds, $ids);
-        }
+            foreach ($ids as $id) {
+                $pathIds[] = $id;
+            }
 
         // Load all parent categories in batch
         if (!empty($pathIds)) {

@@ -162,7 +162,13 @@ class ShipmentsResolver implements BatchResolverInterface
 
                     $this->trackingCache[$trackingNumber] = $trackingStatus;
                 } catch (\Exception $e) {
-                    // Log error if needed
+                    // Skip tracking status for this carrier if it fails
+                    // This prevents the entire shipment from failing due to one tracking issue
+                    $this->trackingCache[$trackingNumber] = $this->trackingStatusFactory->create()
+                        ->setCarrier($track->getCarrierCode())
+                        ->setCarrierTitle($track->getTitle())
+                        ->setTracking($trackingNumber)
+                        ->setStatus('error');
                 }
             }
         }

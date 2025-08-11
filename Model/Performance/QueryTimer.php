@@ -7,8 +7,19 @@ use Psr\Log\LoggerInterface;
 
 class QueryTimer
 {
+    /**
+     * @var array Active timers for tracking query execution
+     */
     private array $timers = [];
+
+    /**
+     * @var array Results of completed query timings
+     */
     private array $results = [];
+
+    /**
+     * @var array Performance metrics aggregated from query timings
+     */
     private array $metrics = [
         'query_count' => 0,
         'total_time' => 0.0,

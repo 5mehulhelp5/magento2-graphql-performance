@@ -9,7 +9,14 @@ use GraphQL\Language\Visitor;
 
 class FieldUsageAnalyzer
 {
+    /**
+     * @var array Map of field names to their usage counts
+     */
     private array $fieldUsageMap = [];
+
+    /**
+     * @var array List of field names that are required in all queries
+     */
     private array $requiredFields = ['id', 'uid', 'entity_id', 'sku'];
 
     /**

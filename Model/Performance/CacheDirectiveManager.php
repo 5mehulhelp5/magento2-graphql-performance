@@ -10,6 +10,9 @@ use Sterk\GraphQlPerformance\Model\Config;
 
 class CacheDirectiveManager
 {
+    /**
+     * @var array List of field names that should never be cached
+     */
     private array $nonCacheableFields = ['cart', 'customer', 'session'];
 
     public function __construct(

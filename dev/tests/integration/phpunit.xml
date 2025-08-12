@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/9.5/phpunit.xsd"
+         colors="true"
+         columns="max"
+         beStrictAboutTestsThatDoNotTestAnything="false"
+         bootstrap="framework/bootstrap.php"
+         stderr="true">
+    <testsuites>
+        <testsuite name="Magento Integration Tests">
+            <directory>testsuite</directory>
+            <directory>../../../Test/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <includePath>.</includePath>
+        <includePath>testsuite</includePath>
+        <ini name="date.timezone" value="America/Los_Angeles"/>
+        <ini name="xdebug.max_nesting_level" value="200"/>
+        <const name="TESTS_INSTALL_CONFIG_FILE" value="etc/install-config-mysql.php"/>
+        <const name="TESTS_GLOBAL_CONFIG_FILE" value="etc/config-global.php"/>
+        <const name="TESTS_GLOBAL_CONFIG_DIR" value="etc/config"/>
+        <const name="TESTS_CLEANUP" value="enabled"/>
+        <const name="TESTS_MAGENTO_MODE" value="developer"/>
+        <const name="TESTS_ERROR_LOG_LISTENER_LEVEL" value="-1"/>
+    </php>
+    <listeners>
+        <listener class="Magento\TestFramework\Event\PhpUnit"/>
+    </listeners>
+</phpunit>

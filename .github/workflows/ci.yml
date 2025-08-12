@@ -105,8 +105,92 @@ jobs:
           composer config --no-interaction allow-plugins.magento/inventory-composer-installer true
           composer install --no-interaction
 
-          # Configure Magento
-          cp ./app/etc/env.php.dist ./app/etc/env.php
+          # Create env.php configuration
+          mkdir -p app/etc
+          cat > app/etc/env.php << 'EOF'
+<?php
+return [
+    'backend' => [
+        'frontName' => 'admin'
+    ],
+    'cache' => [
+        'graphql' => [
+            'id_salt' => 'test'
+        ],
+        'frontend' => [
+            'default' => [
+                'backend' => 'Cm_Cache_Backend_File',
+                'backend_options' => [
+                    'cache_dir' => 'var/cache'
+                ]
+            ]
+        ]
+    ],
+    'crypt' => [
+        'key' => '00000000000000000000000000000000'
+    ],
+    'db' => [
+        'table_prefix' => '',
+        'connection' => [
+            'default' => [
+                'host' => '127.0.0.1',
+                'dbname' => 'magento_test',
+                'username' => 'root',
+                'password' => 'root',
+                'model' => 'mysql4',
+                'engine' => 'innodb',
+                'initStatements' => 'SET NAMES utf8;',
+                'active' => '1',
+                'driver_options' => [
+                    1014 => false
+                ]
+            ]
+        ]
+    ],
+    'resource' => [
+        'default_setup' => [
+            'connection' => 'default'
+        ]
+    ],
+    'x-frame-options' => 'SAMEORIGIN',
+    'MAGE_MODE' => 'developer',
+    'session' => [
+        'save' => 'files'
+    ],
+    'lock' => [
+        'provider' => 'db'
+    ],
+    'directories' => [
+        'document_root_is_pub' => true
+    ],
+    'cache_types' => [
+        'config' => 1,
+        'layout' => 1,
+        'block_html' => 1,
+        'collections' => 1,
+        'reflection' => 1,
+        'db_ddl' => 1,
+        'compiled_config' => 1,
+        'eav' => 1,
+        'customer_notification' => 1,
+        'config_integration' => 1,
+        'config_integration_api' => 1,
+        'full_page' => 1,
+        'config_webservice' => 1,
+        'translate' => 1
+    ],
+    'downloadable_domains' => [],
+    'install' => [
+        'date' => 'Thu, 22 Mar 2024 00:00:00 +0000'
+    ]
+];
+EOF
+
+          # Create required directories and set permissions
+          mkdir -p var/cache var/page_cache var/log var/session generated/code
+          chmod -R 777 var generated pub/static app/etc
+
+          # Install Magento
           bin/magento setup:install \
             --base-url=http://localhost \
             --db-host=127.0.0.1 \

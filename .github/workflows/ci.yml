@@ -35,6 +35,10 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      - name: Configure Composer auth
+        run: |
+          composer config http-basic.repo.magento.com ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }} ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
@@ -65,6 +69,10 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pdo, mysql, intl, gd, exif, iconv
           coverage: xdebug
           tools: composer:v2
+
+      - name: Configure Composer auth
+        run: |
+          composer config http-basic.repo.magento.com ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }} ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
@@ -99,6 +107,10 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pdo, mysql, intl, gd, exif, iconv
           coverage: none
           tools: composer:v2
+
+      - name: Configure Composer auth
+        run: |
+          composer config http-basic.repo.magento.com ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }} ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-dev

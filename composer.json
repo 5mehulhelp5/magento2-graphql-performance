@@ -18,7 +18,9 @@
         "magento/module-graph-ql": "^100.4.6",
         "magento/module-catalog-graph-ql": "^100.4.6",
         "magento/module-store-graph-ql": "^100.4.3",
-        "magento/module-customer-graph-ql": "^100.4.6"
+        "magento/module-customer-graph-ql": "^100.4.6",
+        "magento/module-sales-graph-ql": "^100.4.6",
+        "magento/module-quote-graph-ql": "^100.4.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6",

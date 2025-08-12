@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Checkout;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Directory\Model\RegionFactory;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -47,12 +49,14 @@ class BillingAddressResolver implements BatchResolverInterface
      * @param CartRepositoryInterface $cartRepository Cart repository
      * @param CountryFactory $countryFactory Country factory
      * @param RegionFactory $regionFactory Region factory
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
      * @param LoggerInterface|null $logger Logger service
      */
     public function __construct(
         private readonly CartRepositoryInterface $cartRepository,
         private readonly CountryFactory $countryFactory,
         private readonly RegionFactory $regionFactory,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ?LoggerInterface $logger = null
     ) {
     }
@@ -60,53 +64,54 @@ class BillingAddressResolver implements BatchResolverInterface
     /**
      * Batch resolve billing addresses
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Quote\Api\Data\CartInterface[] $carts
-*/
-        $carts = $value['carts'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
-        if (empty($carts)) {
-            return $result;
-        }
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $carts = $value['carts'] ?? [];
 
-        // Load all carts in batch
-        $this->loadCarts(
-            array_map(
-                function ($cart) {
-                    return $cart->getId();
-                },
-                $carts
-            )
-        );
-
-        foreach ($carts as $cart) {
-            $cartId = $cart->getId();
-            $loadedCart = $this->cartCache[$cartId] ?? null;
-
-            if (!$loadedCart || !$loadedCart->getBillingAddress()) {
-                $result[$cartId] = null;
+            if (empty($carts)) {
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$cartId] = $this->transformBillingAddress($loadedCart->getBillingAddress());
+            // Load all carts in batch
+            $this->loadCarts(
+                array_map(
+                    function ($cart) {
+                        return $cart->getId();
+                    },
+                    $carts
+                )
+            );
+
+            $result = [];
+            foreach ($carts as $cart) {
+                $cartId = $cart->getId();
+                $loadedCart = $this->cartCache[$cartId] ?? null;
+
+                if (!$loadedCart || !$loadedCart->getBillingAddress()) {
+                    $result[$cartId] = null;
+                    continue;
+                }
+
+                $result[$cartId] = $this->transformBillingAddress($loadedCart->getBillingAddress());
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**
@@ -124,9 +129,9 @@ class BillingAddressResolver implements BatchResolverInterface
         }
 
         try {
-            $carts = $this->cartRepository->getList(
-                $this->buildSearchCriteria(['entity_id' => ['in' => $uncachedIds]])
-            )->getItems();
+            $this->searchCriteriaBuilder->addFilter('entity_id', $uncachedIds, 'in');
+            $searchCriteria = $this->searchCriteriaBuilder->create();
+            $carts = $this->cartRepository->getList($searchCriteria)->getItems();
 
             foreach ($carts as $cart) {
                 $this->cartCache[$cart->getId()] = $cart;
@@ -137,8 +142,8 @@ class BillingAddressResolver implements BatchResolverInterface
             $this->logger?->error(
                 'Error loading carts: ' . $e->getMessage(),
                 [
-                'cart_ids' => $uncachedIds,
-                'exception' => $e
+                    'cart_ids' => $uncachedIds,
+                    'exception' => $e
                 ]
             );
         }
@@ -218,22 +223,5 @@ class BillingAddressResolver implements BatchResolverInterface
         }
 
         return $this->regionCache[$cacheKey];
-    }
-
-    /**
-     * Build search criteria
-     *
-     * @param  array $filters
-     * @return \Magento\Framework\Api\SearchCriteria
-     */
-    private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria
-    {
-        $searchCriteriaBuilder = $this->objectManager->create(\Magento\Framework\Api\SearchCriteriaBuilder::class);
-
-        foreach ($filters as $field => $condition) {
-            $searchCriteriaBuilder->addFilter($field, $condition['value'], $condition['condition_type']);
-        }
-
-        return $searchCriteriaBuilder->create();
     }
 }

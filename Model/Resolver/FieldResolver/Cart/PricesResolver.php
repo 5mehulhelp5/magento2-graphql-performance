@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Cart;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartTotalRepositoryInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -39,56 +40,57 @@ class PricesResolver implements BatchResolverInterface
     /**
      * Batch resolve cart prices
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Quote\Api\Data\CartInterface[] $carts
-*/
-        $carts = $value['carts'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
-        if (empty($carts)) {
-            return $result;
-        }
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $carts = $value['carts'] ?? [];
 
-        // Get all cart IDs
-        $cartIds = array_map(
-            function ($cart) {
-                return $cart->getId();
-            },
-            $carts
-        );
-
-        // Load totals for all carts in batch
-        $this->loadCartTotals($cartIds);
-
-        // Get currency
-        $currency = $this->storeManager->getStore()->getCurrentCurrencyCode();
-
-        foreach ($carts as $cart) {
-            $cartId = $cart->getId();
-            $totals = $this->totalsCache[$cartId] ?? null;
-
-            if (!$totals) {
+            if (empty($carts)) {
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$cartId] = $this->transformPrices($totals, $currency);
+            // Get all cart IDs
+            $cartIds = array_map(
+                function ($cart) {
+                    return $cart->getId();
+                },
+                $carts
+            );
+
+            // Load totals for all carts in batch
+            $this->loadCartTotals($cartIds);
+
+            // Get currency
+            $currency = $this->storeManager->getStore()->getCurrentCurrencyCode();
+
+            $result = [];
+            foreach ($carts as $cart) {
+                $cartId = $cart->getId();
+                $totals = $this->totalsCache[$cartId] ?? null;
+
+                if (!$totals) {
+                    continue;
+                }
+
+                $result[$cartId] = $this->transformPrices($totals, $currency);
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**
@@ -160,12 +162,12 @@ class PricesResolver implements BatchResolverInterface
         $prices['applied_taxes'] = array_map(
             function ($tax) use ($currency) {
                 return [
-                'amount' => [
-                    'value' => $this->formatPrice($tax['amount']),
-                    'currency' => $currency
-                ],
-                'label' => $tax['title'],
-                'rate' => $tax['percent']
+                    'amount' => [
+                        'value' => $this->formatPrice($tax['amount']),
+                        'currency' => $currency
+                    ],
+                    'label' => $tax['title'],
+                    'rate' => $tax['percent']
                 ];
             },
             $appliedTaxes
@@ -185,11 +187,11 @@ class PricesResolver implements BatchResolverInterface
                 'taxes' => array_map(
                     function ($tax) use ($currency) {
                         return [
-                        'amount' => [
-                            'value' => $this->formatPrice($tax['amount']),
-                            'currency' => $currency
-                        ],
-                        'rate' => $tax['percent']
+                            'amount' => [
+                                'value' => $this->formatPrice($tax['amount']),
+                                'currency' => $currency
+                            ],
+                            'rate' => $tax['percent']
                         ];
                     },
                     $totals->getShippingTaxes() ?: []

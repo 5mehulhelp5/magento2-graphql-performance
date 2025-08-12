@@ -61,7 +61,7 @@ class ProductsResolver extends AbstractResolver
      *
      * @return array Cache tags
      */
-    protected function getCacheTags(): array
+    public function getCacheTags(): array
     {
         return ['catalog_product'];
     }

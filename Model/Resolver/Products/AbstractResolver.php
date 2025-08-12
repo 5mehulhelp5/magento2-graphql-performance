@@ -1,16 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sterk\GraphQlPerformance\Model\Resolver;
+namespace Sterk\GraphQlPerformance\Model\Resolver\Products;
 
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
-use Sterk\GraphQlPerformance\Api\OptimizedFieldInterface;
 
-abstract class AbstractResolver implements ResolverInterface, OptimizedFieldInterface
+abstract class AbstractResolver implements ResolverInterface
 {
     public function __construct(
         protected readonly ResolverCache $cache,
@@ -39,7 +38,7 @@ abstract class AbstractResolver implements ResolverInterface, OptimizedFieldInte
             $cacheKey,
             $result,
             $this->getCacheTags(),
-            $this->getCacheTtl()
+            3600
         );
 
         return $result;
@@ -54,26 +53,6 @@ abstract class AbstractResolver implements ResolverInterface, OptimizedFieldInte
     ): array;
 
     abstract protected function getEntityType(): string;
-
-    public function getCacheHash(): string
-    {
-        return md5(static::class);
-    }
-
-    public function getCacheTtl(): int
-    {
-        return 3600; // 1 hour by default
-    }
-
-    public function getBatchKey(): string
-    {
-        return $this->getEntityType();
-    }
-
-    public function getBatchSize(): int
-    {
-        return 100; // Default batch size
-    }
 
     abstract public function getCacheTags(): array;
 

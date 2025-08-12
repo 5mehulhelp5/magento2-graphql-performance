@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Cart;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -36,6 +38,7 @@ class ItemsResolver implements BatchResolverInterface
      * @param ProductRepositoryInterface $productRepository Product repository
      * @param PriceCurrencyInterface $priceCurrency Price currency service
      * @param StoreManagerInterface $storeManager Store manager
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
      * @param LoggerInterface|null $logger Logger service
      */
     public function __construct(
@@ -43,6 +46,7 @@ class ItemsResolver implements BatchResolverInterface
         private readonly ProductRepositoryInterface $productRepository,
         private readonly PriceCurrencyInterface $priceCurrency,
         private readonly StoreManagerInterface $storeManager,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ?LoggerInterface $logger = null
     ) {
     }
@@ -50,53 +54,54 @@ class ItemsResolver implements BatchResolverInterface
     /**
      * Batch resolve cart items
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Quote\Api\Data\CartInterface[] $carts
-*/
-        $carts = $value['carts'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
-        if (empty($carts)) {
-            return $result;
-        }
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $carts = $value['carts'] ?? [];
 
-        // Get all cart IDs
-        $cartIds = array_map(
-            function ($cart) {
-                return $cart->getId();
-            },
-            $carts
-        );
+            if (empty($carts)) {
+                $response->addResponse($request, []);
+                continue;
+            }
 
-        // Load items for all carts in batch
-        $this->loadCartItems($cartIds);
-
-        // Get selected fields
-        $fields = $info->getFieldSelection();
-
-        foreach ($carts as $cart) {
-            $cartId = $cart->getId();
-            $result[$cartId] = $this->transformCartItems(
-                $this->itemCache[$cartId] ?? [],
-                $fields
+            // Get all cart IDs
+            $cartIds = array_map(
+                function ($cart) {
+                    return $cart->getId();
+                },
+                $carts
             );
+
+            // Load items for all carts in batch
+            $this->loadCartItems($cartIds);
+
+            // Get selected fields
+            $fields = $request['info']->getFieldSelection();
+
+            $result = [];
+            foreach ($carts as $cart) {
+                $cartId = $cart->getId();
+                $result[$cartId] = $this->transformCartItems(
+                    $this->itemCache[$cartId] ?? [],
+                    $fields
+                );
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**
@@ -148,9 +153,9 @@ class ItemsResolver implements BatchResolverInterface
         }
 
         try {
-            $products = $this->productRepository->getList(
-                $this->buildSearchCriteria(['entity_id' => ['in' => $productIds]])
-            )->getItems();
+            $this->searchCriteriaBuilder->addFilter('entity_id', $productIds, 'in');
+            $searchCriteria = $this->searchCriteriaBuilder->create();
+            $products = $this->productRepository->getList($searchCriteria)->getItems();
 
             foreach ($products as $product) {
                 $this->productCache[$product->getId()] = $product;
@@ -161,8 +166,8 @@ class ItemsResolver implements BatchResolverInterface
             $this->logger?->error(
                 'Error loading products: ' . $e->getMessage(),
                 [
-                'product_ids' => $productIds,
-                'exception' => $e
+                    'product_ids' => $productIds,
+                    'exception' => $e
                 ]
             );
         }
@@ -321,22 +326,5 @@ class ItemsResolver implements BatchResolverInterface
     {
         return $this->storeManager->getStore()
             ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $path;
-    }
-
-    /**
-     * Build search criteria
-     *
-     * @param  array $filters
-     * @return \Magento\Framework\Api\SearchCriteria
-     */
-    private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria
-    {
-        $searchCriteriaBuilder = $this->objectManager->create(\Magento\Framework\Api\SearchCriteriaBuilder::class);
-
-        foreach ($filters as $field => $condition) {
-            $searchCriteriaBuilder->addFilter($field, $condition['value'], $condition['condition_type']);
-        }
-
-        return $searchCriteriaBuilder->create();
     }
 }

@@ -6,8 +6,9 @@ namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Type as ProductType;
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -34,70 +35,70 @@ class PriceResolver implements BatchResolverInterface
     /**
      * Batch resolve product prices
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var ProductInterface[] $products
-*/
-        $products = $value['products'] ?? [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
         $store = $this->storeManager->getStore();
         $currency = $store->getCurrentCurrencyCode();
 
-        $result = [];
-        foreach ($products as $product) {
-            $regularPrice = $product->getPrice();
-            $finalPrice = $this->getFinalPrice($product);
-            $discount = $regularPrice - $finalPrice;
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $products = $value['products'] ?? [];
 
-            $result[$product->getId()] = [
-                'maximum_price' => [
-                    'regular_price' => [
-                        'value' => $this->formatPrice($regularPrice),
-                        'currency' => $currency
+            $result = [];
+            foreach ($products as $product) {
+                $regularPrice = $product->getPrice();
+                $finalPrice = $this->getFinalPrice($product);
+                $discount = $regularPrice - $finalPrice;
+
+                $result[$product->getId()] = [
+                    'maximum_price' => [
+                        'regular_price' => [
+                            'value' => $this->formatPrice($regularPrice),
+                            'currency' => $currency
+                        ],
+                        'final_price' => [
+                            'value' => $this->formatPrice($finalPrice),
+                            'currency' => $currency
+                        ],
+                        'discount' => [
+                            'amount_off' => $this->formatPrice($discount),
+                            'percent_off' => $regularPrice > 0
+                                ? round(($discount / $regularPrice) * 100, 2)
+                                : 0
+                        ]
                     ],
-                    'final_price' => [
-                        'value' => $this->formatPrice($finalPrice),
-                        'currency' => $currency
-                    ],
-                    'discount' => [
-                        'amount_off' => $this->formatPrice($discount),
-                        'percent_off' => $regularPrice > 0
-                            ? round(($discount / $regularPrice) * 100, 2)
-                            : 0
+                    'minimum_price' => [
+                        'regular_price' => [
+                            'value' => $this->formatPrice($regularPrice),
+                            'currency' => $currency
+                        ],
+                        'final_price' => [
+                            'value' => $this->formatPrice($finalPrice),
+                            'currency' => $currency
+                        ],
+                        'discount' => [
+                            'amount_off' => $this->formatPrice($discount),
+                            'percent_off' => $regularPrice > 0
+                                ? round(($discount / $regularPrice) * 100, 2)
+                                : 0
+                        ]
                     ]
-                ],
-                'minimum_price' => [
-                    'regular_price' => [
-                        'value' => $this->formatPrice($regularPrice),
-                        'currency' => $currency
-                    ],
-                    'final_price' => [
-                        'value' => $this->formatPrice($finalPrice),
-                        'currency' => $currency
-                    ],
-                    'discount' => [
-                        'amount_off' => $this->formatPrice($discount),
-                        'percent_off' => $regularPrice > 0
-                            ? round(($discount / $regularPrice) * 100, 2)
-                            : 0
-                    ]
-                ]
-            ];
+                ];
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

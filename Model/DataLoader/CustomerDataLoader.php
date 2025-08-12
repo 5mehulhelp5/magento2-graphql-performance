@@ -7,6 +7,7 @@ use GraphQL\Executor\Promise\PromiseAdapter;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\ObjectManagerInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Psr\Log\LoggerInterface;
 
@@ -21,22 +22,24 @@ class CustomerDataLoader extends FrequentDataLoader
     private const BATCH_SIZE = 50;
 
     /**
-     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ObjectManagerInterface $objectManager Object manager for lazy loading
      * @param ResolverCache $cache Cache service
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
      * @param CustomerRepositoryInterface $customerRepository Customer repository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
      * @param LoggerInterface|null $logger Logger service
      * @param int $cacheLifetime Cache lifetime in seconds
      */
     public function __construct(
-        PromiseAdapter $promiseAdapter,
+        ObjectManagerInterface $objectManager,
         ResolverCache $cache,
+        PromiseAdapter $promiseAdapter,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly ?LoggerInterface $logger = null,
         int $cacheLifetime = 3600
     ) {
-        parent::__construct($promiseAdapter, $cache, $cacheLifetime);
+        parent::__construct($objectManager, $cache, $promiseAdapter, $cacheLifetime);
     }
 
     /**
@@ -77,15 +80,29 @@ class CustomerDataLoader extends FrequentDataLoader
         return $result;
     }
 
-    use CacheKeyGeneratorTrait;
+    /**
+     * Generate cache key for customer data
+     *
+     * @param string $id Customer ID
+     * @return string Cache key
+     */
+    protected function generateCacheKey(string $id): string
+    {
+        return sprintf('customer_%s', $id);
+    }
 
     /**
-     * Get entity type for cache key generation
+     * Get cache tags for customer data
      *
-     * @return string Entity type identifier
+     * @param mixed $item Customer data
+     * @return array Cache tags
      */
-    protected function getEntityType(): string
+    protected function getCacheTags(mixed $item): array
     {
-        return 'customer';
+        $tags = ['customer'];
+        if ($item instanceof \Magento\Customer\Api\Data\CustomerInterface) {
+            $tags[] = 'customer_' . $item->getId();
+        }
+        return $tags;
     }
 }

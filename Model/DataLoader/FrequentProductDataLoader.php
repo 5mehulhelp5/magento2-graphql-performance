@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\DataLoader;
 
 use GraphQL\Executor\Promise\PromiseAdapter;
+use Magento\Framework\ObjectManagerInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
@@ -23,20 +23,20 @@ class FrequentProductDataLoader extends FrequentDataLoader
     private const BATCH_SIZE = 100;
 
     /**
-     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ObjectManagerInterface $objectManager Object manager for lazy loading
      * @param ResolverCache $cache Cache service
-     * @param ResourceConnection $resourceConnection Database connection
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
      * @param StoreManagerInterface $storeManager Store manager service
      * @param int $cacheLifetime Cache lifetime in seconds
      */
     public function __construct(
-        PromiseAdapter $promiseAdapter,
+        ObjectManagerInterface $objectManager,
         ResolverCache $cache,
-        ResourceConnection $resourceConnection,
+        PromiseAdapter $promiseAdapter,
         private readonly StoreManagerInterface $storeManager,
         int $cacheLifetime = 3600
     ) {
-        parent::__construct($promiseAdapter, $cache, $resourceConnection, $cacheLifetime);
+        parent::__construct($objectManager, $cache, $promiseAdapter, $cacheLifetime);
     }
 
     /**
@@ -51,7 +51,8 @@ class FrequentProductDataLoader extends FrequentDataLoader
      */
     protected function loadFromDatabase(array $ids): array
     {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
         $storeId = $this->storeManager->getStore()->getId();
 
         // Split IDs into batches to prevent large IN clauses
@@ -62,11 +63,11 @@ class FrequentProductDataLoader extends FrequentDataLoader
             // Load base product data
             $select = $connection->select()
                 ->from(
-                    ['e' => $this->resourceConnection->getTableName('catalog_product_entity')],
+                    ['e' => $resourceConnection->getTableName('catalog_product_entity')],
                     ['entity_id', 'sku', 'type_id', 'created_at', 'updated_at']
                 )
                 ->join(
-                    ['cpw' => $this->resourceConnection->getTableName('catalog_product_website')],
+                    ['cpw' => $resourceConnection->getTableName('catalog_product_website')],
                     'e.entity_id = cpw.product_id',
                     []
                 )
@@ -115,7 +116,8 @@ class FrequentProductDataLoader extends FrequentDataLoader
      */
     private function loadAttributes(array $productIds, int $storeId): array
     {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
         $result = [];
 
         // Get frequently accessed attributes
@@ -130,7 +132,7 @@ class FrequentProductDataLoader extends FrequentDataLoader
             // Get attribute values
             $select = $connection->select()
                 ->from(
-                    ['t' => $this->resourceConnection->getTableName('catalog_product_entity_varchar')],
+                    ['t' => $resourceConnection->getTableName('catalog_product_entity_varchar')],
                     ['entity_id', 'value']
                 )
                 ->where('t.attribute_id = ?', $attributeId)
@@ -161,11 +163,12 @@ class FrequentProductDataLoader extends FrequentDataLoader
      */
     private function loadStockStatus(array $productIds): array
     {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
 
         $select = $connection->select()
             ->from(
-                $this->resourceConnection->getTableName('cataloginventory_stock_status'),
+                $resourceConnection->getTableName('cataloginventory_stock_status'),
                 ['product_id', 'stock_status']
             )
             ->where('product_id IN (?)', $productIds);
@@ -185,7 +188,8 @@ class FrequentProductDataLoader extends FrequentDataLoader
      */
     private function loadPrices(array $productIds, int $storeId): array
     {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
 
         $priceAttributeId = $this->getAttributeId('price');
@@ -194,7 +198,7 @@ class FrequentProductDataLoader extends FrequentDataLoader
         // Get regular prices
         $select = $connection->select()
             ->from(
-                ['p' => $this->resourceConnection->getTableName('catalog_product_entity_decimal')],
+                ['p' => $resourceConnection->getTableName('catalog_product_entity_decimal')],
                 ['entity_id', 'value']
             )
             ->where('p.attribute_id = ?', $priceAttributeId)
@@ -206,7 +210,7 @@ class FrequentProductDataLoader extends FrequentDataLoader
         // Get special prices
         $select = $connection->select()
             ->from(
-                ['sp' => $this->resourceConnection->getTableName('catalog_product_entity_decimal')],
+                ['sp' => $resourceConnection->getTableName('catalog_product_entity_decimal')],
                 ['entity_id', 'value']
             )
             ->where('sp.attribute_id = ?', $specialPriceAttributeId)
@@ -240,10 +244,11 @@ class FrequentProductDataLoader extends FrequentDataLoader
         static $attributeIds = [];
 
         if (!isset($attributeIds[$attributeCode])) {
-            $connection = $this->resourceConnection->getConnection();
+            $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+            $connection = $resourceConnection->getConnection();
             $select = $connection->select()
                 ->from(
-                    $this->resourceConnection->getTableName('eav_attribute'),
+                    $resourceConnection->getTableName('eav_attribute'),
                     'attribute_id'
                 )
                 ->where('attribute_code = ?', $attributeCode)

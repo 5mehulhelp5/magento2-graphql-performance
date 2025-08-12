@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Api\InvoiceItemRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
@@ -47,33 +48,31 @@ class InvoiceItemsResolver implements BatchResolverInterface
     /**
      * Batch resolve invoice items
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var array $invoiceIds
-*/
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
+
         $invoiceIds = array_map(
-            function ($item) {
-                return $item['id'] ?? null;
+            function ($request) {
+                return $request['value']['id'] ?? null;
             },
-            $value
+            $requests
         );
         $invoiceIds = array_filter($invoiceIds);
 
         if (empty($invoiceIds)) {
-            return [];
+            foreach ($requests as $request) {
+                $response->addResponse($request, []);
+            }
+            return $response;
         }
 
         $storeId = $context->getExtensionAttributes()->getStore()->getId();
@@ -84,21 +83,25 @@ class InvoiceItemsResolver implements BatchResolverInterface
         // Load associated products
         $this->loadProducts($this->itemCache);
 
-        $result = [];
-        foreach ($value as $index => $item) {
-            $invoiceId = $item['id'] ?? null;
+        foreach ($requests as $request) {
+            $invoiceId = $request['value']['id'] ?? null;
             if (!$invoiceId || !isset($this->itemCache[$invoiceId])) {
-                $result[$index] = [];
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$index] = array_map(
-                fn($invoiceItem) => $this->transformInvoiceItemData($invoiceItem, $info->getFieldSelection()),
+            $result = array_map(
+                fn($invoiceItem) => $this->transformInvoiceItemData(
+                    $invoiceItem,
+                    $request['info']->getFieldSelection()
+                ),
                 $this->itemCache[$invoiceId]
             );
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

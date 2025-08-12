@@ -4,6 +4,10 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Ui\DataProvider;
 
 use Magento\Framework\Api\Filter;
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Framework\Api\Search\ReportingInterface;
+use Magento\Framework\Api\Search\SearchCriteriaBuilder;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider;
 use Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface;
 
@@ -21,6 +25,10 @@ class MetricsDataProvider extends DataProvider
      * @param string $name Component name
      * @param string $primaryFieldName Primary field name
      * @param string $requestFieldName Request field name
+     * @param ReportingInterface $reporting Reporting interface
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param RequestInterface $request Request object
+     * @param FilterBuilder $filterBuilder Filter builder
      * @param PerformanceMetricsInterface $performanceMetrics Performance metrics service
      * @param array $meta Component meta data
      * @param array $data Additional data
@@ -29,11 +37,25 @@ class MetricsDataProvider extends DataProvider
         $name,
         $primaryFieldName,
         $requestFieldName,
+        ReportingInterface $reporting,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        RequestInterface $request,
+        FilterBuilder $filterBuilder,
         private readonly PerformanceMetricsInterface $performanceMetrics,
         array $meta = [],
         array $data = []
     ) {
-        parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
+        parent::__construct(
+            $name,
+            $primaryFieldName,
+            $requestFieldName,
+            $reporting,
+            $searchCriteriaBuilder,
+            $request,
+            $filterBuilder,
+            $meta,
+            $data
+        );
     }
 
     /**

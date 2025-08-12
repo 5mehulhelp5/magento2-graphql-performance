@@ -5,8 +5,9 @@ namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Category;
 
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
@@ -46,43 +47,48 @@ class ChildrenResolver implements BatchResolverInterface
     /**
      * Batch resolve category children
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories
-*/
-        $categories = $value['categories'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
-        // Get all parent IDs
-        $parentIds = array_map(
-            function ($category) {
-                return $category->getId();
-            },
-            $categories
-        );
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $categories = $value['categories'] ?? [];
 
-        // Load children data in batch
-        $childrenData = $this->getChildrenData($parentIds);
+            if (empty($categories)) {
+                $response->addResponse($request, []);
+                continue;
+            }
 
-        foreach ($categories as $category) {
-            $categoryId = $category->getId();
-            $result[$categoryId] = $childrenData[$categoryId] ?? [];
+            // Get all parent IDs
+            $parentIds = array_map(
+                function ($category) {
+                    return $category->getId();
+                },
+                $categories
+            );
+
+            // Load children data in batch
+            $childrenData = $this->getChildrenData($parentIds);
+
+            $result = [];
+            foreach ($categories as $category) {
+                $categoryId = $category->getId();
+                $result[$categoryId] = $childrenData[$categoryId] ?? [];
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

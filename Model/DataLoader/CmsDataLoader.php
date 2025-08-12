@@ -4,11 +4,9 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\DataLoader;
 
 use GraphQL\Executor\Promise\PromiseAdapter;
-use Magento\Cms\Api\PageRepositoryInterface;
-use Magento\Cms\Api\BlockRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\ObjectManagerInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Data loader for CMS entities (pages and blocks)
@@ -26,34 +24,20 @@ class CmsDataLoader extends FrequentDataLoader
     private const BATCH_SIZE = 20;
 
     /**
-     * @var array<string, \Magento\Cms\Api\Data\PageInterface> Cache of CMS pages by ID
-     */
-    private array $pageCache = [];
-
-    /**
-     * @var array<string, \Magento\Cms\Api\Data\BlockInterface> Cache of CMS blocks by ID
-     */
-    private array $blockCache = [];
-
-    /**
-     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ObjectManagerInterface $objectManager Object manager for lazy loading
      * @param ResolverCache $cache Cache service
-     * @param PageRepositoryInterface $pageRepository Page repository
-     * @param BlockRepositoryInterface $blockRepository Block repository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
-     * @param StoreManagerInterface $storeManager Store manager
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param StoreManagerInterface $storeManager Store manager service
      * @param int $cacheLifetime Cache lifetime in seconds
      */
     public function __construct(
-        PromiseAdapter $promiseAdapter,
+        ObjectManagerInterface $objectManager,
         ResolverCache $cache,
-        private readonly PageRepositoryInterface $pageRepository,
-        private readonly BlockRepositoryInterface $blockRepository,
-        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        PromiseAdapter $promiseAdapter,
         private readonly StoreManagerInterface $storeManager,
         int $cacheLifetime = 86400 // 24 hours for CMS data
     ) {
-        parent::__construct($promiseAdapter, $cache, $cacheLifetime);
+        parent::__construct($objectManager, $cache, $promiseAdapter, $cacheLifetime);
     }
 
     /**
@@ -114,22 +98,39 @@ class CmsDataLoader extends FrequentDataLoader
             $pageIds
         );
 
-        $searchCriteria = $this->searchCriteriaBuilder
-            ->addFilter('page_id', $pageIds, 'in')
-            ->addFilter('store_id', [0, $storeId], 'in')
-            ->addFilter('is_active', 1)
-            ->create();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
+
+        $select = $connection->select()
+            ->from(
+                ['p' => $resourceConnection->getTableName('cms_page')],
+                [
+                    'page_id',
+                    'identifier',
+                    'title',
+                    'content',
+                    'content_heading',
+                    'meta_title',
+                    'meta_keywords',
+                    'meta_description',
+                    'page_layout',
+                    'layout_update_xml',
+                    'custom_theme',
+                    'custom_root_template'
+                ]
+            )
+            ->where('p.page_id IN (?)', $pageIds)
+            ->where('p.store_id IN (?)', [0, $storeId])
+            ->where('p.is_active = ?', 1);
 
         try {
-            $pages = $this->pageRepository->getList($searchCriteria)->getItems();
+            $pages = $connection->fetchAll($select);
             foreach ($pages as $page) {
-                $id = 'page_' . $page->getId();
-                $result[$id] = $this->transformPageData($page);
-                $this->pageCache[$id] = $page;
+                $id = 'page_' . $page['page_id'];
+                $result[$id] = array_merge($page, ['type' => 'page']);
             }
         } catch (\Exception $e) {
             // If page loading fails, we'll return empty results for those pages
-            // This prevents the entire request from failing due to individual page issues
             foreach ($pageIds as $pageId) {
                 $id = 'page_' . $pageId;
                 $result[$id] = [
@@ -160,22 +161,31 @@ class CmsDataLoader extends FrequentDataLoader
             $blockIds
         );
 
-        $searchCriteria = $this->searchCriteriaBuilder
-            ->addFilter('block_id', $blockIds, 'in')
-            ->addFilter('store_id', [0, $storeId], 'in')
-            ->addFilter('is_active', 1)
-            ->create();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
+
+        $select = $connection->select()
+            ->from(
+                ['b' => $resourceConnection->getTableName('cms_block')],
+                [
+                    'block_id',
+                    'identifier',
+                    'title',
+                    'content'
+                ]
+            )
+            ->where('b.block_id IN (?)', $blockIds)
+            ->where('b.store_id IN (?)', [0, $storeId])
+            ->where('b.is_active = ?', 1);
 
         try {
-            $blocks = $this->blockRepository->getList($searchCriteria)->getItems();
+            $blocks = $connection->fetchAll($select);
             foreach ($blocks as $block) {
-                $id = 'block_' . $block->getId();
-                $result[$id] = $this->transformBlockData($block);
-                $this->blockCache[$id] = $block;
+                $id = 'block_' . $block['block_id'];
+                $result[$id] = array_merge($block, ['type' => 'block']);
             }
         } catch (\Exception $e) {
             // If block loading fails, we'll return empty results for those blocks
-            // This prevents the entire request from failing due to individual block issues
             foreach ($blockIds as $blockId) {
                 $id = 'block_' . $blockId;
                 $result[$id] = [
@@ -187,48 +197,6 @@ class CmsDataLoader extends FrequentDataLoader
         }
 
         return $result;
-    }
-
-    /**
-     * Transform CMS page data to GraphQL format
-     *
-     * @param \Magento\Cms\Api\Data\PageInterface $page CMS page entity
-     * @return array Transformed page data
-     */
-    private function transformPageData($page): array
-    {
-        return [
-            'id' => $page->getId(),
-            'identifier' => $page->getIdentifier(),
-            'title' => $page->getTitle(),
-            'content' => $page->getContent(),
-            'content_heading' => $page->getContentHeading(),
-            'meta_title' => $page->getMetaTitle(),
-            'meta_keywords' => $page->getMetaKeywords(),
-            'meta_description' => $page->getMetaDescription(),
-            'page_layout' => $page->getPageLayout(),
-            'layout_update_xml' => $page->getLayoutUpdateXml(),
-            'custom_theme' => $page->getCustomTheme(),
-            'custom_root_template' => $page->getCustomRootTemplate(),
-            'type' => 'page'
-        ];
-    }
-
-    /**
-     * Transform CMS block data to GraphQL format
-     *
-     * @param \Magento\Cms\Api\Data\BlockInterface $block CMS block entity
-     * @return array Transformed block data
-     */
-    private function transformBlockData($block): array
-    {
-        return [
-            'id' => $block->getId(),
-            'identifier' => $block->getIdentifier(),
-            'title' => $block->getTitle(),
-            'content' => $block->getContent(),
-            'type' => 'block'
-        ];
     }
 
     /**

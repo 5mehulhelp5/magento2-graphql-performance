@@ -5,8 +5,9 @@ namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Category;
 
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\CatalogInventory\Model\ResourceModel\Stock\Status as StockStatusResource;
 
@@ -39,27 +40,34 @@ class ProductCountResolver implements BatchResolverInterface
     /**
      * Batch resolve product count
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories
-*/
-        $categories = $value['categories'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
         // Get all category IDs
+        $categories = [];
+        foreach ($requests as $request) {
+            $categoryData = $request['value']['categories'] ?? [];
+            foreach ($categoryData as $category) {
+                $categories[] = $category;
+            }
+        }
+
+        if (empty($categories)) {
+            foreach ($requests as $request) {
+                $response->addResponse($request, []);
+            }
+            return $response;
+        }
+
         $categoryIds = array_map(
             function ($category) {
                 return $category->getId();
@@ -70,12 +78,19 @@ class ProductCountResolver implements BatchResolverInterface
         // Load product counts in batch
         $productCounts = $this->getProductCounts($categoryIds);
 
-        foreach ($categories as $category) {
-            $categoryId = $category->getId();
-            $result[$categoryId] = $productCounts[$categoryId] ?? 0;
+        foreach ($requests as $request) {
+            $categoryData = $request['value']['categories'] ?? [];
+            $result = [];
+
+            foreach ($categoryData as $category) {
+                $categoryId = $category->getId();
+                $result[$categoryId] = $productCounts[$categoryId] ?? 0;
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

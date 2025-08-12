@@ -6,8 +6,9 @@ namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 
 /**
  * Batch resolver for product stock status
@@ -35,51 +36,57 @@ class StockResolver implements BatchResolverInterface
     /**
      * Batch resolve product stock status
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var ProductInterface[] $products
-*/
-        $products = $value['products'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
-        // Batch load stock data
-        $stockData = $this->getStockData(
-            array_map(
-                function ($product) {
-                    return $product->getId();
-                },
-                $products
-            )
-        );
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $products = $value['products'] ?? [];
 
-        foreach ($products as $product) {
-            $stockItem = $stockData[$product->getId()] ?? null;
-
-            if (!$stockItem) {
-                $result[$product->getId()] = 'OUT_OF_STOCK';
+            if (empty($products)) {
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$product->getId()] = $this->getStockStatus(
-                $stockItem,
-                $product->getTypeId()
+            $result = [];
+
+            // Batch load stock data
+            $stockData = $this->getStockData(
+                array_map(
+                    function ($product) {
+                        return $product->getId();
+                    },
+                    $products
+                )
             );
+
+            foreach ($products as $product) {
+                $stockItem = $stockData[$product->getId()] ?? null;
+
+                if (!$stockItem) {
+                    $result[$product->getId()] = 'OUT_OF_STOCK';
+                    continue;
+                }
+
+                $result[$product->getId()] = $this->getStockStatus(
+                    $stockItem,
+                    $product->getTypeId()
+                );
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

@@ -5,8 +5,8 @@ namespace Sterk\GraphQlPerformance\Model\DataLoader;
 
 use GraphQL\Executor\Promise\Promise;
 use GraphQL\Executor\Promise\PromiseAdapter;
+use Magento\Framework\ObjectManagerInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
-use Magento\Framework\App\ResourceConnection;
 
 /**
  * Abstract base class for frequently accessed data loaders
@@ -29,18 +29,18 @@ abstract class FrequentDataLoader extends BatchDataLoader
     private array $cacheKeys = [];
 
     /**
-     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ObjectManagerInterface $objectManager Object manager for lazy loading
      * @param ResolverCache $cache Cache service for resolver results
-     * @param ResourceConnection $resourceConnection Database connection
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
      * @param int $cacheLifetime Cache lifetime in seconds
      */
     public function __construct(
-        PromiseAdapter $promiseAdapter,
+        ObjectManagerInterface $objectManager,
         protected readonly ResolverCache $cache,
-        protected readonly ResourceConnection $resourceConnection,
+        protected readonly PromiseAdapter $promiseAdapter,
         protected readonly int $cacheLifetime = 3600
     ) {
-        parent::__construct($promiseAdapter);
+        parent::__construct($objectManager);
     }
 
     /**
@@ -53,7 +53,7 @@ abstract class FrequentDataLoader extends BatchDataLoader
      * @param string $id Item identifier
      * @return Promise Promise that resolves to the loaded item
      */
-    public function load(string $id): Promise
+    public function load($id): Promise
     {
         $cacheKey = $this->generateCacheKey($id);
         $cachedData = $this->cache->get($cacheKey);

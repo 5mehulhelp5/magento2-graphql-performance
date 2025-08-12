@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Api\CreditmemoItemRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
@@ -57,33 +58,31 @@ class CreditMemoItemsResolver implements BatchResolverInterface
     /**
      * Batch resolve credit memo items
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var array $creditMemoIds
-*/
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
+
         $creditMemoIds = array_map(
-            function ($item) {
-                return $item['id'] ?? null;
+            function ($request) {
+                return $request['value']['id'] ?? null;
             },
-            $value
+            $requests
         );
         $creditMemoIds = array_filter($creditMemoIds);
 
         if (empty($creditMemoIds)) {
-            return [];
+            foreach ($requests as $request) {
+                $response->addResponse($request, []);
+            }
+            return $response;
         }
 
         $storeId = $context->getExtensionAttributes()->getStore()->getId();
@@ -94,21 +93,25 @@ class CreditMemoItemsResolver implements BatchResolverInterface
         // Load associated products
         $this->loadProducts($this->itemCache);
 
-        $result = [];
-        foreach ($value as $index => $item) {
-            $creditMemoId = $item['id'] ?? null;
+        foreach ($requests as $request) {
+            $creditMemoId = $request['value']['id'] ?? null;
             if (!$creditMemoId || !isset($this->itemCache[$creditMemoId])) {
-                $result[$index] = [];
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$index] = array_map(
-                fn($creditMemoItem) => $this->transformCreditMemoItemData($creditMemoItem, $info->getFieldSelection()),
+            $items = array_map(
+                fn($creditMemoItem) => $this->transformCreditMemoItemData(
+                    $creditMemoItem,
+                    $request['info']->getFieldSelection()
+                ),
                 $this->itemCache[$creditMemoId]
             );
+
+            $response->addResponse($request, $items);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

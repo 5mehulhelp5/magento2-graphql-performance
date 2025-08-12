@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
@@ -39,33 +40,31 @@ class InvoicesResolver implements BatchResolverInterface
     /**
      * Batch resolve order invoices
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var array $orderIds
-*/
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
+
         $orderIds = array_map(
-            function ($item) {
-                return $item['id'] ?? null;
+            function ($request) {
+                return $request['value']['id'] ?? null;
             },
-            $value
+            $requests
         );
         $orderIds = array_filter($orderIds);
 
         if (empty($orderIds)) {
-            return [];
+            foreach ($requests as $request) {
+                $response->addResponse($request, []);
+            }
+            return $response;
         }
 
         $storeId = $context->getExtensionAttributes()->getStore()->getId();
@@ -73,21 +72,25 @@ class InvoicesResolver implements BatchResolverInterface
         // Load invoices in batch
         $this->loadInvoices($orderIds, $storeId);
 
-        $result = [];
-        foreach ($value as $index => $item) {
-            $orderId = $item['id'] ?? null;
+        foreach ($requests as $request) {
+            $orderId = $request['value']['id'] ?? null;
             if (!$orderId || !isset($this->invoiceCache[$orderId])) {
-                $result[$index] = [];
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$index] = array_map(
-                fn($invoice) => $this->transformInvoiceData($invoice, $info->getFieldSelection()),
+            $result = array_map(
+                fn($invoice) => $this->transformInvoiceData(
+                    $invoice,
+                    $request['info']->getFieldSelection()
+                ),
                 $this->invoiceCache[$orderId]
             );
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**

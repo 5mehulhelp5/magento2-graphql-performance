@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Checkout;
 
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Payment\Api\PaymentMethodListInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 
 /**
  * GraphQL resolver for payment methods
@@ -41,74 +43,76 @@ class PaymentMethodsResolver implements BatchResolverInterface
      * @param PaymentMethodListInterface $paymentMethodList Payment method list service
      * @param CartRepositoryInterface $cartRepository Cart repository
      * @param StoreManagerInterface $storeManager Store manager
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
      */
     public function __construct(
         private readonly PaymentMethodListInterface $paymentMethodList,
         private readonly CartRepositoryInterface $cartRepository,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
     }
 
     /**
      * Batch resolve payment methods
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Quote\Api\Data\CartInterface[] $carts
-*/
-        $carts = $value['carts'] ?? [];
-        $result = [];
-
-        if (empty($carts)) {
-            return $result;
-        }
-
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
         $storeId = $this->storeManager->getStore()->getId();
 
-        // Load all carts in batch
-        $this->loadCarts(
-            array_map(
-                function ($cart) {
-                    return $cart->getId();
-                },
-                $carts
-            )
-        );
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $carts = $value['carts'] ?? [];
 
-        // Load payment methods if not cached
-        if (!isset($this->methodsCache[$storeId])) {
-            $this->methodsCache[$storeId] = $this->loadPaymentMethods($storeId);
-        }
-
-        foreach ($carts as $cart) {
-            $cartId = $cart->getId();
-            $loadedCart = $this->cartCache[$cartId] ?? null;
-
-            if (!$loadedCart) {
-                $result[$cartId] = [];
+            if (empty($carts)) {
+                $response->addResponse($request, []);
                 continue;
             }
 
-            $result[$cartId] = $this->filterMethodsForCart(
-                $this->methodsCache[$storeId],
-                $loadedCart
+            // Load all carts in batch
+            $this->loadCarts(
+                array_map(
+                    function ($cart) {
+                        return $cart->getId();
+                    },
+                    $carts
+                )
             );
+
+            // Load payment methods if not cached
+            if (!isset($this->methodsCache[$storeId])) {
+                $this->methodsCache[$storeId] = $this->loadPaymentMethods($storeId);
+            }
+
+            $result = [];
+            foreach ($carts as $cart) {
+                $cartId = $cart->getId();
+                $loadedCart = $this->cartCache[$cartId] ?? null;
+
+                if (!$loadedCart) {
+                    $result[$cartId] = [];
+                    continue;
+                }
+
+                $result[$cartId] = $this->filterMethodsForCart(
+                    $this->methodsCache[$storeId],
+                    $loadedCart
+                );
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        return $result;
+        return $response;
     }
 
     /**
@@ -126,9 +130,9 @@ class PaymentMethodsResolver implements BatchResolverInterface
         }
 
         try {
-            $carts = $this->cartRepository->getList(
-                $this->buildSearchCriteria(['entity_id' => ['in' => $uncachedIds]])
-            )->getItems();
+            $this->searchCriteriaBuilder->addFilter('entity_id', $uncachedIds, 'in');
+            $searchCriteria = $this->searchCriteriaBuilder->create();
+            $carts = $this->cartRepository->getList($searchCriteria)->getItems();
 
             foreach ($carts as $cart) {
                 $this->cartCache[$cart->getId()] = $cart;
@@ -273,22 +277,5 @@ class PaymentMethodsResolver implements BatchResolverInterface
             'paytr' => 25000.0,
             default => null
         };
-    }
-
-    /**
-     * Build search criteria
-     *
-     * @param  array $filters
-     * @return \Magento\Framework\Api\SearchCriteria
-     */
-    private function buildSearchCriteria(array $filters): \Magento\Framework\Api\SearchCriteria
-    {
-        $searchCriteriaBuilder = $this->objectManager->create(\Magento\Framework\Api\SearchCriteriaBuilder::class);
-
-        foreach ($filters as $field => $condition) {
-            $searchCriteriaBuilder->addFilter($field, $condition['value'], $condition['condition_type']);
-        }
-
-        return $searchCriteriaBuilder->create();
     }
 }

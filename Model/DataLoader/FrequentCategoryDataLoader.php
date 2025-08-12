@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Model\DataLoader;
 
 use GraphQL\Executor\Promise\PromiseAdapter;
+use Magento\Framework\ObjectManagerInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
@@ -23,20 +23,20 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
     private const BATCH_SIZE = 50;
 
     /**
-     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ObjectManagerInterface $objectManager Object manager for lazy loading
      * @param ResolverCache $cache Cache service
-     * @param ResourceConnection $resourceConnection Database connection
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
      * @param StoreManagerInterface $storeManager Store manager service
      * @param int $cacheLifetime Cache lifetime in seconds
      */
     public function __construct(
-        PromiseAdapter $promiseAdapter,
+        ObjectManagerInterface $objectManager,
         ResolverCache $cache,
-        ResourceConnection $resourceConnection,
+        PromiseAdapter $promiseAdapter,
         private readonly StoreManagerInterface $storeManager,
         int $cacheLifetime = 7200 // 2 hours for categories
     ) {
-        parent::__construct($promiseAdapter, $cache, $resourceConnection, $cacheLifetime);
+        parent::__construct($objectManager, $cache, $promiseAdapter, $cacheLifetime);
     }
 
     /**
@@ -51,7 +51,8 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
      */
     protected function loadFromDatabase(array $ids): array
     {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
         $storeId = $this->storeManager->getStore()->getId();
 
         // Split IDs into batches
@@ -62,7 +63,7 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
             // Load base category data
             $select = $connection->select()
                 ->from(
-                    ['e' => $this->resourceConnection->getTableName('catalog_category_entity')],
+                    ['e' => $resourceConnection->getTableName('catalog_category_entity')],
                     [
                         'entity_id',
                         'parent_id',
@@ -117,7 +118,8 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
      * @return array           Attribute values indexed by category ID
      */
     private function loadAttributes(array $categoryIds, int $storeId): array {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
         $result = [];
 
         // Get frequently accessed attributes
@@ -132,7 +134,7 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
             // Get attribute values
             $select = $connection->select()
                 ->from(
-                    ['t' => $this->resourceConnection->getTableName('catalog_category_entity_varchar')],
+                    ['t' => $resourceConnection->getTableName('catalog_category_entity_varchar')],
                     ['entity_id', 'value']
                 )
                 ->where('t.attribute_id = ?', $attributeId)
@@ -164,11 +166,12 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
      */
     private function loadProductCounts(array $categoryIds): array
     {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
 
         $select = $connection->select()
             ->from(
-                ['cat_index' => $this->resourceConnection->getTableName('catalog_category_product')],
+                ['cat_index' => $resourceConnection->getTableName('catalog_category_product')],
                 [
                     'category_id',
                     'product_count' => new \Zend_Db_Expr('COUNT(DISTINCT product_id)')
@@ -191,11 +194,12 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
      * @return array           URL rewrites indexed by category ID
      */
     private function loadUrlRewrites(array $categoryIds, int $storeId): array {
-        $connection = $this->resourceConnection->getConnection();
+        $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+        $connection = $resourceConnection->getConnection();
 
         $select = $connection->select()
             ->from(
-                $this->resourceConnection->getTableName('url_rewrite'),
+                $resourceConnection->getTableName('url_rewrite'),
                 ['entity_id', 'request_path']
             )
             ->where('entity_type = ?', 'category')
@@ -220,10 +224,11 @@ class FrequentCategoryDataLoader extends FrequentDataLoader
         static $attributeIds = [];
 
         if (!isset($attributeIds[$attributeCode])) {
-            $connection = $this->resourceConnection->getConnection();
+            $resourceConnection = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+            $connection = $resourceConnection->getConnection();
             $select = $connection->select()
                 ->from(
-                    $this->resourceConnection->getTableName('eav_attribute'),
+                    $resourceConnection->getTableName('eav_attribute'),
                     'attribute_id'
                 )
                 ->where('attribute_code = ?', $attributeCode)

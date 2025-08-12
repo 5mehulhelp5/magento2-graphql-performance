@@ -5,8 +5,9 @@ namespace Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Category;
 
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\Resolver\BatchResponse;
 use Magento\Framework\GraphQl\Config\Element\Field;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
@@ -47,54 +48,55 @@ class BreadcrumbsResolver implements BatchResolverInterface
     /**
      * Batch resolve category breadcrumbs
      *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
+     * @param ContextInterface $context
+     * @param Field $field
+     * @param array $requests
+     * @return BatchResponse
      */
     public function resolve(
+        ContextInterface $context,
         Field $field,
-        $context,
-        ResolveInfo $info,
-        array $value = [],
-        array $args = []
-    ): array {
-        /**
- * @var \Magento\Catalog\Api\Data\CategoryInterface[] $categories
-*/
-        $categories = $value['categories'] ?? [];
-        $result = [];
+        array $requests
+    ): BatchResponse {
+        $response = new BatchResponse();
 
-        if (empty($categories)) {
-            return $result;
-        }
+        foreach ($requests as $request) {
+            $value = $request['value'] ?? [];
+            $categories = $value['categories'] ?? [];
 
-        // Get all category paths
-        $pathIds = [];
-        foreach ($categories as $category) {
-            $path = $category->getPath();
-            $ids = explode('/', $path);
-            array_shift($ids); // Remove root category
-            array_pop($ids); // Remove current category
-            foreach ($ids as $id) {
-                $pathIds[] = $id;
+            if (empty($categories)) {
+                $response->addResponse($request, []);
+                continue;
             }
+
+            // Get all category paths
+            $pathIds = [];
+            foreach ($categories as $category) {
+                $path = $category->getPath();
+                $ids = explode('/', $path);
+                array_shift($ids); // Remove root category
+                array_pop($ids); // Remove current category
+                foreach ($ids as $id) {
+                    $pathIds[] = $id;
+                }
+            }
+
+            // Load all parent categories in batch
+            if (!empty($pathIds)) {
+                $this->loadCategories(array_unique($pathIds));
+            }
+
+            // Build breadcrumbs for each category
+            $result = [];
+            foreach ($categories as $category) {
+                $categoryId = $category->getId();
+                $result[$categoryId] = $this->buildBreadcrumbs($category);
+            }
+
+            $response->addResponse($request, $result);
         }
 
-        // Load all parent categories in batch
-        if (!empty($pathIds)) {
-            $this->loadCategories(array_unique($pathIds));
-        }
-
-        // Build breadcrumbs for each category
-        foreach ($categories as $category) {
-            $categoryId = $category->getId();
-            $result[$categoryId] = $this->buildBreadcrumbs($category);
-        }
-
-        return $result;
+        return $response;
     }
 
     /**

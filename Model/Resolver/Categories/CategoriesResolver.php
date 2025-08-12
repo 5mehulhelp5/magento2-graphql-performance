@@ -37,26 +37,16 @@ class CategoriesResolver extends AbstractResolver
      */
     public function __construct(
         private readonly CategoryRepositoryInterface $categoryRepository,
-        private readonly CategoryCollectionFactory $categoryCollectionFactory,
+        protected readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly CategoryDataLoader $dataLoader,
-        private readonly StoreManagerInterface $storeManager,
-        ResolverCache $cache,
-        QueryTimer $queryTimer
+        protected readonly StoreManagerInterface $storeManager,
+        protected readonly ResolverCache $cache,
+        private readonly QueryTimer $queryTimer
     ) {
-        parent::__construct($cache, $queryTimer);
+        parent::__construct($categoryCollectionFactory, $storeManager, $cache);
     }
 
-    /**
-     * Batch resolve categories
-     *
-     * @param  Field       $field
-     * @param  mixed       $context
-     * @param  ResolveInfo $info
-     * @param  array       $value
-     * @param  array       $args
-     * @return array
-     */
     /**
      * Get entity type code
      *
@@ -75,6 +65,65 @@ class CategoriesResolver extends AbstractResolver
     protected function getCacheTags(): array
     {
         return ['catalog_category'];
+    }
+
+    /**
+     * Get category IDs from request value
+     *
+     * @param array $value
+     * @return array
+     */
+    protected function getCategoryIds(array $value): array
+    {
+        if (isset($value['id'])) {
+            return [$value['id']];
+        }
+
+        if (isset($value['ids']) && is_array($value['ids'])) {
+            return $value['ids'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Process categories and return result
+     *
+     * @param array $categoryIds
+     * @param array $fields
+     * @return array
+     */
+    protected function processCategories(array $categoryIds, array $fields): array
+    {
+        $items = [];
+        foreach ($categoryIds as $categoryId) {
+            if (!isset($this->categoryCache[$categoryId])) {
+                continue;
+            }
+
+            $category = $this->categoryCache[$categoryId];
+            $categoryData = $this->getBaseCategoryData($category);
+
+            if (isset($fields['image'])) {
+                $categoryData['image'] = $category->getImage() ? $this->getImageUrl($category->getImage()) : null;
+            }
+
+            if (isset($fields['breadcrumbs'])) {
+                $categoryData['breadcrumbs'] = $this->getBreadcrumbs($category);
+            }
+
+            // Handle custom attributes
+            $customAttributes = ['is_collection', 'is_brand', 'is_featured'];
+            foreach ($customAttributes as $attribute) {
+                if (isset($fields[$attribute])) {
+                    $categoryData[$attribute] = (bool)$category->getData($attribute);
+                }
+            }
+
+            $items[] = $categoryData;
+        }
+
+        return $items;
     }
 
     /**
@@ -192,8 +241,8 @@ class CategoriesResolver extends AbstractResolver
             $items,
             $collection->getSize(),
             [
-            'pageSize' => $collection->getPageSize() ?: 20,
-            'currentPage' => $collection->getCurPage()
+                'pageSize' => $collection->getPageSize() ?: 20,
+                'currentPage' => $collection->getCurPage()
             ]
         );
     }
@@ -272,7 +321,19 @@ class CategoriesResolver extends AbstractResolver
     }
 
     /**
-     * Generate cache key
+     * Generate cache key for category
+     *
+     * @param int $categoryId
+     * @param int $storeId
+     * @return string
+     */
+    protected function generateCacheKey(int $categoryId, int $storeId): string
+    {
+        return parent::generateCacheKey($categoryId, $storeId);
+    }
+
+    /**
+     * Generate query cache key
      *
      * @param  Field       $field
      * @param  mixed       $context
@@ -281,7 +342,7 @@ class CategoriesResolver extends AbstractResolver
      * @param  array       $args
      * @return string
      */
-    private function generateCacheKey(
+    private function generateQueryCacheKey(
         Field $field,
         $context,
         ResolveInfo $info,

@@ -8,8 +8,20 @@ use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPoolManager;
 
+/**
+ * Service class for collecting and aggregating GraphQL performance metrics
+ *
+ * This class gathers performance data from various components including query timing,
+ * cache statistics, and connection pool usage to provide a comprehensive view of
+ * GraphQL performance.
+ */
 class PerformanceMetrics implements PerformanceMetricsInterface
 {
+    /**
+     * @param QueryTimer $queryTimer Service for measuring query execution time
+     * @param ResolverCache $cache Cache service for GraphQL resolvers
+     * @param ConnectionPoolManager $connectionPool Service for managing database connections
+     */
     public function __construct(
         private readonly QueryTimer $queryTimer,
         private readonly ResolverCache $cache,

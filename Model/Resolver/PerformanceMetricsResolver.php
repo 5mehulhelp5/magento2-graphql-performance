@@ -10,8 +10,21 @@ use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPool;
 
+/**
+ * GraphQL resolver for performance metrics
+ *
+ * This resolver provides access to various performance metrics including
+ * query statistics, cache performance, memory usage, and connection pool
+ * status. It aggregates data from multiple monitoring services to provide
+ * a comprehensive view of system performance.
+ */
 class PerformanceMetricsResolver implements ResolverInterface
 {
+    /**
+     * @param QueryTimer $queryTimer Query timing service
+     * @param ResolverCache $cache Cache service
+     * @param ConnectionPool $connectionPool Connection pool service
+     */
     public function __construct(
         private readonly QueryTimer $queryTimer,
         private readonly ResolverCache $cache,
@@ -19,6 +32,16 @@ class PerformanceMetricsResolver implements ResolverInterface
     ) {
     }
 
+    /**
+     * Resolve performance metrics query
+     *
+     * @param Field $field Field to resolve
+     * @param mixed $context Context object
+     * @param ResolveInfo $info Resolve info
+     * @param array|null $value Parent value
+     * @param array|null $args Query arguments
+     * @return array Performance metrics data
+     */
     public function resolve(
         Field $field,
         $context,

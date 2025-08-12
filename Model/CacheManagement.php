@@ -7,8 +7,18 @@ use Sterk\GraphQlPerformance\Api\CacheManagementInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\Cache\CacheWarmer;
 
+/**
+ * Service class for managing GraphQL cache operations
+ *
+ * This class provides functionality for cleaning and warming the GraphQL cache,
+ * helping maintain optimal performance and data freshness.
+ */
 class CacheManagement implements CacheManagementInterface
 {
+    /**
+     * @param ResolverCache $cache Cache service for GraphQL resolvers
+     * @param CacheWarmer $cacheWarmer Service for warming up the cache
+     */
     public function __construct(
         private readonly ResolverCache $cache,
         private readonly CacheWarmer $cacheWarmer

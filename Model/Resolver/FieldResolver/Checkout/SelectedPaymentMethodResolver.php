@@ -11,20 +11,29 @@ use Magento\Payment\Helper\Data as PaymentHelper;
 use Psr\Log\LoggerInterface;
 
 /**
- * Resolver for selected payment method in checkout
+ * GraphQL resolver for selected payment methods
+ *
+ * This resolver handles batch loading of selected payment methods with support
+ * for payment method instances and additional data. It transforms payment data
+ * into the GraphQL format and handles related entities like payment methods.
  */
 class SelectedPaymentMethodResolver implements BatchResolverInterface
 {
     /**
-     * @var array Cart objects cache
+     * @var array<int, ?\Magento\Quote\Api\Data\CartInterface> Cache of carts by cart ID
      */
     private array $cartCache = [];
 
     /**
-     * @var array Payment method instance cache
+     * @var array<string, ?\Magento\Payment\Model\MethodInterface> Cache of payment method instances by method code
      */
     private array $methodInstanceCache = [];
 
+    /**
+     * @param CartRepositoryInterface $cartRepository Cart repository
+     * @param PaymentHelper $paymentHelper Payment helper
+     * @param LoggerInterface|null $logger Logger service
+     */
     public function __construct(
         private readonly CartRepositoryInterface $cartRepository,
         private readonly PaymentHelper $paymentHelper,

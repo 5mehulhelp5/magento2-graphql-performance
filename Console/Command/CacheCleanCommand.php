@@ -9,10 +9,20 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Sterk\GraphQlPerformance\Api\CacheManagementInterface;
 
+/**
+ * Console command for cleaning GraphQL performance cache
+ *
+ * This command provides functionality to clean the GraphQL performance cache,
+ * optionally allowing specific cache tags to be targeted for cleaning.
+ */
 class CacheCleanCommand extends Command
 {
     private const TAGS_OPTION = 'tags';
 
+    /**
+     * @param CacheManagementInterface $cacheManagement Cache management service
+     * @param string|null $name Command name
+     */
     public function __construct(
         private readonly CacheManagementInterface $cacheManagement,
         string $name = null
@@ -20,6 +30,9 @@ class CacheCleanCommand extends Command
         parent::__construct($name);
     }
 
+    /**
+     * Configure command options
+     */
     protected function configure(): void
     {
         $this->setName('graphql:cache:clean')
@@ -34,6 +47,13 @@ class CacheCleanCommand extends Command
         parent::configure();
     }
 
+    /**
+     * Execute command
+     *
+     * @param InputInterface $input Command input
+     * @param OutputInterface $output Command output
+     * @return int Command exit code
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {

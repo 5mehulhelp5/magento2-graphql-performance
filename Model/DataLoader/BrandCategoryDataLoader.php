@@ -7,8 +7,20 @@ use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCo
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * Data loader for brand categories
+ *
+ * This class provides efficient loading of brand category data, with support
+ * for batch loading and filtering. It specifically handles categories marked
+ * as brands at level 3 in the category hierarchy.
+ */
 class BrandCategoryDataLoader extends BatchDataLoader
 {
+    /**
+     * @param ObjectManagerInterface $objectManager Object manager
+     * @param CategoryCollectionFactory $categoryCollectionFactory Category collection factory
+     * @param StoreManagerInterface $storeManager Store manager
+     */
     public function __construct(
         ObjectManagerInterface $objectManager,
         private readonly CategoryCollectionFactory $categoryCollectionFactory,

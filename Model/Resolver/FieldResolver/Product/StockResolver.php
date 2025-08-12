@@ -9,10 +9,24 @@ use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 
+/**
+ * Batch resolver for product stock status
+ *
+ * This class provides efficient batch resolution of product stock status,
+ * handling stock data caching and status determination based on product type.
+ * It implements the batch resolver interface to optimize performance when
+ * resolving stock status for multiple products.
+ */
 class StockResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, ?\Magento\CatalogInventory\Api\Data\StockItemInterface> Cache of stock items
+     */
     private array $stockCache = [];
 
+    /**
+     * @param StockRegistryInterface $stockRegistry Stock registry service
+     */
     public function __construct(
         private readonly StockRegistryInterface $stockRegistry
     ) {

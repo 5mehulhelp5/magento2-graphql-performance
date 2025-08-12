@@ -8,8 +8,18 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Schema;
 use Sterk\GraphQlPerformance\Model\QueryComplexity\ComplexityValidator;
 
+/**
+ * Plugin for validating GraphQL query complexity
+ *
+ * This plugin analyzes GraphQL queries before execution to ensure they don't
+ * exceed configured complexity limits, preventing resource-intensive queries
+ * that could impact performance.
+ */
 class QueryComplexityValidatorPlugin
 {
+    /**
+     * @param ComplexityValidator $complexityValidator Service for validating query complexity
+     */
     public function __construct(
         private readonly ComplexityValidator $complexityValidator
     ) {

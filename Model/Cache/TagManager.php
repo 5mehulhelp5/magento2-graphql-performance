@@ -3,8 +3,22 @@ declare(strict_types=1);
 
 namespace Sterk\GraphQlPerformance\Model\Cache;
 
+/**
+ * Service class for managing GraphQL cache tags
+ *
+ * This class handles cache tag generation and management for GraphQL queries
+ * and entities. It maintains relationships between entities and their cache
+ * tags, and provides methods for generating appropriate cache tags based on
+ * query content and results.
+ */
 class TagManager
 {
+    /**
+     * @var array<string, array{
+     *     related_entities: array<string>,
+     *     invalidation_events: array<string>
+     * }> Entity tag configuration
+     */
     private array $entityTags = [
         'catalog_product' => [
             'related_entities' => ['category', 'attribute'],

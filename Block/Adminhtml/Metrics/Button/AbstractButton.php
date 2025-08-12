@@ -5,6 +5,13 @@ namespace Sterk\GraphQlPerformance\Block\Adminhtml\Metrics\Button;
 
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 
+/**
+ * Abstract base class for admin button components
+ *
+ * This class provides common functionality for admin UI buttons, including
+ * button data structure, default implementations, and required abstract methods
+ * that concrete button classes must implement.
+ */
 abstract class AbstractButton implements ButtonProviderInterface
 {
     /**

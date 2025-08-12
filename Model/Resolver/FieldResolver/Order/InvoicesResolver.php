@@ -10,10 +10,25 @@ use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 
+/**
+ * GraphQL resolver for order invoices
+ *
+ * This resolver handles batch loading of invoice data with support for caching.
+ * It transforms invoice data into the GraphQL format and handles related
+ * entities like invoice items, comments, and totals.
+ */
 class InvoicesResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<\Magento\Sales\Api\Data\InvoiceInterface>> Cache of invoices by order ID
+     */
     private array $invoiceCache = [];
 
+    /**
+     * @param InvoiceRepositoryInterface $invoiceRepository Invoice repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ResolverCache $cache Cache service
+     */
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,

@@ -8,11 +8,24 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
+/**
+ * UI component for handling metrics grid actions
+ *
+ * This class provides action buttons (view, delete) for each row in the
+ * metrics grid, handling URL generation and confirmation messages.
+ */
 class MetricsActions extends Column
 {
     private const URL_PATH_VIEW = 'graphql_performance/metrics/view';
     private const URL_PATH_DELETE = 'graphql_performance/metrics/delete';
 
+    /**
+     * @param ContextInterface $context UI component context
+     * @param UiComponentFactory $uiComponentFactory UI component factory
+     * @param UrlInterface $urlBuilder URL builder service
+     * @param array $components Additional components
+     * @param array $data Additional data
+     */
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,

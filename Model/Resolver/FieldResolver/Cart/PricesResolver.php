@@ -10,10 +10,25 @@ use Magento\Quote\Api\CartTotalRepositoryInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * GraphQL resolver for cart prices
+ *
+ * This resolver handles batch loading of cart totals and transforms them into
+ * the GraphQL format. It provides detailed price information including taxes,
+ * discounts, and shipping costs for multiple carts in a single operation.
+ */
 class PricesResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, ?\Magento\Quote\Api\Data\TotalsInterface> Cache of cart totals by cart ID
+     */
     private array $totalsCache = [];
 
+    /**
+     * @param CartTotalRepositoryInterface $cartTotalRepository Cart total repository
+     * @param PriceCurrencyInterface $priceCurrency Price currency service
+     * @param StoreManagerInterface $storeManager Store manager
+     */
     public function __construct(
         private readonly CartTotalRepositoryInterface $cartTotalRepository,
         private readonly PriceCurrencyInterface $priceCurrency,

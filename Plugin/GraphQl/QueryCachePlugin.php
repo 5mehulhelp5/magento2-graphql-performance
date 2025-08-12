@@ -9,8 +9,20 @@ use Sterk\GraphQlPerformance\Model\Cache\QueryCache;
 use Sterk\GraphQlPerformance\Model\Config;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Plugin for caching GraphQL query results
+ *
+ * This plugin implements caching for GraphQL queries, improving performance by
+ * serving cached results when available. It handles cache key generation,
+ * cache tagging, and cache lifetime management based on query type.
+ */
 class QueryCachePlugin
 {
+    /**
+     * @param QueryCache $queryCache Query cache service
+     * @param Config $config Configuration service
+     * @param LoggerInterface $logger Logger service
+     */
     public function __construct(
         private readonly QueryCache $queryCache,
         private readonly Config $config,
@@ -18,6 +30,18 @@ class QueryCachePlugin
     ) {
     }
 
+    /**
+     * Around plugin for query processing
+     *
+     * @param QueryProcessor $subject Query processor instance
+     * @param \Closure $proceed Original method
+     * @param Schema $schema GraphQL schema
+     * @param string $query GraphQL query
+     * @param array|null $variables Query variables
+     * @param array|null $contextValue Context value
+     * @param array|null $rootValue Root value
+     * @return array Query result
+     */
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,

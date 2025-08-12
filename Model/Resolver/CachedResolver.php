@@ -8,8 +8,19 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 
+/**
+ * Abstract base class for cached GraphQL resolvers
+ *
+ * This class provides caching functionality for GraphQL resolvers,
+ * automatically handling cache key generation, cache storage, and cache
+ * tag management. It improves performance by serving cached results when
+ * available.
+ */
 abstract class CachedResolver implements ResolverInterface
 {
+    /**
+     * @param ResolverCache $cache Cache service for resolver results
+     */
     public function __construct(
         private readonly ResolverCache $cache
     ) {

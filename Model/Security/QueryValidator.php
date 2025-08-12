@@ -15,6 +15,16 @@ use GraphQL\Validator\Rules\QueryDepth;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Sterk\GraphQlPerformance\Model\Config;
 
+/**
+ * Service class for validating GraphQL queries
+ *
+ * This class performs comprehensive validation of GraphQL queries, including:
+ * - Query length and syntax validation
+ * - Complexity and depth limits
+ * - Restricted field access control
+ * - Variable validation and sanitization
+ * - Protection against SQL injection and XSS
+ */
 class QueryValidator
 {
     private const MAX_QUERY_LENGTH = 8000;
@@ -25,6 +35,10 @@ class QueryValidator
         'key'
     ];
 
+    /**
+     * @param Config $config Configuration service
+     * @param Schema $schema GraphQL schema
+     */
     public function __construct(
         private readonly Config $config,
         private readonly Schema $schema
@@ -140,7 +154,7 @@ class QueryValidator
     private function validateRestrictedFields(string $query): void
     {
         $ast = \GraphQL\Language\Parser::parse($query);
-        
+
         $restrictedFieldFound = false;
         $foundField = '';
 

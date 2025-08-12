@@ -6,6 +6,13 @@ namespace Sterk\GraphQlPerformance\Model\QueryComplexity;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 
+/**
+ * Complexity validator for GraphQL queries
+ *
+ * This class calculates and validates the complexity of GraphQL queries
+ * based on predefined thresholds. It checks both the query complexity
+ * and the query depth to ensure optimal performance.
+ */
 class ComplexityValidator
 {
     /**
@@ -18,6 +25,11 @@ class ComplexityValidator
      */
     private const DEFAULT_MAX_DEPTH = 20;
 
+    /**
+     * @param ComplexityCalculator $complexityCalculator Complexity calculator service
+     * @param int $maxComplexity Maximum allowed query complexity
+     * @param int $maxDepth Maximum allowed query depth
+     */
     public function __construct(
         private readonly ComplexityCalculator $complexityCalculator,
         private readonly int $maxComplexity = self::DEFAULT_MAX_COMPLEXITY,

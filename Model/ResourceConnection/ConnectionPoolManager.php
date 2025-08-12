@@ -7,8 +7,28 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Sterk\GraphQlPerformance\Model\Config;
 
+/**
+ * Manager for database connection pooling
+ *
+ * This class manages a pool of database connections to optimize resource usage
+ * and improve performance. It handles connection lifecycle, including creation,
+ * distribution, and cleanup of both active and idle connections. The pool
+ * maintains connections within configured minimum and maximum limits.
+ *
+ * Features:
+ * - Connection pooling with active/idle management
+ * - Automatic cleanup of idle connections
+ * - Connection health monitoring
+ * - Configurable retry mechanism for connection acquisition
+ * - Pool statistics tracking
+ */
 class ConnectionPoolManager
 {
+    /**
+     * @param ResourceConnection $resourceConnection Resource connection service
+     * @param Config $config Configuration service
+     * @param array $connections Initial connection pool state
+     */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly Config $config,

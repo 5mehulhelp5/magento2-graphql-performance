@@ -13,13 +13,34 @@ use PHPUnit\Framework\TestCase;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 use Sterk\GraphQlPerformance\Model\Repository\ProductRepositoryAdapter;
 
+/**
+ * Unit test for ProductDataLoader
+ */
 class ProductDataLoaderTest extends TestCase
 {
+    /**
+     * @var ObjectManagerInterface
+     */
     private ObjectManagerInterface $objectManager;
+
+    /**
+     * @var ProductRepositoryAdapter
+     */
     private ProductRepositoryAdapter $repository;
+
+    /**
+     * @var ProductDataLoader
+     */
     private ProductDataLoader $dataLoader;
+
+    /**
+     * @var SearchCriteriaBuilder
+     */
     private SearchCriteriaBuilder $searchCriteriaBuilder;
 
+    /**
+     * Set up test environment
+     */
     protected function setUp(): void
     {
         $this->objectManager = $this->createMock(ObjectManagerInterface::class);
@@ -32,6 +53,9 @@ class ProductDataLoaderTest extends TestCase
         );
     }
 
+    /**
+     * Test batch loading of products
+     */
     public function testBatchLoad(): void
     {
         $productIds = ['1', '2', '3'];
@@ -64,6 +88,9 @@ class ProductDataLoaderTest extends TestCase
         }
     }
 
+    /**
+     * Test loading a single product
+     */
     public function testLoadSingle(): void
     {
         $productId = '1';
@@ -82,6 +109,9 @@ class ProductDataLoaderTest extends TestCase
         $this->assertSame($product, $result);
     }
 
+    /**
+     * Test loading multiple products
+     */
     public function testLoadMultiple(): void
     {
         $productIds = ['1', '2'];

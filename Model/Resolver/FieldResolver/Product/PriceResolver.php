@@ -11,8 +11,20 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * Batch resolver for product prices
+ *
+ * This class provides efficient batch resolution of product prices,
+ * handling price calculations, discounts, and currency formatting.
+ * It implements the batch resolver interface to optimize performance
+ * when resolving prices for multiple products.
+ */
 class PriceResolver implements BatchResolverInterface
 {
+    /**
+     * @param PriceCurrencyInterface $priceCurrency Price currency service
+     * @param StoreManagerInterface $storeManager Store manager service
+     */
     public function __construct(
         private readonly PriceCurrencyInterface $priceCurrency,
         private readonly StoreManagerInterface $storeManager

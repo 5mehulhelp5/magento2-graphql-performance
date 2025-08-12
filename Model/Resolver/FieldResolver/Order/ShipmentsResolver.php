@@ -11,11 +11,31 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Magento\Shipping\Model\Tracking\Result\StatusFactory;
 
+/**
+ * GraphQL resolver for order shipments
+ *
+ * This resolver handles batch loading of shipments with support for caching.
+ * It transforms shipment data into the GraphQL format and handles related
+ * entities like tracking information and shipment items.
+ */
 class ShipmentsResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<\Magento\Sales\Api\Data\ShipmentInterface>> Cache of shipments by order ID
+     */
     private array $shipmentCache = [];
+
+    /**
+     * @var array<string, \Magento\Shipping\Model\Tracking\Result\Status> Cache of tracking statuses by tracking number
+     */
     private array $trackingCache = [];
 
+    /**
+     * @param ShipmentRepositoryInterface $shipmentRepository Shipment repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ResolverCache $cache Cache service
+     * @param StatusFactory $trackingStatusFactory Tracking status factory
+     */
     public function __construct(
         private readonly ShipmentRepositoryInterface $shipmentRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,

@@ -7,8 +7,18 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Sterk\GraphQlPerformance\Model\Config\ConfigPath;
 
+/**
+ * Configuration model for GraphQL performance settings
+ *
+ * This class provides access to all configuration settings related to GraphQL
+ * performance optimization, including cache settings, query limits, connection
+ * pool settings, monitoring configuration, and resolver-specific settings.
+ */
 class Config
 {
+    /**
+     * @param ScopeConfigInterface $scopeConfig Configuration reader
+     */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
     ) {

@@ -7,10 +7,24 @@ use Magento\Framework\Api\Filter;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider;
 use Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface;
 
+/**
+ * Data provider for GraphQL performance metrics grid
+ */
 class MetricsDataProvider extends DataProvider
 {
+    /**
+     * @var array Array of applied filters
+     */
     private array $filters = [];
 
+    /**
+     * @param string $name Component name
+     * @param string $primaryFieldName Primary field name
+     * @param string $requestFieldName Request field name
+     * @param PerformanceMetricsInterface $performanceMetrics Performance metrics service
+     * @param array $meta Component meta data
+     * @param array $data Additional data
+     */
     public function __construct(
         $name,
         $primaryFieldName,
@@ -22,6 +36,11 @@ class MetricsDataProvider extends DataProvider
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
     }
 
+    /**
+     * Get metrics data for grid
+     *
+     * @return array
+     */
     public function getData()
     {
         $metrics = $this->performanceMetrics->getMetrics();
@@ -38,6 +57,12 @@ class MetricsDataProvider extends DataProvider
         ];
     }
 
+    /**
+     * Transform raw metrics data into grid format
+     *
+     * @param array $metrics Raw metrics data
+     * @return array Formatted grid data
+     */
     private function transformMetricsToGridData(array $metrics): array
     {
         $items = [];
@@ -74,6 +99,11 @@ class MetricsDataProvider extends DataProvider
         return $items;
     }
 
+    /**
+     * Add filter to the collection
+     *
+     * @param Filter $filter Filter to add
+     */
     public function addFilter(Filter $filter)
     {
         $this->filters[] = [
@@ -83,6 +113,12 @@ class MetricsDataProvider extends DataProvider
         ];
     }
 
+    /**
+     * Apply filters to items
+     *
+     * @param array $items Items to filter
+     * @return array Filtered items
+     */
     private function applyFilters(array $items): array
     {
         if (empty($this->filters)) {
@@ -90,7 +126,8 @@ class MetricsDataProvider extends DataProvider
         }
 
         return array_filter(
-            $items, function ($item) {
+            $items,
+            function ($item) {
                 foreach ($this->filters as $filter) {
                     if (!$this->matchesFilter($item, $filter)) {
                         return false;
@@ -101,6 +138,13 @@ class MetricsDataProvider extends DataProvider
         );
     }
 
+    /**
+     * Check if item matches filter
+     *
+     * @param array $item Item to check
+     * @param array $filter Filter to apply
+     * @return bool True if item matches filter
+     */
     private function matchesFilter(array $item, array $filter): bool
     {
         $value = $item[$filter['field']] ?? null;
@@ -109,18 +153,18 @@ class MetricsDataProvider extends DataProvider
         }
 
         switch ($filter['condition']) {
-        case 'eq':
-            return $value == $filter['value'];
-        case 'neq':
-            return $value != $filter['value'];
-        case 'like':
-            return stripos($value, trim($filter['value'], '%')) !== false;
-        case 'gt':
-            return $value > $filter['value'];
-        case 'lt':
-            return $value < $filter['value'];
-        default:
-            return false;
+            case 'eq':
+                return $value == $filter['value'];
+            case 'neq':
+                return $value != $filter['value'];
+            case 'like':
+                return stripos($value, trim($filter['value'], '%')) !== false;
+            case 'gt':
+                return $value > $filter['value'];
+            case 'lt':
+                return $value < $filter['value'];
+            default:
+                return false;
         }
     }
 }

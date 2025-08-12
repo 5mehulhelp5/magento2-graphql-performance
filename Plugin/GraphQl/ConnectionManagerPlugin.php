@@ -8,8 +8,18 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Schema;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionManager;
 
+/**
+ * Plugin for managing database connections in GraphQL operations
+ *
+ * This plugin handles database connection management for GraphQL queries and mutations,
+ * ensuring proper connection pooling, transaction management, and resource cleanup.
+ * It automatically uses read connections for queries and write connections for mutations.
+ */
 class ConnectionManagerPlugin
 {
+    /**
+     * @param ConnectionManager $connectionManager Service for managing database connections
+     */
     public function __construct(
         private readonly ConnectionManager $connectionManager
     ) {

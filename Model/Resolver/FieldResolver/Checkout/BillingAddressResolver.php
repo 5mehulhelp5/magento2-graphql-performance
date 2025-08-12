@@ -11,23 +11,44 @@ use Magento\Directory\Model\CountryFactory;
 use Magento\Directory\Model\RegionFactory;
 use Psr\Log\LoggerInterface;
 
+/**
+ * GraphQL resolver for cart billing addresses
+ *
+ * This resolver handles batch loading of billing addresses with support for
+ * country and region data. It transforms address data into the GraphQL format
+ * and handles related entities like countries and regions.
+ */
 class BillingAddressResolver implements BatchResolverInterface
 {
     /**
-     * @var array Cart objects cache
+     * Cache of carts by cart ID
+     *
+     * @var array<int, ?\Magento\Quote\Api\Data\CartInterface>
      */
     private array $cartCache = [];
 
     /**
-     * @var array Country data cache
+     * Cache of country data by country code
+     *
+     * @var array<string, array{code: string, label: string}>
      */
     private array $countryCache = [];
 
     /**
-     * @var array Region data cache
+     * Cache of region data by country_region key
+     *
+     * @var array<string, array{region_id: ?int, region_code: ?string, region: ?string}>
      */
     private array $regionCache = [];
 
+    /**
+     * Constructor
+     *
+     * @param CartRepositoryInterface $cartRepository Cart repository
+     * @param CountryFactory $countryFactory Country factory
+     * @param RegionFactory $regionFactory Region factory
+     * @param LoggerInterface|null $logger Logger service
+     */
     public function __construct(
         private readonly CartRepositoryInterface $cartRepository,
         private readonly CountryFactory $countryFactory,

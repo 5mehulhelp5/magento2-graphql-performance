@@ -10,11 +10,38 @@ use Magento\Payment\Api\PaymentMethodListInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * GraphQL resolver for payment methods
+ *
+ * This resolver handles batch loading of payment methods with support for
+ * filtering based on cart totals and currency. It provides detailed payment
+ * method information including 3DS support, issuers, and amount limits.
+ */
 class PaymentMethodsResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<array{
+     *     code: string,
+     *     title: string,
+     *     is_deferred: bool,
+     *     available_issuers: array,
+     *     supports_3ds: bool,
+     *     minimum_amount: ?float,
+     *     maximum_amount: ?float
+     * }>> Cache of payment methods by store ID
+     */
     private array $methodsCache = [];
+
+    /**
+     * @var array<int, ?\Magento\Quote\Api\Data\CartInterface> Cache of carts by cart ID
+     */
     private array $cartCache = [];
 
+    /**
+     * @param PaymentMethodListInterface $paymentMethodList Payment method list service
+     * @param CartRepositoryInterface $cartRepository Cart repository
+     * @param StoreManagerInterface $storeManager Store manager
+     */
     public function __construct(
         private readonly PaymentMethodListInterface $paymentMethodList,
         private readonly CartRepositoryInterface $cartRepository,

@@ -10,8 +10,20 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\BrandCategoryDataLoader;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 
+/**
+ * GraphQL resolver for brand categories
+ *
+ * This resolver handles loading and transforming brand categories with support
+ * for pagination and alphabetical sorting. It implements caching and query
+ * timing to optimize performance when loading brand categories.
+ */
 class BrandCategoriesResolver implements ResolverInterface
 {
+    /**
+     * @param BrandCategoryDataLoader $brandCategoryDataLoader Brand category data loader
+     * @param ResolverCache $cache Cache service
+     * @param QueryTimer $queryTimer Query timing service
+     */
     public function __construct(
         private readonly BrandCategoryDataLoader $brandCategoryDataLoader,
         private readonly ResolverCache $cache,

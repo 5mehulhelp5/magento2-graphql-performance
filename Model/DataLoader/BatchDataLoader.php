@@ -5,12 +5,34 @@ namespace Sterk\GraphQlPerformance\Model\DataLoader;
 
 use Magento\Framework\ObjectManagerInterface;
 
+/**
+ * Abstract base class for batch data loading
+ *
+ * This class provides functionality for efficient batch loading of data,
+ * implementing the DataLoader pattern to prevent N+1 query problems.
+ * It queues individual load requests and executes them in batches,
+ * significantly reducing the number of database queries.
+ */
 abstract class BatchDataLoader
 {
+    /**
+     * @var array Queue of IDs to be loaded
+     */
     private array $queue = [];
+
+    /**
+     * @var array Cache of loaded items indexed by ID
+     */
     private array $loadedItems = [];
+
+    /**
+     * @var bool Flag indicating if a batch load is in progress
+     */
     private bool $loading = false;
 
+    /**
+     * @param ObjectManagerInterface $objectManager Object manager for dependency injection
+     */
     public function __construct(
         protected readonly ObjectManagerInterface $objectManager
     ) {

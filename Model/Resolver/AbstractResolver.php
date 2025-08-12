@@ -11,9 +11,21 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Resolver\OptimizedFieldTrait;
 
+/**
+ * Abstract base class for GraphQL field resolvers
+ *
+ * This class provides common functionality for GraphQL field resolvers,
+ * including caching, performance monitoring, and batch loading capabilities.
+ * It implements optimized field resolution with automatic caching and
+ * performance tracking.
+ */
 abstract class AbstractResolver implements BatchServiceContractResolverInterface, OptimizedFieldInterface
 {
     use OptimizedFieldTrait;
+    /**
+     * @param ResolverCache $cache Cache service for resolver results
+     * @param QueryTimer $queryTimer Query timing service
+     */
     public function __construct(
         protected readonly ResolverCache $cache,
         protected readonly QueryTimer $queryTimer

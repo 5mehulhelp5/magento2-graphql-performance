@@ -12,6 +12,11 @@ use Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface;
  */
 class Chart extends Template
 {
+    /**
+     * @param Context $context Block context
+     * @param PerformanceMetricsInterface $performanceMetrics Performance metrics service
+     * @param array $data Additional block data
+     */
     public function __construct(
         Context $context,
         private readonly PerformanceMetricsInterface $performanceMetrics,
@@ -62,16 +67,20 @@ class Chart extends Template
     }
 
     /**
-     * Get formatted metric value
+     * Format a metric value with the given format string
      *
-     * @param array $metrics
-     * @param string $path
-     * @param string $format
-     * @param mixed $default
+     * @param array $metrics The metrics array
+     * @param string $path Path to the metric value
+     * @param string $format Format string (default: '%.2f')
+     * @param mixed $default Default value if metric not found
      * @return string
      */
-    public function getFormattedMetricValue(array $metrics, string $path, string $format = '%.2f', mixed $default = 0): string
-    {
+    public function getFormattedMetricValue(
+        array $metrics,
+        string $path,
+        string $format = '%.2f',
+        mixed $default = 0
+    ): string {
         $value = $this->getMetricValue($metrics, $path, $default);
         return sprintf($format, $value);
     }

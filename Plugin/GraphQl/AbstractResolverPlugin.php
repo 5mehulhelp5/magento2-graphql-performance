@@ -7,8 +7,18 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 
+/**
+ * Abstract base class for GraphQL resolver plugins
+ *
+ * This class provides the foundation for optimizing GraphQL resolvers through plugins.
+ * It replaces the original resolver with an optimized version that can implement
+ * caching, batching, and other performance improvements.
+ */
 abstract class AbstractResolverPlugin
 {
+    /**
+     * @param ResolverInterface $optimizedResolver The optimized resolver implementation
+     */
     public function __construct(
         private readonly ResolverInterface $optimizedResolver
     ) {

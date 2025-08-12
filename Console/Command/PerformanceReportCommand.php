@@ -9,11 +9,22 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface;
 
+/**
+ * Console command for generating GraphQL performance reports
+ *
+ * This command generates detailed performance reports for GraphQL operations,
+ * including metrics like query counts, response times, cache hit rates, and
+ * memory usage. Reports can be output in various formats (text, JSON, CSV).
+ */
 class PerformanceReportCommand extends Command
 {
     private const FORMAT_OPTION = 'format';
     private const PERIOD_OPTION = 'period';
 
+    /**
+     * @param PerformanceMetricsInterface $performanceMetrics Performance metrics service
+     * @param string|null $name Command name
+     */
     public function __construct(
         private readonly PerformanceMetricsInterface $performanceMetrics,
         string $name = null
@@ -21,6 +32,9 @@ class PerformanceReportCommand extends Command
         parent::__construct($name);
     }
 
+    /**
+     * Configure command options
+     */
     protected function configure(): void
     {
         $this->setName('graphql:performance:report')
@@ -43,6 +57,13 @@ class PerformanceReportCommand extends Command
         parent::configure();
     }
 
+    /**
+     * Execute command
+     *
+     * @param InputInterface $input Command input
+     * @param OutputInterface $output Command output
+     * @return int Command exit code
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
@@ -70,6 +91,12 @@ class PerformanceReportCommand extends Command
         }
     }
 
+    /**
+     * Output metrics in text format
+     *
+     * @param OutputInterface $output Command output
+     * @param array $metrics Performance metrics data
+     */
     private function outputText(OutputInterface $output, array $metrics): void
     {
         $output->writeln('<info>GraphQL Performance Report</info>');
@@ -98,6 +125,12 @@ class PerformanceReportCommand extends Command
         }
     }
 
+    /**
+     * Output metrics in CSV format
+     *
+     * @param OutputInterface $output Command output
+     * @param array $metrics Performance metrics data
+     */
     private function outputCsv(OutputInterface $output, array $metrics): void
     {
         $headers = ['Metric', 'Value'];

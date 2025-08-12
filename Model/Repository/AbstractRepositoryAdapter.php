@@ -8,8 +8,19 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Sterk\GraphQlPerformance\Api\RepositoryInterface;
 
+/**
+ * Abstract base class for repository adapters
+ *
+ * This class provides common functionality for repository adapters, including
+ * batch loading capabilities and standardized repository operations. It serves
+ * as a base for entity-specific repository adapters.
+ */
 abstract class AbstractRepositoryAdapter implements RepositoryInterface
 {
+    /**
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param RepositoryInterface $repository Underlying repository
+     */
     public function __construct(
         protected readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         protected readonly RepositoryInterface $repository

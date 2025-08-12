@@ -7,12 +7,42 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 
+/**
+ * Manager class for GraphQL field resolvers
+ *
+ * This class manages field resolvers, providing support for batched field
+ * resolution and caching. It helps prevent N+1 query problems by batching
+ * multiple field resolutions into a single operation and caching the results
+ * for improved performance.
+ */
 class FieldResolverManager
 {
+    /**
+     * @var array<string, array<string, callable>> Map of type and field to resolver functions
+     */
     private array $resolvers = [];
+
+    /**
+     * @var array<string, array<string, bool>> Map of type and field to batchable flag
+     */
     private array $batchedFields = [];
+
+    /**
+     * @var array<string, array{
+     *     type: string,
+     *     field: string,
+     *     sources: array,
+     *     context: mixed,
+     *     info: ResolveInfo,
+     *     value: ?array,
+     *     args: ?array
+     * }> Map of batch key to pending resolver data
+     */
     private array $pendingResolvers = [];
 
+    /**
+     * @param ResolverCache $cache Cache service for resolver results
+     */
     public function __construct(
         private readonly ResolverCache $cache
     ) {

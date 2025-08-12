@@ -8,10 +8,22 @@ use Magento\Framework\Exception\LocalizedException;
 use Sterk\GraphQlPerformance\Model\Config;
 use Sterk\GraphQlPerformance\Model\Security\SecurityPattern;
 
+/**
+ * Service class for validating GraphQL requests
+ *
+ * This class performs various security validations on GraphQL requests,
+ * including query size limits, forbidden patterns, variable validation,
+ * rate limiting, and authentication checks. It helps protect against
+ * malicious queries and ensures proper API usage.
+ */
 class RequestValidator
 {
     private const MAX_QUERY_SIZE = 8000;
 
+    /**
+     * @param Config $config Configuration service
+     * @param RateLimiter $rateLimiter Rate limiting service
+     */
     public function __construct(
         private readonly Config $config,
         private readonly RateLimiter $rateLimiter

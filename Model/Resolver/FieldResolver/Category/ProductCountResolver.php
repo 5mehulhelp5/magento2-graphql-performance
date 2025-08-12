@@ -10,10 +10,25 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\CatalogInventory\Model\ResourceModel\Stock\Status as StockStatusResource;
 
+/**
+ * GraphQL resolver for category product counts
+ *
+ * This resolver efficiently calculates the number of active, visible, and
+ * in-stock products for multiple categories in a single batch operation.
+ * It uses caching to improve performance for frequently accessed categories.
+ */
 class ProductCountResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, int> Cache of product counts by category ID
+     */
     private array $countCache = [];
 
+    /**
+     * @param ProductCollectionFactory $productCollectionFactory Product collection factory
+     * @param StockStatusResource $stockStatusResource Stock status resource
+     * @param StoreManagerInterface $storeManager Store manager
+     */
     public function __construct(
         private readonly ProductCollectionFactory $productCollectionFactory,
         private readonly StockStatusResource $stockStatusResource,

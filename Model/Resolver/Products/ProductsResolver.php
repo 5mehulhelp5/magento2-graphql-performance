@@ -12,11 +12,25 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 
+/**
+ * GraphQL resolver for product queries
+ *
+ * This resolver handles product queries with support for filtering, sorting,
+ * and pagination. It implements batch loading and caching strategies for
+ * optimal performance when loading multiple products.
+ */
 class ProductsResolver extends AbstractResolver
 {
     use FieldSelectionTrait;
     use PaginationTrait;
 
+    /**
+     * @param ProductRepositoryInterface $productRepository Product repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ProductDataLoader $dataLoader Product data loader
+     * @param ResolverCache $cache Cache service
+     * @param QueryTimer $queryTimer Query timing service
+     */
     public function __construct(
         private readonly ProductRepositoryInterface $productRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -42,11 +56,26 @@ class ProductsResolver extends AbstractResolver
         return 'product';
     }
 
+    /**
+     * Get cache tags for product data
+     *
+     * @return array Cache tags
+     */
     protected function getCacheTags(): array
     {
         return ['catalog_product'];
     }
 
+    /**
+     * Resolve product data for GraphQL query
+     *
+     * @param Field $field Field to resolve
+     * @param mixed $context Context object
+     * @param ResolveInfo $info Resolve info
+     * @param array $value Parent value
+     * @param array $args Query arguments
+     * @return array Resolved product data
+     */
     protected function resolveData(
         Field $field,
         $context,
@@ -134,9 +163,10 @@ class ProductsResolver extends AbstractResolver
     /**
      * Transform products to GraphQL format
      *
-     * @param  array       $products
-     * @param  ResolveInfo $info
-     * @return array
+     * @param array<\Magento\Catalog\Api\Data\ProductInterface> $products Array of product entities
+     * @param ResolveInfo $info Resolve info
+     * @param array $args Query arguments
+     * @return array Transformed product data
      */
     private function transformProductsToGraphQL(array $products, ResolveInfo $info, array $args): array
     {
@@ -177,6 +207,12 @@ class ProductsResolver extends AbstractResolver
         return $this->getPaginatedResult($items, count($products), $args);
     }
 
+    /**
+     * Get base product data for GraphQL response
+     *
+     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @return array Base product data
+     */
     private function getBaseProductData($product): array
     {
         return [
@@ -238,6 +274,13 @@ class ProductsResolver extends AbstractResolver
             ->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK';
     }
 
+    /**
+     * Get attribute value and label for a product attribute
+     *
+     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @param string $attributeCode
+     * @return array{value: string, label: string}
+     */
     private function getAttributeValueLabel($product, string $attributeCode): array
     {
         $attribute = $product->getResource()->getAttribute($attributeCode);

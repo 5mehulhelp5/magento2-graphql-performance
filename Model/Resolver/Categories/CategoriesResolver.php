@@ -14,11 +14,27 @@ use Sterk\GraphQlPerformance\Model\DataLoader\CategoryDataLoader;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * GraphQL resolver for categories
+ *
+ * This resolver handles batch loading of categories with support for filtering,
+ * sorting, and pagination. It transforms category data into the GraphQL format
+ * and handles related entities like breadcrumbs and custom attributes.
+ */
 class CategoriesResolver extends AbstractResolver
 {
     use FieldSelectionTrait;
     use PaginationTrait;
 
+    /**
+     * @param CategoryRepositoryInterface $categoryRepository Category repository
+     * @param CategoryCollectionFactory $categoryCollectionFactory Category collection factory
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param CategoryDataLoader $dataLoader Category data loader
+     * @param StoreManagerInterface $storeManager Store manager
+     * @param ResolverCache $cache Cache service
+     * @param QueryTimer $queryTimer Query timing service
+     */
     public function __construct(
         private readonly CategoryRepositoryInterface $categoryRepository,
         private readonly CategoryCollectionFactory $categoryCollectionFactory,
@@ -41,16 +57,40 @@ class CategoriesResolver extends AbstractResolver
      * @param  array       $args
      * @return array
      */
+    /**
+     * Get entity type code
+     *
+     * @return string Entity type code
+     */
     protected function getEntityType(): string
     {
         return 'category';
     }
 
+    /**
+     * Get cache tags for invalidation
+     *
+     * @return array Cache tag identifiers
+     */
     protected function getCacheTags(): array
     {
         return ['catalog_category'];
     }
 
+    /**
+     * Resolve category data for GraphQL query
+     *
+     * This method handles the main resolution logic for category queries. It
+     * retrieves categories using an optimized collection, applies filters and
+     * sorting, and transforms the data into the GraphQL format.
+     *
+     * @param  Field       $field   Field to resolve
+     * @param  mixed       $context Context object
+     * @param  ResolveInfo $info    Resolve info
+     * @param  array       $value   Parent value
+     * @param  array       $args    Query arguments
+     * @return array       Resolved category data
+     */
     protected function resolveData(
         Field $field,
         $context,
@@ -116,12 +156,12 @@ class CategoriesResolver extends AbstractResolver
     /**
      * Transform categories to GraphQL format
      *
-     * @param  \Magento\Catalog\Model\ResourceModel\Category\Collection $collection
-     * @param  ResolveInfo                                              $info
-     * @return array
+     * @param \Magento\Catalog\Model\ResourceModel\Category\Collection $collection Category collection
+     * @param ResolveInfo                                             $info       Resolve info
+     * @param array                                                   $args       Query arguments
+     * @return array                                                             Transformed category data
      */
-    private function transformCategoriesToGraphQL($collection, ResolveInfo $info, array $args): array
-    {
+    private function transformCategoriesToGraphQL(\Magento\Catalog\Model\ResourceModel\Category\Collection $collection, ResolveInfo $info, array $args): array {
         $items = [];
         foreach ($collection as $category) {
             $categoryData = $this->getBaseCategoryData($category);
@@ -158,6 +198,12 @@ class CategoriesResolver extends AbstractResolver
         );
     }
 
+    /**
+     * Get base category data for GraphQL response
+     *
+     * @param \Magento\Catalog\Model\Category $category Category entity
+     * @return array Base category data
+     */
     private function getBaseCategoryData($category): array
     {
         return [

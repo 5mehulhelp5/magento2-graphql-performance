@@ -9,11 +9,37 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\ShippingMethodManagementInterface;
 use Magento\Directory\Model\CountryFactory;
 
+/**
+ * GraphQL resolver for cart shipping addresses
+ *
+ * This resolver handles batch loading of shipping addresses with support for
+ * shipping methods and country data. It transforms address data into the
+ * GraphQL format and handles related entities like shipping methods.
+ */
 class ShippingAddressesResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<array{
+     *     carrier_code: string,
+     *     carrier_title: string,
+     *     method_code: string,
+     *     method_title: string,
+     *     amount: array{value: float, currency: string},
+     *     price_excl_tax: array{value: float, currency: string},
+     *     price_incl_tax: array{value: float, currency: string}
+     * }>> Cache of shipping methods by cart ID
+     */
     private array $methodsCache = [];
+
+    /**
+     * @var array<string, array{code: string, label: string}> Cache of country data by country code
+     */
     private array $countryCache = [];
 
+    /**
+     * @param ShippingMethodManagementInterface $shippingMethodManagement Shipping method management
+     * @param CountryFactory $countryFactory Country factory
+     */
     public function __construct(
         private readonly ShippingMethodManagementInterface $shippingMethodManagement,
         private readonly CountryFactory $countryFactory

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-03-22
+### Fixed
+- Fixed all PHPCS issues for better code quality
+- Improved DocBlock formatting and consistency
+- Fixed method argument alignment
+- Added missing DocBlocks for better code documentation
+- Fixed constructor property promotion formatting
+- Optimized enum static method documentation
+
 ## [1.1.1] - 2024-03-21
 ### Fixed
 - Fixed empty catch blocks with proper error logging

@@ -8,11 +8,24 @@ use Sterk\GraphQlPerformance\Model\Performance\QueryOptimizer;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 
+/**
+ * Plugin for optimizing GraphQL query performance
+ *
+ * This plugin handles query optimization, caching, and performance monitoring
+ * for GraphQL queries. It attempts to serve cached results when available and
+ * optimizes queries before execution to improve performance.
+ */
 class PerformancePlugin
 {
     private const CACHE_LIFETIME = 3600;
     private const TIMING_KEY = 'query_processing';
 
+    /**
+     * @param QueryOptimizer $queryOptimizer Query optimization service
+     * @param QueryTimer $queryTimer Query timing service
+     * @param ResolverCache $cache Cache service for GraphQL resolvers
+     * @param CacheKeyGenerator $cacheKeyGenerator Cache key generation service
+     */
     public function __construct(
         private readonly QueryOptimizer $queryOptimizer,
         private readonly QueryTimer $queryTimer,

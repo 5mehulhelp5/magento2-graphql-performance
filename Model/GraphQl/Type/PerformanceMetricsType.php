@@ -8,8 +8,18 @@ use Magento\Framework\GraphQl\ConfigInterface;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 
+/**
+ * GraphQL type for performance metrics
+ *
+ * This type defines the structure of performance metrics data in the GraphQL
+ * schema. It includes fields for query statistics, memory usage, cache stats,
+ * and connection pool metrics to provide comprehensive performance monitoring.
+ */
 class PerformanceMetricsType extends Type
 {
+    /**
+     * @param ConfigInterface $config GraphQL configuration
+     */
     public function __construct(ConfigInterface $config)
     {
         $data = [
@@ -53,6 +63,15 @@ class PerformanceMetricsType extends Type
         parent::__construct($config, $data);
     }
 
+    /**
+     * Resolve performance metrics data
+     *
+     * @param mixed $value Field value
+     * @param ContextInterface $context Request context
+     * @param ResolveInfo $info Resolve info
+     * @param array|null $args Field arguments
+     * @return mixed Resolved value
+     */
     public function resolve(
         $value,
         $context,

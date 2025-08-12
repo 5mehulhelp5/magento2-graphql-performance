@@ -38,38 +38,6 @@ class ConnectionManager
     }
 
     /**
-     * Get connection for read operations
-     *
-     * @param  string $connectionName
-     * @return AdapterInterface
-     */
-    /**
-     * Get connection for read operations
-     *
-     * @param  string $connectionName
-     * @return AdapterInterface
-     * @deprecated This method is deprecated in favor of using getConnection() for better connection management.
-     * @see getConnection() Use this method instead with forWrite=false
-     */
-    public function getReadConnection(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): AdapterInterface
-    {
-        return $this->getConnection($connectionName);
-    }
-
-    /**
-     * Get connection for write operations
-     *
-     * @param  string $connectionName
-     * @return AdapterInterface
-     * @deprecated This method is deprecated in favor of using getConnection() for better connection management.
-     * @see getConnection() Use this method instead with forWrite=true
-     */
-    public function getWriteConnection(string $connectionName = ResourceConnection::DEFAULT_CONNECTION): AdapterInterface
-    {
-        return $this->getConnection($connectionName, true);
-    }
-
-    /**
      * Get database connection
      *
      * @param  string $connectionName

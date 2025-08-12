@@ -8,10 +8,27 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * Data loader for frequently accessed product data
+ *
+ * This class provides optimized loading of product data, including attributes,
+ * stock status, and prices. It implements batch loading and caching strategies
+ * to improve performance when loading data for multiple products.
+ */
 class FrequentProductDataLoader extends FrequentDataLoader
 {
+    /**
+     * @var int Maximum number of products to load in a single batch
+     */
     private const BATCH_SIZE = 100;
 
+    /**
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ResolverCache $cache Cache service
+     * @param ResourceConnection $resourceConnection Database connection
+     * @param StoreManagerInterface $storeManager Store manager service
+     * @param int $cacheLifetime Cache lifetime in seconds
+     */
     public function __construct(
         PromiseAdapter $promiseAdapter,
         ResolverCache $cache,
@@ -22,6 +39,16 @@ class FrequentProductDataLoader extends FrequentDataLoader
         parent::__construct($promiseAdapter, $cache, $resourceConnection, $cacheLifetime);
     }
 
+    /**
+     * Load product data from database
+     *
+     * This method loads product data in batches, including base data, attributes,
+     * stock status, and prices. It optimizes database queries by using batch
+     * loading and efficient joins.
+     *
+     * @param  array $ids Product IDs to load
+     * @return array     Product data indexed by ID
+     */
     protected function loadFromDatabase(array $ids): array
     {
         $connection = $this->resourceConnection->getConnection();
@@ -75,6 +102,17 @@ class FrequentProductDataLoader extends FrequentDataLoader
         return $result;
     }
 
+    /**
+     * Load product attributes from database
+     *
+     * This method loads frequently accessed product attributes like name, URL key,
+     * status, etc. It handles store-specific values and fallbacks to default
+     * values when needed.
+     *
+     * @param  array $productIds Product IDs to load attributes for
+     * @param  int   $storeId    Store view ID
+     * @return array             Attribute values indexed by product ID
+     */
     private function loadAttributes(array $productIds, int $storeId): array
     {
         $connection = $this->resourceConnection->getConnection();
@@ -112,6 +150,15 @@ class FrequentProductDataLoader extends FrequentDataLoader
         return $result;
     }
 
+    /**
+     * Load stock status for products
+     *
+     * This method retrieves the stock status (in stock/out of stock) for products.
+     * It uses the cataloginventory_stock_status table for efficient lookups.
+     *
+     * @param  array $productIds Product IDs to load stock status for
+     * @return array            Stock status indexed by product ID
+     */
     private function loadStockStatus(array $productIds): array
     {
         $connection = $this->resourceConnection->getConnection();
@@ -126,6 +173,16 @@ class FrequentProductDataLoader extends FrequentDataLoader
         return $connection->fetchPairs($select);
     }
 
+    /**
+     * Load prices for products
+     *
+     * This method loads both regular and special prices for products. It handles
+     * store-specific pricing and fallbacks to default (website) prices when needed.
+     *
+     * @param  array $productIds Product IDs to load prices for
+     * @param  int   $storeId    Store view ID
+     * @return array            Price data indexed by product ID
+     */
     private function loadPrices(array $productIds, int $storeId): array
     {
         $connection = $this->resourceConnection->getConnection();
@@ -169,6 +226,15 @@ class FrequentProductDataLoader extends FrequentDataLoader
         return $result;
     }
 
+    /**
+     * Get attribute ID by code
+     *
+     * This method retrieves the attribute ID for a given attribute code. It uses
+     * static caching to avoid repeated database lookups for the same attribute.
+     *
+     * @param  string   $attributeCode Attribute code to look up
+     * @return int|null                Attribute ID or null if not found
+     */
     private function getAttributeId(string $attributeCode): ?int
     {
         static $attributeIds = [];
@@ -189,12 +255,30 @@ class FrequentProductDataLoader extends FrequentDataLoader
         return $attributeIds[$attributeCode] ?: null;
     }
 
+    /**
+     * Generate cache key for product data
+     *
+     * This method generates a unique cache key for product data that includes
+     * both the product ID and store ID to ensure store-specific caching.
+     *
+     * @param  string $id Product ID
+     * @return string    Cache key
+     */
     protected function generateCacheKey(string $id): string
     {
         $storeId = $this->storeManager->getStore()->getId();
         return sprintf('frequent_product_%s_store_%d', $id, $storeId);
     }
 
+    /**
+     * Get cache tags for product data
+     *
+     * This method returns the cache tags used for cache invalidation. It includes
+     * both a general product tag and a specific tag for the individual product.
+     *
+     * @param  mixed $item Product data
+     * @return array      Cache tags
+     */
     protected function getCacheTags(mixed $item): array
     {
         $tags = ['catalog_product'];

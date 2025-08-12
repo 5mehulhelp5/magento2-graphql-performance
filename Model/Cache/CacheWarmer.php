@@ -8,8 +8,18 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Service class for warming GraphQL cache
+ *
+ * This class executes predefined GraphQL queries to populate the cache with
+ * frequently accessed data, improving response times for subsequent requests.
+ * It supports both default and custom warming patterns per store view.
+ */
 class CacheWarmer
 {
+    /**
+     * @var array<string, string> Default cache warming queries
+     */
     private array $defaultQueries = [
         'categories' => '
             query GetCategories {
@@ -72,6 +82,12 @@ class CacheWarmer
         '
     ];
 
+    /**
+     * @param QueryProcessor $queryProcessor GraphQL query processor
+     * @param StoreManagerInterface $storeManager Store manager
+     * @param ScopeConfigInterface $scopeConfig Configuration reader
+     * @param LoggerInterface $logger Logger service
+     */
     public function __construct(
         private readonly QueryProcessor $queryProcessor,
         private readonly StoreManagerInterface $storeManager,

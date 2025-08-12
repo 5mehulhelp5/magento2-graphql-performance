@@ -6,10 +6,21 @@ namespace Sterk\GraphQlPerformance\Model\Cache;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 
+/**
+ * Cache service for GraphQL resolvers
+ *
+ * This class provides caching functionality for GraphQL resolver results,
+ * handling data serialization, cache key generation, and cache tag management.
+ * It helps improve performance by caching frequently accessed resolver data.
+ */
 class ResolverCache
 {
     private const CACHE_LIFETIME = 3600; // 1 hour
 
+    /**
+     * @param CacheInterface $cache Cache storage service
+     * @param SerializerInterface $serializer Data serializer
+     */
     public function __construct(
         private readonly CacheInterface $cache,
         private readonly SerializerInterface $serializer

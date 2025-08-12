@@ -10,8 +10,21 @@ use GraphQL\Language\Visitor;
 use GraphQL\Language\Printer;
 use Magento\Framework\GraphQl\Schema;
 
+/**
+ * Service class for optimizing GraphQL queries
+ *
+ * This class analyzes and optimizes GraphQL queries by removing unused fields,
+ * managing cache directives, and analyzing field usage patterns. It helps
+ * improve query performance while maintaining functionality.
+ */
 class QueryOptimizer
 {
+    /**
+     * @param Schema $schema GraphQL schema
+     * @param ComplexityCalculator $complexityCalculator Query complexity calculator
+     * @param FieldUsageAnalyzer $fieldUsageAnalyzer Field usage analyzer
+     * @param CacheDirectiveManager $cacheDirectiveManager Cache directive manager
+     */
     public function __construct(
         private readonly Schema $schema,
         private readonly ComplexityCalculator $complexityCalculator,

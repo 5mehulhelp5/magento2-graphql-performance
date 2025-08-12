@@ -5,8 +5,18 @@ namespace Sterk\GraphQlPerformance\Cron;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Abstract base class for GraphQL performance cron jobs
+ *
+ * This class provides common functionality for cron jobs including error handling,
+ * logging, and execution flow. All GraphQL performance cron jobs should extend
+ * this class and implement the process() method.
+ */
 abstract class AbstractCron
 {
+    /**
+     * @param LoggerInterface $logger Logger for recording cron job execution
+     */
     public function __construct(
         protected readonly LoggerInterface $logger
     ) {

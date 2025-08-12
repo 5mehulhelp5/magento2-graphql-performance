@@ -9,18 +9,35 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * GraphQL resolver for category breadcrumbs
+ *
+ * This resolver efficiently generates breadcrumb paths for multiple categories
+ * in a single batch operation. It uses caching to improve performance and
+ * handles loading of parent categories in batches.
+ */
 class BreadcrumbsResolver implements BatchResolverInterface
 {
     /**
-     * @var array Cache for category breadcrumb paths
+     * @var array<string, array<array{
+     *     category_id: int,
+     *     category_name: string,
+     *     category_level: int,
+     *     category_url_key: string,
+     *     category_url_path: string
+     * }>> Cache for category breadcrumb paths
      */
     private array $pathCache = [];
 
     /**
-     * @var array Cache for loaded category objects
+     * @var array<int, \Magento\Catalog\Api\Data\CategoryInterface> Cache for loaded category objects
      */
     private array $categoryCache = [];
 
+    /**
+     * @param CategoryCollectionFactory $categoryCollectionFactory Category collection factory
+     * @param StoreManagerInterface $storeManager Store manager
+     */
     public function __construct(
         private readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly StoreManagerInterface $storeManager

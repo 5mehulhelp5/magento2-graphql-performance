@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 namespace Sterk\GraphQlPerformance\Model\Security;
 
+/**
+ * Enum defining security patterns for GraphQL query validation
+ *
+ * This enum contains regular expression patterns used to identify potentially
+ * dangerous or restricted GraphQL queries, including introspection queries,
+ * sensitive field access, and system-level operations.
+ */
 enum SecurityPattern: string
 {
     case INTROSPECTION = '__schema|__type';
@@ -25,6 +32,10 @@ enum SecurityPattern: string
 
     /**
      * Get all patterns as array
+     *
+     * Note: This method must be static as it provides a utility function
+     * for accessing all enum cases. It's a common pattern in enums to
+     * provide static methods for working with the enum values as a group.
      *
      * @return array<string, string>
      */

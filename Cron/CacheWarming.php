@@ -7,8 +7,20 @@ use Sterk\GraphQlPerformance\Model\Config;
 use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Cron job for warming GraphQL cache
+ *
+ * This cron job runs predefined GraphQL queries to populate the cache with
+ * frequently accessed data, improving response times for subsequent requests.
+ * It uses configured query patterns to simulate real user queries.
+ */
 class CacheWarming extends AbstractCron
 {
+    /**
+     * @param Config $config Configuration service
+     * @param QueryProcessor $queryProcessor GraphQL query processor
+     * @param LoggerInterface $logger Logger for recording cron job execution
+     */
     public function __construct(
         private readonly Config $config,
         private readonly QueryProcessor $queryProcessor,
@@ -17,6 +29,9 @@ class CacheWarming extends AbstractCron
         parent::__construct($logger);
     }
 
+    /**
+     * Process cron job by executing cache warming patterns
+     */
     protected function process(): void
     {
         if (!$this->config->isCacheWarmingEnabled()) {
@@ -29,6 +44,12 @@ class CacheWarming extends AbstractCron
         }
     }
 
+    /**
+     * Execute a single cache warming pattern
+     *
+     * @param string $name Pattern name for logging
+     * @param string $query GraphQL query to execute
+     */
     private function warmPattern(string $name, string $query): void
     {
         try {

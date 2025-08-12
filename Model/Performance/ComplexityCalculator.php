@@ -6,8 +6,19 @@ namespace Sterk\GraphQlPerformance\Model\Performance;
 use GraphQL\Language\AST\Node;
 use GraphQL\Language\AST\NodeKind;
 
+/**
+ * Service class for calculating GraphQL query complexity
+ *
+ * This class analyzes GraphQL queries to determine their computational
+ * complexity. It considers field nesting, argument types, and selection
+ * sets to provide a numerical complexity score that can be used for
+ * query cost analysis and limiting.
+ */
 class ComplexityCalculator
 {
+    /**
+     * @var array<string, int> Map of field names to their calculated complexity
+     */
     private array $complexityMap = [];
 
     /**

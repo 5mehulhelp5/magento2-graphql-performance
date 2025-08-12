@@ -9,10 +9,24 @@ use Magento\Framework\GraphQl\Query\Resolver\BatchResolverInterface;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 
+/**
+ * Batch resolver for product attributes
+ *
+ * This class provides efficient batch resolution of product attributes,
+ * handling attribute metadata caching and value-to-label conversion.
+ * It implements the batch resolver interface to optimize performance
+ * when resolving attributes for multiple products.
+ */
 class AttributeResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<string, ?\Magento\Catalog\Api\Data\ProductAttributeInterface> Cache of attribute metadata
+     */
     private array $attributeCache = [];
 
+    /**
+     * @param AttributeRepositoryInterface $attributeRepository Attribute repository service
+     */
     public function __construct(
         private readonly AttributeRepositoryInterface $attributeRepository
     ) {

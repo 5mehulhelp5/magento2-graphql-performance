@@ -9,10 +9,34 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * GraphQL resolver for category children
+ *
+ * This resolver handles batch loading of category children with support for
+ * caching and efficient data retrieval. It transforms category data into the
+ * GraphQL format and handles related entities like category IDs and URLs.
+ */
 class ChildrenResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<array{
+     *     id: int,
+     *     uid: string,
+     *     name: string,
+     *     url_key: string,
+     *     url_path: string,
+     *     is_active: bool,
+     *     include_in_menu: bool,
+     *     position: int,
+     *     __typename: string
+     * }>> Cache of children data by parent category ID
+     */
     private array $childrenCache = [];
 
+    /**
+     * @param CategoryCollectionFactory $categoryCollectionFactory Category collection factory
+     * @param StoreManagerInterface $storeManager Store manager
+     */
     public function __construct(
         private readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly StoreManagerInterface $storeManager

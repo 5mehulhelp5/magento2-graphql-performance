@@ -12,18 +12,32 @@ use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * GraphQL resolver for cart items
+ *
+ * This resolver handles batch loading of cart items with support for caching
+ * and product data loading. It transforms cart item data into the GraphQL
+ * format and handles related entities like products, prices, and options.
+ */
 class ItemsResolver implements BatchResolverInterface
 {
     /**
-     * @var array Cart item objects cache
+     * @var array<int, array<\Magento\Quote\Api\Data\CartItemInterface>> Cache of cart items by cart ID
      */
     private array $itemCache = [];
 
     /**
-     * @var array Product objects cache
+     * @var array<int, \Magento\Catalog\Api\Data\ProductInterface> Cache of products by product ID
      */
     private array $productCache = [];
 
+    /**
+     * @param CartItemRepositoryInterface $cartItemRepository Cart item repository
+     * @param ProductRepositoryInterface $productRepository Product repository
+     * @param PriceCurrencyInterface $priceCurrency Price currency service
+     * @param StoreManagerInterface $storeManager Store manager
+     * @param LoggerInterface|null $logger Logger service
+     */
     public function __construct(
         private readonly CartItemRepositoryInterface $cartItemRepository,
         private readonly ProductRepositoryInterface $productRepository,

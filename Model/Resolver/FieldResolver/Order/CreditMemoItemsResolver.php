@@ -11,11 +11,41 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 
+/**
+ * GraphQL resolver for credit memo items
+ *
+ * This resolver handles batch loading of credit memo items with support for caching
+ * and product data loading. It transforms credit memo item data into the GraphQL
+ * format and handles related entities like products and discounts.
+ *
+ * Features:
+ * - Batch loading of credit memo items
+ * - Product data loading with caching
+ * - Discount calculation
+ * - Store-specific caching
+ */
 class CreditMemoItemsResolver implements BatchResolverInterface
 {
+    /**
+     * Cache of credit memo items by credit memo ID
+     *
+     * @var array<int, array<\Magento\Sales\Api\Data\CreditmemoItemInterface>>
+     */
     private array $itemCache = [];
+
+    /**
+     * Cache of products by product ID
+     *
+     * @var array<int, \Magento\Catalog\Api\Data\ProductInterface>
+     */
     private array $productCache = [];
 
+    /**
+     * @param CreditmemoItemRepositoryInterface $creditMemoItemRepository Credit memo item repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ResolverCache $cache Cache service
+     * @param ProductDataLoader $productDataLoader Product data loader
+     */
     public function __construct(
         private readonly CreditmemoItemRepositoryInterface $creditMemoItemRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,

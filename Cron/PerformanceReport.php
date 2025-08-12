@@ -8,8 +8,22 @@ use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPool;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Cron job for generating GraphQL performance reports
+ *
+ * This cron job collects performance metrics from various components and generates
+ * a comprehensive report, including query timing, cache statistics, connection pool
+ * usage, and memory consumption. It also checks for potential performance issues.
+ */
 class PerformanceReport extends AbstractCron
 {
+    /**
+     * @param QueryTimer $queryTimer Service for measuring query execution time
+     * @param ResolverCache $cache Cache service for GraphQL resolvers
+     * @param ConnectionPool $connectionPool Database connection pool
+     * @param IssueDetector $issueDetector Service for detecting performance issues
+     * @param LoggerInterface $logger Logger for recording cron job execution
+     */
     public function __construct(
         private readonly QueryTimer $queryTimer,
         private readonly ResolverCache $cache,
@@ -20,6 +34,9 @@ class PerformanceReport extends AbstractCron
         parent::__construct($logger);
     }
 
+    /**
+     * Process cron job by collecting metrics and generating report
+     */
     protected function process(): void
     {
         $metrics = $this->collectMetrics();
@@ -27,6 +44,11 @@ class PerformanceReport extends AbstractCron
         $this->issueDetector->checkForIssues($metrics);
     }
 
+    /**
+     * Collect performance metrics from various components
+     *
+     * @return array Performance metrics data
+     */
     private function collectMetrics(): array
     {
         return [

@@ -10,12 +10,40 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Store\Model\StoreManagerInterface;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 
+/**
+ * Data loader for CMS entities (pages and blocks)
+ *
+ * This class provides efficient loading of CMS data through batch loading.
+ * It handles both pages and blocks, with support for store-specific content
+ * and caching. The cache lifetime is extended for CMS data as it changes
+ * less frequently than other entities.
+ */
 class CmsDataLoader extends FrequentDataLoader
 {
+    /**
+     * @var int Maximum number of CMS entities to load in a single batch
+     */
     private const BATCH_SIZE = 20;
+
+    /**
+     * @var array<string, \Magento\Cms\Api\Data\PageInterface> Cache of CMS pages by ID
+     */
     private array $pageCache = [];
+
+    /**
+     * @var array<string, \Magento\Cms\Api\Data\BlockInterface> Cache of CMS blocks by ID
+     */
     private array $blockCache = [];
 
+    /**
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ResolverCache $cache Cache service
+     * @param PageRepositoryInterface $pageRepository Page repository
+     * @param BlockRepositoryInterface $blockRepository Block repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param StoreManagerInterface $storeManager Store manager
+     * @param int $cacheLifetime Cache lifetime in seconds
+     */
     public function __construct(
         PromiseAdapter $promiseAdapter,
         ResolverCache $cache,
@@ -28,6 +56,16 @@ class CmsDataLoader extends FrequentDataLoader
         parent::__construct($promiseAdapter, $cache, $cacheLifetime);
     }
 
+    /**
+     * Load CMS data from database
+     *
+     * This method loads both CMS pages and blocks in batches. It handles the
+     * separation of IDs by entity type (page/block) and delegates loading to
+     * specialized methods.
+     *
+     * @param  array $ids CMS entity IDs (prefixed with 'page_' or 'block_')
+     * @return array     CMS data indexed by ID
+     */
     protected function loadFromDatabase(array $ids): array
     {
         $result = [];
@@ -59,6 +97,13 @@ class CmsDataLoader extends FrequentDataLoader
         return $result;
     }
 
+    /**
+     * Load CMS pages in batch
+     *
+     * @param array $pageIds Array of page IDs (with 'page_' prefix)
+     * @param int $storeId Store ID to load pages for
+     * @return array<string, array> Loaded pages indexed by ID
+     */
     private function loadPages(array $pageIds, int $storeId): array
     {
         $result = [];
@@ -98,6 +143,13 @@ class CmsDataLoader extends FrequentDataLoader
         return $result;
     }
 
+    /**
+     * Load CMS blocks in batch
+     *
+     * @param array $blockIds Array of block IDs (with 'block_' prefix)
+     * @param int $storeId Store ID to load blocks for
+     * @return array<string, array> Loaded blocks indexed by ID
+     */
     private function loadBlocks(array $blockIds, int $storeId): array
     {
         $result = [];
@@ -137,6 +189,12 @@ class CmsDataLoader extends FrequentDataLoader
         return $result;
     }
 
+    /**
+     * Transform CMS page data to GraphQL format
+     *
+     * @param \Magento\Cms\Api\Data\PageInterface $page CMS page entity
+     * @return array Transformed page data
+     */
     private function transformPageData($page): array
     {
         return [
@@ -156,6 +214,12 @@ class CmsDataLoader extends FrequentDataLoader
         ];
     }
 
+    /**
+     * Transform CMS block data to GraphQL format
+     *
+     * @param \Magento\Cms\Api\Data\BlockInterface $block CMS block entity
+     * @return array Transformed block data
+     */
     private function transformBlockData($block): array
     {
         return [
@@ -167,12 +231,30 @@ class CmsDataLoader extends FrequentDataLoader
         ];
     }
 
+    /**
+     * Generate cache key for CMS data
+     *
+     * This method generates a unique cache key for CMS data that includes both
+     * the entity ID and store ID to ensure store-specific caching.
+     *
+     * @param  string $id CMS entity ID
+     * @return string    Cache key
+     */
     protected function generateCacheKey(string $id): string
     {
         $storeId = $this->storeManager->getStore()->getId();
         return sprintf('cms_%s_store_%d', $id, $storeId);
     }
 
+    /**
+     * Get cache tags for CMS data
+     *
+     * This method returns the cache tags used for cache invalidation. It includes
+     * both general CMS tags and specific tags for pages and blocks.
+     *
+     * @param  mixed $item CMS data
+     * @return array      Cache tags
+     */
     protected function getCacheTags(mixed $item): array
     {
         $tags = ['cms'];

@@ -9,8 +9,20 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\BatchDataLoader;
 
+/**
+ * Abstract base class for batch-loading GraphQL resolvers
+ *
+ * This class provides functionality for resolvers that need to load multiple
+ * items in a single batch operation, improving performance by reducing the
+ * number of database queries. It includes caching support and handles the
+ * transformation of loaded items into the final result format.
+ */
 abstract class BatchedResolver implements ResolverInterface
 {
+    /**
+     * @param ResolverCache $cache Cache service for resolver results
+     * @param BatchDataLoader $dataLoader Batch data loading service
+     */
     public function __construct(
         protected readonly ResolverCache $cache,
         protected readonly BatchDataLoader $dataLoader

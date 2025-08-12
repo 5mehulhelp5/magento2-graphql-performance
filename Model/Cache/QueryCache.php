@@ -8,15 +8,38 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 
+/**
+ * GraphQL Query Cache implementation
+ *
+ * This class provides caching functionality for GraphQL queries, taking into account
+ * store context and customer groups for proper cache segmentation.
+ */
 class QueryCache extends \Magento\Framework\Cache\Frontend\Decorator\TagScope
 {
     public const TYPE_IDENTIFIER = 'graphql_query_cache';
     public const CACHE_TAG = 'GRAPHQL_QUERY';
 
+    /**
+     * @var SerializerInterface
+     */
     private SerializerInterface $serializer;
+
+    /**
+     * @var StoreManagerInterface
+     */
     private StoreManagerInterface $storeManager;
+
+    /**
+     * @var CustomerSession
+     */
     private CustomerSession $customerSession;
 
+    /**
+     * @param FrontendPool $cacheFrontendPool Cache frontend pool
+     * @param SerializerInterface $serializer Data serializer
+     * @param StoreManagerInterface $storeManager Store manager
+     * @param CustomerSession $customerSession Customer session
+     */
     public function __construct(
         FrontendPool $cacheFrontendPool,
         SerializerInterface $serializer,

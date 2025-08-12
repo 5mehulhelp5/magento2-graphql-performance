@@ -8,8 +8,18 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Sterk\GraphQlPerformance\Api\CacheManagementInterface;
 
+/**
+ * Console command for warming GraphQL performance cache
+ *
+ * This command executes predefined GraphQL queries to populate the cache with
+ * frequently accessed data, improving response times for subsequent requests.
+ */
 class CacheWarmCommand extends Command
 {
+    /**
+     * @param CacheManagementInterface $cacheManagement Cache management service
+     * @param string|null $name Command name
+     */
     public function __construct(
         private readonly CacheManagementInterface $cacheManagement,
         string $name = null
@@ -17,6 +27,9 @@ class CacheWarmCommand extends Command
         parent::__construct($name);
     }
 
+    /**
+     * Configure command options
+     */
     protected function configure(): void
     {
         $this->setName('graphql:cache:warm')
@@ -25,6 +38,13 @@ class CacheWarmCommand extends Command
         parent::configure();
     }
 
+    /**
+     * Execute command
+     *
+     * @param InputInterface $input Command input
+     * @param OutputInterface $output Command output
+     * @return int Command exit code
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {

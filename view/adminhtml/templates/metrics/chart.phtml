@@ -4,7 +4,7 @@ $metrics = $block->getMetrics();
 ?>
 <div class="graphql-performance-metrics-chart">
     <div class="admin__field-complex-title">
-        <span><?= $block->escapeHtml(__('Performance Overview')) ?></span>
+        <span><?= $escaper->escapeHtml(__('Performance Overview')) ?></span>
     </div>
     <div class="admin__field-complex-content">
         <div class="metrics-chart-container">
@@ -12,19 +12,19 @@ $metrics = $block->getMetrics();
         </div>
         <div class="metrics-summary">
             <div class="metric-box">
-                <span class="metric-label"><?= $block->escapeHtml(__('Average Response Time')) ?></span>
+                <span class="metric-label"><?= $escaper->escapeHtml(__('Average Response Time')) ?></span>
                 <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'average_response_time') ?> ms</span>
             </div>
             <div class="metric-box">
-                <span class="metric-label"><?= $block->escapeHtml(__('Cache Hit Rate')) ?></span>
+                <span class="metric-label"><?= $escaper->escapeHtml(__('Cache Hit Rate')) ?></span>
                 <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'cache_hit_rate', '%.1f', 0) ?>%</span>
             </div>
             <div class="metric-box">
-                <span class="metric-label"><?= $block->escapeHtml(__('Error Rate')) ?></span>
+                <span class="metric-label"><?= $escaper->escapeHtml(__('Error Rate')) ?></span>
                 <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'error_rate', '%.1f', 0) ?>%</span>
             </div>
             <div class="metric-box">
-                <span class="metric-label"><?= $block->escapeHtml(__('Memory Usage')) ?></span>
+                <span class="metric-label"><?= $escaper->escapeHtml(__('Memory Usage')) ?></span>
                 <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'memory_usage/current_usage', '%.1f', 0) ?> MB</span>
             </div>
         </div>
@@ -40,8 +40,8 @@ require([
     initChart({
         data: <?= /* @noEscape */ json_encode($block->getChartData()) ?>,
         labels: {
-            responseTime: '<?= $block->escapeJs(__('Response Time (ms)')) ?>',
-            cacheHitRate: '<?= $block->escapeJs(__('Cache Hit Rate (%)')) ?>'
+            responseTime: '<?= $escaper->escapeJs(__('Response Time (ms)')) ?>',
+            cacheHitRate: '<?= $escaper->escapeJs(__('Cache Hit Rate (%)')) ?>'
         }
     });
 });

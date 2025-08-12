@@ -8,6 +8,14 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ObjectType;
 
+/**
+ * Calculator for determining GraphQL query complexity
+ *
+ * This class analyzes GraphQL queries to calculate their complexity based on
+ * field types, depth, arguments, and custom complexity rules. It helps prevent
+ * resource-intensive queries by assigning complexity scores to different
+ * query patterns.
+ */
 class ComplexityCalculator
 {
     /**
@@ -22,6 +30,12 @@ class ComplexityCalculator
 
     /**
      * Field complexity configurations
+     *
+     * @var array<string, array{
+     *     base: int,
+     *     multiplier?: float,
+     *     attributes?: array<string, int>
+     * }>
      */
     private array $fieldComplexityMap = [
         'products' => [

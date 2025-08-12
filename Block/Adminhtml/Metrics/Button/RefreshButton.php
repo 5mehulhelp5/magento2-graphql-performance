@@ -7,9 +7,16 @@ use Magento\Framework\UrlInterface;
 
 /**
  * Button to refresh GraphQL performance metrics
+ *
+ * This block renders a button in the admin interface that allows users to
+ * manually refresh the GraphQL performance metrics. It provides a simple way
+ * to update the metrics data without waiting for the automatic refresh.
  */
 class RefreshButton extends AbstractButton
 {
+    /**
+     * @param UrlInterface $urlBuilder URL builder service
+     */
     public function __construct(
         private readonly UrlInterface $urlBuilder
     ) {

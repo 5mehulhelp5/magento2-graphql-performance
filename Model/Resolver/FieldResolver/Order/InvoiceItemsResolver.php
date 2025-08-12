@@ -11,11 +11,31 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 
+/**
+ * GraphQL resolver for invoice items
+ *
+ * This resolver handles batch loading of invoice items with support for caching
+ * and product data loading. It transforms invoice item data into the GraphQL
+ * format and handles related entities like products and discounts.
+ */
 class InvoiceItemsResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<\Magento\Sales\Api\Data\InvoiceItemInterface>> Cache of invoice items by invoice ID
+     */
     private array $itemCache = [];
+
+    /**
+     * @var array<int, \Magento\Catalog\Api\Data\ProductInterface> Cache of products by product ID
+     */
     private array $productCache = [];
 
+    /**
+     * @param InvoiceItemRepositoryInterface $invoiceItemRepository Invoice item repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ResolverCache $cache Cache service
+     * @param ProductDataLoader $productDataLoader Product data loader
+     */
     public function __construct(
         private readonly InvoiceItemRepositoryInterface $invoiceItemRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,

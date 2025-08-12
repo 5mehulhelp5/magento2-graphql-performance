@@ -3,6 +3,14 @@ declare(strict_types=1);
 
 namespace Sterk\GraphQlPerformance\Model\Cache;
 
+/**
+ * Enum for cache tag strategy options
+ *
+ * This enum defines the available strategies for cache tag generation:
+ * - SPECIFIC: Generates detailed tags for individual entities
+ * - GROUPED: Groups tags by entity type
+ * - MINIMAL: Uses minimal tagging for better performance
+ */
 enum CacheTagStrategy: string
 {
     case SPECIFIC = 'specific';
@@ -11,6 +19,9 @@ enum CacheTagStrategy: string
 
     /**
      * Get default strategy
+     *
+     * Note: This method must be static as it's part of an enum class.
+     * Enums are value objects and cannot have instance methods.
      *
      * @return self
      */
@@ -21,6 +32,9 @@ enum CacheTagStrategy: string
 
     /**
      * Check if strategy is valid
+     *
+     * Note: This method must be static as it's part of an enum class.
+     * Enums are value objects and cannot have instance methods.
      *
      * @param  string $strategy
      * @return bool

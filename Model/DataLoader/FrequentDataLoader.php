@@ -8,11 +8,32 @@ use GraphQL\Executor\Promise\PromiseAdapter;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Magento\Framework\App\ResourceConnection;
 
+/**
+ * Abstract base class for frequently accessed data loaders
+ *
+ * This class extends BatchDataLoader to add caching capabilities for
+ * frequently accessed data. It implements a two-level caching strategy:
+ * in-memory cache for the current request and persistent cache for
+ * subsequent requests.
+ */
 abstract class FrequentDataLoader extends BatchDataLoader
 {
+    /**
+     * @var array In-memory cache of loaded data
+     */
     private array $loadedData = [];
+
+    /**
+     * @var array Cache keys for loaded items
+     */
     private array $cacheKeys = [];
 
+    /**
+     * @param PromiseAdapter $promiseAdapter GraphQL promise adapter
+     * @param ResolverCache $cache Cache service for resolver results
+     * @param ResourceConnection $resourceConnection Database connection
+     * @param int $cacheLifetime Cache lifetime in seconds
+     */
     public function __construct(
         PromiseAdapter $promiseAdapter,
         protected readonly ResolverCache $cache,
@@ -22,6 +43,16 @@ abstract class FrequentDataLoader extends BatchDataLoader
         parent::__construct($promiseAdapter);
     }
 
+    /**
+     * Load a single item by ID with caching
+     *
+     * This method first checks the cache for the requested item. If found,
+     * returns a fulfilled promise with the cached data. Otherwise, queues
+     * the item for batch loading and returns a deferred promise.
+     *
+     * @param string $id Item identifier
+     * @return Promise Promise that resolves to the loaded item
+     */
     public function load(string $id): Promise
     {
         $cacheKey = $this->generateCacheKey($id);
@@ -36,6 +67,16 @@ abstract class FrequentDataLoader extends BatchDataLoader
         return parent::load($id);
     }
 
+    /**
+     * Load multiple items in a batch with caching
+     *
+     * This method loads items from the database in a batch operation and
+     * caches the results. It is called automatically when queued items
+     * need to be loaded.
+     *
+     * @param array $ids Array of item identifiers
+     * @return array Loaded items indexed by ID
+     */
     protected function batchLoad(array $ids): array
     {
         // Load data from database

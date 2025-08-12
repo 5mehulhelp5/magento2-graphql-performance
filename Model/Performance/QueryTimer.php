@@ -5,6 +5,14 @@ namespace Sterk\GraphQlPerformance\Model\Performance;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Service class for timing and analyzing GraphQL query performance
+ *
+ * This class provides functionality to track query execution times,
+ * detect slow queries, and maintain performance metrics. It supports
+ * both cached and non-cached query timing and provides aggregated
+ * performance statistics.
+ */
 class QueryTimer
 {
     /**
@@ -29,6 +37,10 @@ class QueryTimer
         'cached_queries' => 0
     ];
 
+    /**
+     * @param LoggerInterface $logger Logger service for recording slow queries
+     * @param int $slowQueryThreshold Threshold in milliseconds for slow query detection
+     */
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly int $slowQueryThreshold = 1000 // milliseconds

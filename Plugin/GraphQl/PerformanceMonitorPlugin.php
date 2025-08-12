@@ -6,8 +6,18 @@ namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 
+/**
+ * Plugin for monitoring GraphQL query performance
+ *
+ * This plugin measures and records the execution time and performance metrics
+ * of GraphQL queries, providing insights into query performance and helping
+ * identify potential bottlenecks.
+ */
 class PerformanceMonitorPlugin
 {
+    /**
+     * @param QueryTimer $queryTimer Service for measuring query execution time
+     */
     public function __construct(
         private readonly QueryTimer $queryTimer
     ) {

@@ -10,10 +10,25 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 
+/**
+ * GraphQL resolver for order data
+ *
+ * This resolver handles batch loading of order data with support for caching
+ * and customer-specific access control. It transforms order data into the
+ * GraphQL format and handles lazy loading of related entities.
+ */
 class OrderResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, \Magento\Sales\Api\Data\OrderInterface> Cache of orders by order ID
+     */
     private array $orderCache = [];
 
+    /**
+     * @param OrderRepositoryInterface $orderRepository Order repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ResolverCache $cache Cache service
+     */
     public function __construct(
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,

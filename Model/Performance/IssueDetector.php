@@ -5,8 +5,19 @@ namespace Sterk\GraphQlPerformance\Model\Performance;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Service class for detecting GraphQL performance issues
+ *
+ * This class monitors various performance metrics and detects potential issues
+ * such as low cache hit rates, high rates of slow queries, connection pool
+ * saturation, and high memory utilization. It logs warnings when metrics
+ * exceed defined thresholds.
+ */
 class IssueDetector
 {
+    /**
+     * @var array<string, float> Performance threshold values
+     */
     private const THRESHOLDS = [
         'cache_hit_rate' => 0.8,
         'slow_query_rate' => 0.1,
@@ -14,6 +25,9 @@ class IssueDetector
         'memory_utilization' => 0.8
     ];
 
+    /**
+     * @param LoggerInterface $logger Logger service for recording issues
+     */
     public function __construct(
         private readonly LoggerInterface $logger
     ) {

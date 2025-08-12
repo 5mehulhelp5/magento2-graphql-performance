@@ -8,11 +8,24 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Sterk\GraphQlPerformance\Model\Config;
 
+/**
+ * Service class for rate limiting GraphQL requests
+ *
+ * This class implements rate limiting functionality for GraphQL requests,
+ * tracking request counts per client and enforcing configured limits.
+ * It supports multiple identification methods (IP, token) and provides
+ * flexible window-based rate limiting.
+ */
 class RateLimiter
 {
     private const CACHE_KEY_PREFIX = 'graphql_rate_limit_';
     private const WINDOW_SIZE = 3600; // 1 hour in seconds
 
+    /**
+     * @param Config $config Configuration service
+     * @param CacheConfig $cache Cache storage service
+     * @param RequestInterface $request Current request
+     */
     public function __construct(
         private readonly Config $config,
         private readonly CacheConfig $cache,

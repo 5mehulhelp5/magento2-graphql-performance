@@ -11,11 +11,31 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
 use Sterk\GraphQlPerformance\Model\DataLoader\ProductDataLoader;
 
+/**
+ * GraphQL resolver for order items
+ *
+ * This resolver handles batch loading of order items with support for caching
+ * and product data loading. It transforms order item data into the GraphQL
+ * format and handles related entities like products and selected options.
+ */
 class ItemsResolver implements BatchResolverInterface
 {
+    /**
+     * @var array<int, array<\Magento\Sales\Api\Data\OrderItemInterface>> Cache of order items by order ID
+     */
     private array $itemCache = [];
+
+    /**
+     * @var array<int, \Magento\Catalog\Api\Data\ProductInterface> Cache of products by product ID
+     */
     private array $productCache = [];
 
+    /**
+     * @param OrderItemRepositoryInterface $orderItemRepository Order item repository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder Search criteria builder
+     * @param ResolverCache $cache Cache service
+     * @param ProductDataLoader $productDataLoader Product data loader
+     */
     public function __construct(
         private readonly OrderItemRepositoryInterface $orderItemRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,

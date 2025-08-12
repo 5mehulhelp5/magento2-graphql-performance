@@ -8,6 +8,13 @@ use GraphQL\Language\AST\NodeKind;
 use GraphQL\Language\Visitor;
 use Sterk\GraphQlPerformance\Model\Config;
 
+/**
+ * Service class for managing GraphQL cache directives
+ *
+ * This class handles the addition and management of cache directives in
+ * GraphQL queries. It determines which fields can be cached and applies
+ * appropriate cache TTLs based on configuration.
+ */
 class CacheDirectiveManager
 {
     /**
@@ -15,6 +22,9 @@ class CacheDirectiveManager
      */
     private array $nonCacheableFields = ['cart', 'customer', 'session'];
 
+    /**
+     * @param Config $config Configuration service
+     */
     public function __construct(
         private readonly Config $config
     ) {

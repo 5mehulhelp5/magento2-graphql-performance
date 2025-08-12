@@ -43,7 +43,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: PHPCS check
-        run: vendor/bin/phpcs --standard=Magento2 --report=checkstyle -q . | cs2pr
+        run: vendor/bin/phpcs -p
 
   tests:
     name: PHPUnit Tests
@@ -171,6 +171,54 @@ jobs:
           # Create database tables for integration tests
           mysql -h127.0.0.1 -uroot -proot -e 'DROP DATABASE IF EXISTS magento_test; CREATE DATABASE magento_test;'
 
+          # Create base tables for website setup
+          mysql -h127.0.0.1 -uroot -proot magento_test -e "
+            CREATE TABLE IF NOT EXISTS store_website (
+              website_id smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+              code varchar(32) DEFAULT NULL,
+              name varchar(64) DEFAULT NULL,
+              sort_order smallint(5) unsigned NOT NULL DEFAULT 0,
+              default_group_id smallint(5) unsigned NOT NULL DEFAULT 0,
+              is_default smallint(5) unsigned NOT NULL DEFAULT 0,
+              PRIMARY KEY (website_id),
+              UNIQUE KEY STORE_WEBSITE_CODE (code)
+            ) ENGINE=InnoDB;
+
+            CREATE TABLE IF NOT EXISTS store_group (
+              group_id smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+              website_id smallint(5) unsigned NOT NULL DEFAULT 0,
+              code varchar(32) DEFAULT NULL,
+              name varchar(255) NOT NULL,
+              root_category_id int(10) unsigned NOT NULL DEFAULT 0,
+              default_store_id smallint(5) unsigned NOT NULL DEFAULT 0,
+              PRIMARY KEY (group_id)
+            ) ENGINE=InnoDB;
+
+            CREATE TABLE IF NOT EXISTS store (
+              store_id smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+              code varchar(32) DEFAULT NULL,
+              website_id smallint(5) unsigned NOT NULL DEFAULT 0,
+              group_id smallint(5) unsigned NOT NULL DEFAULT 0,
+              name varchar(255) NOT NULL,
+              sort_order smallint(5) unsigned NOT NULL DEFAULT 0,
+              is_active smallint(5) unsigned NOT NULL DEFAULT 0,
+              PRIMARY KEY (store_id),
+              UNIQUE KEY STORE_CODE (code)
+            ) ENGINE=InnoDB;
+
+            INSERT INTO store_website (website_id, code, name, sort_order, default_group_id, is_default)
+            VALUES (1, 'base', 'Main Website', 0, 1, 1)
+            ON DUPLICATE KEY UPDATE is_default = 1;
+
+            INSERT INTO store_group (group_id, website_id, code, name, root_category_id, default_store_id)
+            VALUES (1, 1, 'main_website_store', 'Main Website Store', 2, 1)
+            ON DUPLICATE KEY UPDATE website_id = 1;
+
+            INSERT INTO store (store_id, code, website_id, group_id, name, sort_order, is_active)
+            VALUES (1, 'default', 1, 1, 'Default Store View', 0, 1)
+            ON DUPLICATE KEY UPDATE website_id = 1, group_id = 1;
+          "
+
           # Install Magento with minimal settings
           bin/magento setup:install \
             --base-url=http://localhost \
@@ -193,15 +241,11 @@ jobs:
             --cleanup-database \
             --session-save=db \
             --backend-frontname=admin \
+            --disable-modules=Magento_InventorySales \
             -n
 
-          # Configure the default website
-          mysql -h127.0.0.1 -uroot -proot magento_test -e "INSERT INTO store_website (code, name, sort_order, default_group_id, is_default) VALUES ('base', 'Main Website', 0, 0, 1) ON DUPLICATE KEY UPDATE is_default = 1;"
-          mysql -h127.0.0.1 -uroot -proot magento_test -e "INSERT INTO store_group (website_id, code, root_category_id, default_store_id) VALUES (1, 'main_website_store', 2, 1) ON DUPLICATE KEY UPDATE website_id = 1;"
-          mysql -h127.0.0.1 -uroot -proot magento_test -e "INSERT INTO store (code, website_id, group_id, name, sort_order, is_active) VALUES ('default', 1, 1, 'Default Store View', 0, 1) ON DUPLICATE KEY UPDATE website_id = 1, group_id = 1;"
-
           # Run setup:upgrade to apply patches
-          bin/magento setup:upgrade --keep-generated
+          bin/magento setup:upgrade --keep-generated --no-interaction
 
           # Additional initialization steps
           bin/magento config:set web/seo/use_rewrites 1

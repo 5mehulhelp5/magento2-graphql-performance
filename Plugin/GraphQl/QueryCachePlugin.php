@@ -46,19 +46,19 @@ class QueryCachePlugin
         QueryProcessor $subject,
         \Closure $proceed,
         RequestInterface $request,
-        ?string $query = null,
-        ?string $operationName = null,
         ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
-        // Handle non-query requests
-        if ($query === null) {
-            return $proceed($request, $query, $operationName, $variables, $extensions);
+        // Get query from request
+        $query = $request->getContent();
+        if (empty($query)) {
+            return $proceed($request, $variables, $operationName, $extensions);
         }
 
         // Skip caching for mutations
         if ($this->isMutation($query)) {
-            return $proceed($request, $query, $operationName, $variables, $extensions);
+            return $proceed($request, $variables, $operationName, $extensions);
         }
 
         // Try to get from cache
@@ -76,7 +76,7 @@ class QueryCachePlugin
         }
 
         // Execute query
-        $result = $proceed($request, $query, $operationName, $variables, $extensions);
+        $result = $proceed($request, $variables, $operationName, $extensions);
 
         // Cache the result if no errors
         if (!isset($result['errors'])) {

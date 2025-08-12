@@ -40,15 +40,15 @@ class ConnectionManagerPlugin
         QueryProcessor $subject,
         \Closure $proceed,
         RequestInterface $request,
-        ?string $query = null,
-        ?string $operationName = null,
         ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
         // Parse the query to determine operation type
         try {
-            if ($query === null) {
-                return $proceed($request, $query, $operationName, $variables, $extensions);
+            $query = $request->getContent();
+            if (empty($query)) {
+                return $proceed($request, $variables, $operationName, $extensions);
             }
 
             $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($query));
@@ -62,7 +62,7 @@ class ConnectionManagerPlugin
             }
         } catch (\Exception $e) {
             // If parsing fails, proceed with original request
-            return $proceed($request, $query, $operationName, $variables, $extensions);
+            return $proceed($request, $variables, $operationName, $extensions);
         }
 
         try {
@@ -75,7 +75,7 @@ class ConnectionManagerPlugin
             }
 
             // Execute the query
-            $result = $proceed($request, $query, $operationName, $variables, $extensions);
+            $result = $proceed($request, $variables, $operationName, $extensions);
 
             // Handle transaction for mutations
             if ($isMutation) {

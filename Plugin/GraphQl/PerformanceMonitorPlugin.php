@@ -26,28 +26,30 @@ class PerformanceMonitorPlugin
     /**
      * Monitor GraphQL query performance
      *
-     * @param  QueryProcessor $subject
-     * @param  callable       $proceed
-     * @param  string         $query
-     * @param  string|null    $operationName
-     * @param  array          $variables
+     * @param QueryProcessor $subject Query processor instance
+     * @param \Closure $proceed Original method
+     * @param string $source GraphQL query source
+     * @param string|null $operationName Operation name
+     * @param array|null $variables Query variables
+     * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function aroundProcess(
         QueryProcessor $subject,
-        callable $proceed,
-        string $query,
+        \Closure $proceed,
+        string $source,
         ?string $operationName = null,
-        array $variables = []
+        ?array $variables = null,
+        ?array $extensions = null
     ): array {
-        $this->queryTimer->start($operationName ?? 'anonymous', $query);
+        $this->queryTimer->start($operationName ?? 'anonymous', $source);
 
         try {
-            $result = $proceed($query, $operationName, $variables);
-            $this->queryTimer->stop($operationName ?? 'anonymous', $query);
+            $result = $proceed($source, $operationName, $variables, $extensions);
+            $this->queryTimer->stop($operationName ?? 'anonymous', $source);
             return $result;
         } catch (\Exception $e) {
-            $this->queryTimer->stop($operationName ?? 'anonymous', $query);
+            $this->queryTimer->stop($operationName ?? 'anonymous', $source);
             throw $e;
         }
     }

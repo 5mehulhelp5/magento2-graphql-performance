@@ -35,34 +35,33 @@ class QueryCachePlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param Schema $schema GraphQL schema
-     * @param string $query GraphQL query
+     * @param string $source GraphQL query source
+     * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
-     * @param array|null $contextValue Context value
-     * @param array|null $rootValue Root value
+     * @param array|null $extensions GraphQL extensions
      * @return array Query result
      */
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        Schema $schema,
-        string $query,
+        string $source,
+        ?string $operationName = null,
         ?array $variables = null,
-        ?array $contextValue = null,
-        ?array $rootValue = null
+        ?array $extensions = null
     ): array {
         // Skip caching for mutations
-        if ($this->isMutation($query)) {
-            return $proceed($schema, $query, $variables, $contextValue, $rootValue);
+        if ($this->isMutation($source)) {
+            return $proceed($source, $operationName, $variables, $extensions);
         }
 
         // Try to get from cache
-        $cachedResult = $this->queryCache->getQueryResult($query, $variables ?? []);
+        $cachedResult = $this->queryCache->getQueryResult($source, $variables ?? []);
         if ($cachedResult !== null) {
             $this->logger->debug(
                 'GraphQL query cache hit',
                 [
-                'query' => $query,
+                'query' => $source,
+                'operation' => $operationName,
                 'variables' => $variables
                 ]
             );
@@ -70,15 +69,15 @@ class QueryCachePlugin
         }
 
         // Execute query
-        $result = $proceed($schema, $query, $variables, $contextValue, $rootValue);
+        $result = $proceed($source, $operationName, $variables, $extensions);
 
         // Cache the result if no errors
         if (!isset($result['errors'])) {
-            $lifetime = $this->getCacheLifetime($query);
+            $lifetime = $this->getCacheLifetime($source);
             $tags = $this->getCacheTags($result);
 
             $this->queryCache->saveQueryResult(
-                $query,
+                $source,
                 $variables ?? [],
                 $result,
                 $tags,
@@ -88,7 +87,8 @@ class QueryCachePlugin
             $this->logger->debug(
                 'GraphQL query cached',
                 [
-                'query' => $query,
+                'query' => $source,
+                'operation' => $operationName,
                 'variables' => $variables,
                 'lifetime' => $lifetime,
                 'tags' => $tags

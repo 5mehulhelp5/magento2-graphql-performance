@@ -37,47 +37,56 @@ class PerformancePlugin
     /**
      * Optimize query before processing
      *
-     * @param  QueryProcessor $subject
-     * @param  string         $query
-     * @param  array|null     $variables
+     * @param QueryProcessor $subject Query processor instance
+     * @param string $source GraphQL query source
+     * @param string|null $operationName Operation name
+     * @param array|null $variables Query variables
+     * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function beforeProcess(
         QueryProcessor $subject,
-        string $query,
-        ?array $variables = null
+        string $source,
+        ?string $operationName = null,
+        ?array $variables = null,
+        ?array $extensions = null
     ): array {
         $this->queryTimer->start(self::TIMING_KEY);
 
         try {
-            $result = $this->tryGetFromCache($query, $variables);
+            $result = $this->tryGetFromCache($source, $variables);
             if ($result !== null) {
-                return $result;
+                return [$source, $operationName, $variables, $extensions, $result];
             }
 
-            return $this->optimizeQuery($query, $variables);
+            $optimizedQuery = $this->optimizeQuery($source, $variables);
+            return [$optimizedQuery[0], $operationName, $optimizedQuery[1], $extensions];
         } catch (\Exception $e) {
-            return [$query, $variables];
+            return [$source, $operationName, $variables, $extensions];
         }
     }
 
     /**
      * Process result after query execution
      *
-     * @param  QueryProcessor $subject
-     * @param  array          $result
-     * @param  string         $query
-     * @param  array|null     $variables
+     * @param QueryProcessor $subject Query processor instance
+     * @param array $result Query result
+     * @param string $source GraphQL query source
+     * @param string|null $operationName Operation name
+     * @param array|null $variables Query variables
+     * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function afterProcess(
         QueryProcessor $subject,
         array $result,
-        string $query,
-        ?array $variables = null
+        string $source,
+        ?string $operationName = null,
+        ?array $variables = null,
+        ?array $extensions = null
     ): array {
         try {
-            $this->cacheResultIfValid($result, $query, $variables);
+            $this->cacheResultIfValid($result, $source, $variables);
         } finally {
             $this->queryTimer->stop(self::TIMING_KEY);
         }

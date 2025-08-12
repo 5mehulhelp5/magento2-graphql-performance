@@ -29,22 +29,26 @@ class SecurityPlugin
     /**
      * Validate request before processing
      *
-     * @param  QueryProcessor $subject
-     * @param  string         $query
-     * @param  array|null     $variables
+     * @param QueryProcessor $subject Query processor instance
+     * @param string $source GraphQL query source
+     * @param string|null $operationName Operation name
+     * @param array|null $variables Query variables
+     * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function beforeProcess(
         QueryProcessor $subject,
-        string $query,
-        ?array $variables = null
+        string $source,
+        ?string $operationName = null,
+        ?array $variables = null,
+        ?array $extensions = null
     ): array {
         $this->requestValidator->validate(
             $this->request,
-            $query,
+            $source,
             $variables ?? []
         );
 
-        return [$query, $variables];
+        return [$source, $operationName, $variables, $extensions];
     }
 }

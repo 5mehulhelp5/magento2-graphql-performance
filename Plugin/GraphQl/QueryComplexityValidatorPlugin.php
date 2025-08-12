@@ -28,23 +28,21 @@ class QueryComplexityValidatorPlugin
     /**
      * Validate query complexity before processing
      *
-     * @param  QueryProcessor        $subject
-     * @param  callable              $proceed
-     * @param  Schema                $schema
-     * @param  string                $source
-     * @param  ContextInterface|null $contextValue
-     * @param  array|null            $variableValues
-     * @param  string|null           $operationName
+     * @param QueryProcessor $subject Query processor instance
+     * @param \Closure $proceed Original method
+     * @param string $source GraphQL query source
+     * @param string|null $operationName Operation name
+     * @param array|null $variables Query variables
+     * @param array|null $extensions GraphQL extensions
      * @return array
      */
-    public function aroundExecute(
+    public function aroundProcess(
         QueryProcessor $subject,
-        callable $proceed,
-        Schema $schema,
+        \Closure $proceed,
         string $source,
-        ?ContextInterface $contextValue = null,
-        ?array $variableValues = null,
-        ?string $operationName = null
+        ?string $operationName = null,
+        ?array $variables = null,
+        ?array $extensions = null
     ): array {
         // Parse the query to get AST
         $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
@@ -74,6 +72,6 @@ class QueryComplexityValidatorPlugin
         }
 
         // Proceed with query execution
-        return $proceed($schema, $source, $contextValue, $variableValues, $operationName);
+        return $proceed($source, $operationName, $variables, $extensions);
     }
 }

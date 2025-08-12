@@ -73,4 +73,18 @@ class ResolverCache
     {
         return 'graphql_' . sha1($key);
     }
+
+    /**
+     * Clean cache by tags
+     *
+     * @param array $tags
+     * @return bool
+     */
+    public function clean(array $tags = []): bool
+    {
+        if (empty($tags)) {
+            $tags = [GraphQlCache::CACHE_TAG];
+        }
+        return $this->cache->clean($tags);
+    }
 }

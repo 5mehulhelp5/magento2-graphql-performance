@@ -39,9 +39,9 @@ class ConnectionManagerPlugin
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        RequestInterface $request,
-        ?array $variables = null,
+        string $source,
         ?string $operationName = null,
+        ?array $variables = null,
         ?array $extensions = null
     ): array {
         // Parse the query to determine operation type

@@ -22,20 +22,20 @@ class Thresholds extends Value
         $value = $this->getValue();
 
         // Handle empty values
-        if (empty($value)) {
+        if (empty($value) || (is_string($value) && trim($value) === '')) {
             $this->setValue('[]');
             return parent::beforeSave();
         }
 
         // Convert to array if string
         if (is_string($value)) {
-            if (trim($value) === '') {
-                $this->setValue('[]');
-                return parent::beforeSave();
-            }
-            $values = explode(',', $value);
+            $values = array_filter(explode(',', $value), function($v) {
+                return trim($v) !== '';
+            });
         } elseif (is_array($value)) {
-            $values = $value;
+            $values = array_filter($value, function($v) {
+                return !empty($v) || is_numeric($v);
+            });
         } else {
             throw new ValidatorException(__('Threshold values must be provided as a comma-separated list'));
         }

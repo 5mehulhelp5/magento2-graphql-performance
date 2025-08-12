@@ -45,9 +45,9 @@ class QueryCachePlugin
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        RequestInterface $request,
-        ?array $variables = null,
+        string $source,
         ?string $operationName = null,
+        ?array $variables = null,
         ?array $extensions = null
     ): array {
         // Get query from request

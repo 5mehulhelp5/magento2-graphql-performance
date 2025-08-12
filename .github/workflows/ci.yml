@@ -80,7 +80,14 @@ jobs:
       - name: Run unit tests
         run: vendor/bin/phpunit -c Test/Unit/phpunit.xml.dist --coverage-clover=coverage.xml
 
+      - name: Set up test environment
+        run: |
+          mkdir -p Test/Integration/tmp
+          chmod -R 777 Test/Integration/tmp
+
       - name: Run integration tests
+        env:
+          TESTS_MAGENTO_ROOT: ${{ github.workspace }}
         run: vendor/bin/phpunit -c Test/Integration/phpunit.xml.dist
 
       - name: Upload coverage to Codecov

@@ -9,32 +9,22 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 
 require_once __DIR__ . '/../../../vendor/autoload.php';
 
-/**
- * @SuppressWarnings(PHPMD.ShortMethodName)
- */
-function __()
-{
-    $argc = func_get_args();
-
-    $text = array_shift($argc);
-    if (!empty($argc) && is_array($argc[0])) {
-        $argc = $argc[0];
-    }
-
-    return new \Magento\Framework\Phrase($text, $argc);
-}
+// The __() function is already defined by Magento Framework
 
 $testsBaseDir = dirname(__DIR__);
 $integrationTestsDir = realpath("{$testsBaseDir}/../../");
 
-if (isset($_SERVER['TESTS_MAGENTO_ROOT'])) {
+// Check for Magento root in environment variable
+if (!empty($_SERVER['TESTS_MAGENTO_ROOT'])) {
     $magentoRoot = $_SERVER['TESTS_MAGENTO_ROOT'];
+} elseif (file_exists(dirname(dirname(dirname(__DIR__))) . '/app/etc/di.xml')) {
+    // Check if we're in a Magento installation
+    $magentoRoot = dirname(dirname(dirname(__DIR__)));
 } else {
-    $magentoRoot = realpath("{$integrationTestsDir}/../../../");
-}
-
-if (!file_exists($magentoRoot . '/app/etc/di.xml')) {
-    throw new \Exception("TESTS_MAGENTO_ROOT directory is not valid Magento root: {$magentoRoot}");
+    throw new \Exception(
+        'TESTS_MAGENTO_ROOT must be defined in phpunit.xml or environment variable. ' .
+        'It should point to a valid Magento installation.'
+    );
 }
 
 if (!defined('TESTS_TEMP_DIR')) {

@@ -30,7 +30,7 @@ class ConnectionManagerPlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param string $source GraphQL query source
+     * @param string|Schema $source GraphQL query source or schema
      * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
      * @param array|null $extensions GraphQL extensions
@@ -39,20 +39,30 @@ class ConnectionManagerPlugin
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        string $source,
+        $source,
         ?string $operationName = null,
         ?array $variables = null,
         ?array $extensions = null
     ): array {
-        // Parse the query to determine operation type
-        $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
-        $isMutation = false;
+        // Handle schema introspection
+        if ($source instanceof Schema) {
+            return $proceed($source, $operationName, $variables, $extensions);
+        }
 
-        foreach ($documentNode->definitions as $definition) {
-            if ($definition->kind === 'OperationDefinition' && $definition->operation === 'mutation') {
-                $isMutation = true;
-                break;
+        // Parse the query to determine operation type
+        try {
+            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
+            $isMutation = false;
+
+            foreach ($documentNode->definitions as $definition) {
+                if ($definition->kind === 'OperationDefinition' && $definition->operation === 'mutation') {
+                    $isMutation = true;
+                    break;
+                }
             }
+        } catch (\Exception $e) {
+            // If parsing fails, treat as a query
+            $isMutation = false;
         }
 
         try {

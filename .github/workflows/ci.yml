@@ -168,7 +168,10 @@ jobs:
           mkdir -p var/cache var/page_cache var/log var/session generated/code
           chmod -R 777 var generated pub/static app/etc
 
-          # Install Magento
+          # Create database tables for integration tests
+          mysql -h127.0.0.1 -uroot -proot -e 'DROP DATABASE IF EXISTS magento_test; CREATE DATABASE magento_test;'
+
+          # Install Magento with minimal settings
           bin/magento setup:install \
             --base-url=http://localhost \
             --db-host=127.0.0.1 \
@@ -188,7 +191,31 @@ jobs:
             --elasticsearch-host=localhost \
             --elasticsearch-port=9200 \
             --cleanup-database \
-            --quiet
+            --session-save=db \
+            --backend-frontname=admin \
+            -n
+
+          # Configure the default website
+          mysql -h127.0.0.1 -uroot -proot magento_test -e "INSERT INTO store_website (code, name, sort_order, default_group_id, is_default) VALUES ('base', 'Main Website', 0, 0, 1) ON DUPLICATE KEY UPDATE is_default = 1;"
+          mysql -h127.0.0.1 -uroot -proot magento_test -e "INSERT INTO store_group (website_id, code, root_category_id, default_store_id) VALUES (1, 'main_website_store', 2, 1) ON DUPLICATE KEY UPDATE website_id = 1;"
+          mysql -h127.0.0.1 -uroot -proot magento_test -e "INSERT INTO store (code, website_id, group_id, name, sort_order, is_active) VALUES ('default', 1, 1, 'Default Store View', 0, 1) ON DUPLICATE KEY UPDATE website_id = 1, group_id = 1;"
+
+          # Run setup:upgrade to apply patches
+          bin/magento setup:upgrade --keep-generated
+
+          # Additional initialization steps
+          bin/magento config:set web/seo/use_rewrites 1
+          bin/magento config:set web/secure/use_in_frontend 0
+          bin/magento config:set web/secure/use_in_adminhtml 0
+          bin/magento config:set catalog/search/engine elasticsearch7
+          bin/magento config:set catalog/search/elasticsearch7_server_hostname localhost
+          bin/magento config:set catalog/search/elasticsearch7_server_port 9200
+
+          # Enable developer mode
+          bin/magento deploy:mode:set developer
+
+          # Clear cache
+          bin/magento cache:flush
 
           cd ..
           mkdir -p Test/Integration/tmp

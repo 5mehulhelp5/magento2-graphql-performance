@@ -4,8 +4,7 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 
 use Magento\Framework\GraphQl\Query\QueryProcessor;
-use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
-use Magento\Framework\GraphQl\Schema;
+use Magento\Framework\App\RequestInterface;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionManager;
 
 /**
@@ -30,7 +29,8 @@ class ConnectionManagerPlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param string|Schema $source GraphQL query source or schema
+     * @param RequestInterface $request Request object
+     * @param string|null $query GraphQL query
      * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
      * @param array|null $extensions GraphQL extensions
@@ -39,19 +39,19 @@ class ConnectionManagerPlugin
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        $source,
+        RequestInterface $request,
+        ?string $query = null,
         ?string $operationName = null,
         ?array $variables = null,
         ?array $extensions = null
     ): array {
-        // Handle schema introspection
-        if ($source instanceof Schema) {
-            return $proceed($source, $operationName, $variables, $extensions);
-        }
-
         // Parse the query to determine operation type
         try {
-            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
+            if ($query === null) {
+                return $proceed($request, $query, $operationName, $variables, $extensions);
+            }
+
+            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($query));
             $isMutation = false;
 
             foreach ($documentNode->definitions as $definition) {
@@ -61,8 +61,8 @@ class ConnectionManagerPlugin
                 }
             }
         } catch (\Exception $e) {
-            // If parsing fails, treat as a query
-            $isMutation = false;
+            // If parsing fails, proceed with original request
+            return $proceed($request, $query, $operationName, $variables, $extensions);
         }
 
         try {
@@ -75,7 +75,7 @@ class ConnectionManagerPlugin
             }
 
             // Execute the query
-            $result = $proceed($source, $operationName, $variables, $extensions);
+            $result = $proceed($request, $query, $operationName, $variables, $extensions);
 
             // Handle transaction for mutations
             if ($isMutation) {

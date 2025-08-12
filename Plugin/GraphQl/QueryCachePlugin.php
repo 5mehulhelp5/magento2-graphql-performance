@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 
 use Magento\Framework\GraphQl\Query\QueryProcessor;
-use Magento\Framework\GraphQl\Schema\Schema;
+use Magento\Framework\App\RequestInterface;
 use Sterk\GraphQlPerformance\Model\Cache\QueryCache;
 use Sterk\GraphQlPerformance\Model\Config;
 use Psr\Log\LoggerInterface;
@@ -35,7 +35,8 @@ class QueryCachePlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param string $source GraphQL query source
+     * @param RequestInterface $request Request object
+     * @param string|null $query GraphQL query
      * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
      * @param array|null $extensions GraphQL extensions
@@ -44,23 +45,29 @@ class QueryCachePlugin
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        string $source,
+        RequestInterface $request,
+        ?string $query = null,
         ?string $operationName = null,
         ?array $variables = null,
         ?array $extensions = null
     ): array {
+        // Handle non-query requests
+        if ($query === null) {
+            return $proceed($request, $query, $operationName, $variables, $extensions);
+        }
+
         // Skip caching for mutations
-        if ($this->isMutation($source)) {
-            return $proceed($source, $operationName, $variables, $extensions);
+        if ($this->isMutation($query)) {
+            return $proceed($request, $query, $operationName, $variables, $extensions);
         }
 
         // Try to get from cache
-        $cachedResult = $this->queryCache->getQueryResult($source, $variables ?? []);
+        $cachedResult = $this->queryCache->getQueryResult($query, $variables ?? []);
         if ($cachedResult !== null) {
             $this->logger->debug(
                 'GraphQL query cache hit',
                 [
-                'query' => $source,
+                'query' => $query,
                 'operation' => $operationName,
                 'variables' => $variables
                 ]
@@ -69,15 +76,15 @@ class QueryCachePlugin
         }
 
         // Execute query
-        $result = $proceed($source, $operationName, $variables, $extensions);
+        $result = $proceed($request, $query, $operationName, $variables, $extensions);
 
         // Cache the result if no errors
         if (!isset($result['errors'])) {
-            $lifetime = $this->getCacheLifetime($source);
+            $lifetime = $this->getCacheLifetime($query);
             $tags = $this->getCacheTags($result);
 
             $this->queryCache->saveQueryResult(
-                $source,
+                $query,
                 $variables ?? [],
                 $result,
                 $tags,
@@ -87,7 +94,7 @@ class QueryCachePlugin
             $this->logger->debug(
                 'GraphQL query cached',
                 [
-                'query' => $source,
+                'query' => $query,
                 'operation' => $operationName,
                 'variables' => $variables,
                 'lifetime' => $lifetime,

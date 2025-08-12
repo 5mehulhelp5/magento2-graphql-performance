@@ -19,6 +19,6 @@ enum ConfigPath: string
      */
     public function getPath(string $field): string
     {
-        return $this->value . $field;
+        return self::from($this)->value . $field;
     }
 }

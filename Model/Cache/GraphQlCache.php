@@ -20,9 +20,8 @@ class GraphQlCache extends TagScope
     public const CACHE_TAG = 'GRAPHQL';
 
     /**
-     * @param FrontendPool $cacheFrontendPool
-     */
-    /**
+     * Serializer for cache data
+     *
      * @var SerializerInterface
      */
     private readonly SerializerInterface $serializer;

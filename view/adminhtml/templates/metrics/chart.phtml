@@ -13,19 +13,19 @@ $metrics = $block->getMetrics();
         <div class="metrics-summary">
             <div class="metric-box">
                 <span class="metric-label"><?= $escaper->escapeHtml(__('Average Response Time')) ?></span>
-                <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'average_response_time') ?> ms</span>
+                <span class="metric-value"><?= $escaper->escapeHtml($block->getFormattedMetricValue($metrics, 'average_response_time')) ?> ms</span>
             </div>
             <div class="metric-box">
                 <span class="metric-label"><?= $escaper->escapeHtml(__('Cache Hit Rate')) ?></span>
-                <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'cache_hit_rate', '%.1f', 0) ?>%</span>
+                <span class="metric-value"><?= $escaper->escapeHtml($block->getFormattedMetricValue($metrics, 'cache_hit_rate', '%.1f', 0)) ?>%</span>
             </div>
             <div class="metric-box">
                 <span class="metric-label"><?= $escaper->escapeHtml(__('Error Rate')) ?></span>
-                <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'error_rate', '%.1f', 0) ?>%</span>
+                <span class="metric-value"><?= $escaper->escapeHtml($block->getFormattedMetricValue($metrics, 'error_rate', '%.1f', 0)) ?>%</span>
             </div>
             <div class="metric-box">
                 <span class="metric-label"><?= $escaper->escapeHtml(__('Memory Usage')) ?></span>
-                <span class="metric-value"><?= $block->getFormattedMetricValue($metrics, 'memory_usage/current_usage', '%.1f', 0) ?> MB</span>
+                <span class="metric-value"><?= $escaper->escapeHtml($block->getFormattedMetricValue($metrics, 'memory_usage/current_usage', '%.1f', 0)) ?> MB</span>
             </div>
         </div>
     </div>

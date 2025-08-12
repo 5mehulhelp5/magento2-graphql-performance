@@ -59,6 +59,15 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+        env:
+          discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        ports:
+          - 9200:9200
+        options: --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
+
     steps:
       - uses: actions/checkout@v4
 
@@ -80,14 +89,52 @@ jobs:
       - name: Run unit tests
         run: vendor/bin/phpunit -c Test/Unit/phpunit.xml.dist --coverage-clover=coverage.xml
 
-      - name: Set up test environment
+      - name: Set up Magento for integration tests
         run: |
+          # Create temporary directory for Magento
+          mkdir -p magento
+          cd magento
+
+          # Configure Magento authentication
+          composer config -g http-basic.repo.magento.com ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }} ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
+
+          # Install Magento via Composer
+          composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.6 . --no-install
+          composer config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
+          composer config --no-interaction allow-plugins.magento/composer-dependency-version-audit-plugin true
+          composer config --no-interaction allow-plugins.magento/inventory-composer-installer true
+          composer install --no-interaction
+
+          # Configure Magento
+          cp ./app/etc/env.php.dist ./app/etc/env.php
+          bin/magento setup:install \
+            --base-url=http://localhost \
+            --db-host=127.0.0.1 \
+            --db-name=magento_test \
+            --db-user=root \
+            --db-password=root \
+            --admin-firstname=Admin \
+            --admin-lastname=User \
+            --admin-email=admin@example.com \
+            --admin-user=admin \
+            --admin-password=admin123 \
+            --language=en_US \
+            --currency=USD \
+            --timezone=America/Los_Angeles \
+            --use-rewrites=1 \
+            --search-engine=elasticsearch7 \
+            --elasticsearch-host=localhost \
+            --elasticsearch-port=9200 \
+            --cleanup-database \
+            --quiet
+
+          cd ..
           mkdir -p Test/Integration/tmp
           chmod -R 777 Test/Integration/tmp
 
       - name: Run integration tests
         env:
-          TESTS_MAGENTO_ROOT: ${{ github.workspace }}
+          TESTS_MAGENTO_ROOT: ${{ github.workspace }}/magento
         run: vendor/bin/phpunit -c Test/Integration/phpunit.xml.dist
 
       - name: Upload coverage to Codecov

@@ -21,17 +21,39 @@ class Thresholds extends Value
     {
         $value = $this->getValue();
 
+        // Handle empty values
+        if (empty($value)) {
+            $this->setValue('[]');
+            return parent::beforeSave();
+        }
+
         // If the value is a string (comma-separated list), convert it to array
         if (is_string($value)) {
             $value = array_map('trim', explode(',', $value));
+            // Filter out empty values
+            $value = array_filter($value, function($v) {
+                return $v !== '';
+            });
         }
 
         if (!is_array($value)) {
             throw new ValidatorException(__('Threshold values must be provided as a comma-separated list'));
         }
 
+        // If array is empty after filtering, store as empty array
+        if (empty($value)) {
+            $this->setValue('[]');
+            return parent::beforeSave();
+        }
+
         foreach ($value as $threshold) {
-            if (!is_numeric($threshold) || $threshold < 0) {
+            if (!is_numeric($threshold)) {
+                throw new ValidatorException(
+                    __('Invalid threshold value "%1". Thresholds must be numbers.', $threshold)
+                );
+            }
+
+            if ((float)$threshold < 0) {
                 throw new ValidatorException(
                     __('Invalid threshold value "%1". Thresholds must be non-negative numbers.', $threshold)
                 );
@@ -53,15 +75,20 @@ class Thresholds extends Value
     {
         $value = $this->getValue();
 
-        if ($value) {
-            try {
-                $decodedValue = json_decode($value, true);
-                if (is_array($decodedValue)) {
-                    $this->setValue(implode(',', $decodedValue));
-                }
-            } catch (\Exception $e) {
-                // If JSON decode fails, keep the original value
+        if (empty($value)) {
+            $this->setValue('');
+            parent::_afterLoad();
+            return;
+        }
+
+        try {
+            $decodedValue = json_decode($value, true);
+            if (is_array($decodedValue)) {
+                $this->setValue(implode(',', $decodedValue));
             }
+        } catch (\Exception $e) {
+            // If JSON decode fails, keep the original value
+            $this->setValue('');
         }
 
         parent::_afterLoad();

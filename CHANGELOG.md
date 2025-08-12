@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added missing DocBlocks for better code documentation
 - Fixed constructor property promotion formatting
 - Optimized enum static method documentation
+- Fixed $this usage in enum methods
+- Added proper escaping for template output
+- Fixed missing property DocBlock in GraphQlCache
+- Added GitHub Actions workflow for automated testing
 
 ## [1.1.1] - 2024-03-21
 ### Fixed

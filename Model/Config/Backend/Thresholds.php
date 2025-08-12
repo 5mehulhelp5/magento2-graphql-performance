@@ -27,41 +27,54 @@ class Thresholds extends Value
             return parent::beforeSave();
         }
 
-        // If the value is a string (comma-separated list), convert it to array
+        // Convert to array if string
         if (is_string($value)) {
-            $value = array_map('trim', explode(',', $value));
-            // Filter out empty values
-            $value = array_filter($value, function($v) {
-                return $v !== '';
-            });
-        }
-
-        if (!is_array($value)) {
+            if (trim($value) === '') {
+                $this->setValue('[]');
+                return parent::beforeSave();
+            }
+            $values = explode(',', $value);
+        } elseif (is_array($value)) {
+            $values = $value;
+        } else {
             throw new ValidatorException(__('Threshold values must be provided as a comma-separated list'));
         }
 
-        // If array is empty after filtering, store as empty array
-        if (empty($value)) {
-            $this->setValue('[]');
-            return parent::beforeSave();
-        }
+        // Process each value
+        $cleanValues = [];
+        foreach ($values as $threshold) {
+            $threshold = trim($threshold);
+            if ($threshold === '') {
+                continue;
+            }
 
-        foreach ($value as $threshold) {
+            // Remove any non-numeric characters
+            $threshold = preg_replace('/[^0-9.-]/', '', $threshold);
+
             if (!is_numeric($threshold)) {
                 throw new ValidatorException(
                     __('Invalid threshold value "%1". Thresholds must be numbers.', $threshold)
                 );
             }
 
-            if ((float)$threshold < 0) {
+            $floatValue = (float)$threshold;
+            if ($floatValue < 0) {
                 throw new ValidatorException(
                     __('Invalid threshold value "%1". Thresholds must be non-negative numbers.', $threshold)
                 );
             }
+
+            $cleanValues[] = $floatValue;
+        }
+
+        // If no valid values found, store as empty array
+        if (empty($cleanValues)) {
+            $this->setValue('[]');
+            return parent::beforeSave();
         }
 
         // Store as JSON for consistent format
-        $this->setValue(json_encode($value));
+        $this->setValue(json_encode($cleanValues));
 
         return parent::beforeSave();
     }

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <graphql_performance>
+            <redis_cluster>
+                <enabled>0</enabled>
+                <nodes>redis-node-1:6379,redis-node-2:6379,redis-node-3:6379</nodes>
+                <timeout>1.0</timeout>
+                <read_timeout>1.0</read_timeout>
+                <persistent>1</persistent>
+                <distribute>1</distribute>
+                <failover>distribute</failover>
+                <cache_prefix>graphql_</cache_prefix>
+                <compression_enabled>1</compression_enabled>
+                <compression_lib>gzip</compression_lib>
+                <compression_threshold>2048</compression_threshold>
+                <connection_retries>3</connection_retries>
+                <connection_retry_interval>100</connection_retry_interval>
+                <load_from_slave>1</load_from_slave>
+            </redis_cluster>
+        </graphql_performance>
+    </default>
+</config>

@@ -1,304 +1,41 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- Product Resolver Plugin -->
-    <type name="Magento\CatalogGraphQl\Model\Resolver\Products">
-        <plugin name="sterk_graphql_optimization_products"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\ProductResolverPlugin"/>
-    </type>
-
-    <!-- Query Complexity Settings -->
-    <type name="Magento\Framework\GraphQl\Query\QueryComplexity">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Watch Attribute Resolver -->
+    <type name="Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver">
         <arguments>
-            <argument name="maxQueryComplexity" xsi:type="number">300</argument>
+            <argument name="cache" xsi:type="object">Sterk\GraphQlPerformance\Model\Cache\RedisClusterCache</argument>
+            <argument name="dataLoader" xsi:type="object">Sterk\GraphQlPerformance\Model\DataLoader\BatchDataLoader</argument>
         </arguments>
     </type>
 
-    <!-- Query Depth Settings -->
-    <type name="Magento\Framework\GraphQl\Query\QueryDepth">
+    <!-- Redis Cluster Cache -->
+    <type name="Sterk\GraphQlPerformance\Model\Cache\RedisClusterCache">
         <arguments>
-            <argument name="maxQueryDepth" xsi:type="number">20</argument>
-        </arguments>
-    </type>
-
-    <!-- Cache Settings -->
-    <type name="Magento\Framework\App\Cache\Type\FrontendPool">
-        <arguments>
-            <argument name="types" xsi:type="array">
-                <item name="graphql" xsi:type="array">
-                    <item name="backend" xsi:type="string">Magento\Framework\Cache\Backend\Redis</item>
-                    <item name="backend_options" xsi:type="array">
-                        <item name="server" xsi:type="string">redis</item>
-                        <item name="port" xsi:type="string">6379</item>
-                        <item name="database" xsi:type="string">1</item>
-                        <item name="compress_data" xsi:type="string">1</item>
-                    </item>
-                </item>
+            <argument name="nodes" xsi:type="array">
+                <item name="node1" xsi:type="string">redis-node-1:6379</item>
+                <item name="node2" xsi:type="string">redis-node-2:6379</item>
+                <item name="node3" xsi:type="string">redis-node-3:6379</item>
+            </argument>
+            <argument name="options" xsi:type="array">
+                <item name="timeout" xsi:type="number">1.0</item>
+                <item name="read_timeout" xsi:type="number">1.0</item>
+                <item name="persistent" xsi:type="boolean">true</item>
+                <item name="distribute" xsi:type="boolean">true</item>
             </argument>
         </arguments>
     </type>
 
-    <!-- Category Resolver Plugin -->
-    <type name="Magento\CatalogGraphQl\Model\Resolver\Categories">
-        <plugin name="sterk_graphql_optimization_categories"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\CategoryResolverPlugin"/>
-    </type>
-
-    <!-- Brand Categories Resolver Plugin -->
-    <type name="MagentoTeknik\EdipCustom\Model\Resolver\BrandCategoriesQuery">
-        <plugin name="sterk_graphql_optimization_brand_categories"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\BrandCategoriesResolverPlugin"/>
-    </type>
-
-    <!-- Query Complexity Validation -->
-    <type name="Magento\Framework\GraphQl\Query\QueryProcessor">
-        <plugin name="sterk_graphql_optimization_complexity"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\QueryComplexityValidatorPlugin"
-                sortOrder="10"/>
-        <plugin name="sterk_graphql_optimization_performance"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\PerformanceMonitorPlugin"
-                sortOrder="20"/>
-        <plugin name="sterk_graphql_optimization_connection"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\ConnectionManagerPlugin"
-                sortOrder="5"/>
-    </type>
-
-    <!-- Connection Pool Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPool">
-        <arguments>
-            <argument name="maxConnections" xsi:type="number">50</argument>
-            <argument name="minConnections" xsi:type="number">5</argument>
-            <argument name="idleTimeout" xsi:type="number">300</argument>
-        </arguments>
-    </type>
-
-    <!-- Connection Manager Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionManager">
-        <arguments>
-            <argument name="logger" xsi:type="object">Magento\Framework\DB\Logger\File</argument>
-        </arguments>
-    </type>
-
-        <!-- Field Resolver Configuration -->
+    <!-- Field Resolver Configuration -->
     <type name="Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\FieldResolverManager">
         <arguments>
             <argument name="resolvers" xsi:type="array">
                 <item name="Product" xsi:type="array">
-                    <!-- Custom Attribute Resolvers -->
-                    <item name="es_saat_mekanizma" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\AttributeResolver</item>
-                    <item name="es_kasa_capi" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\AttributeResolver</item>
-                    <item name="es_kasa_cinsi" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\AttributeResolver</item>
-                    <item name="es_kordon_tipi" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\AttributeResolver</item>
-                    <item name="manufacturer" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\AttributeResolver</item>
-
-                    <!-- Price Resolver -->
-                    <item name="price_range" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\PriceResolver</item>
-
-                    <!-- Stock Resolver -->
-                    <item name="stock_status" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\StockResolver</item>
-                </item>
-                <item name="CategoryTree" xsi:type="array">
-                    <!-- Children Resolver -->
-                    <item name="children" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Category\ChildrenResolver</item>
-
-                    <!-- Product Count Resolver -->
-                    <item name="product_count" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Category\ProductCountResolver</item>
-
-                    <!-- Breadcrumbs Resolver -->
-                    <item name="breadcrumbs" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Category\BreadcrumbsResolver</item>
-                </item>
-            </argument>
-            <argument name="batchedFields" xsi:type="array">
-                <item name="Product" xsi:type="array">
-                    <item name="es_saat_mekanizma" xsi:type="boolean">true</item>
-                    <item name="es_kasa_capi" xsi:type="boolean">true</item>
-                    <item name="es_kasa_cinsi" xsi:type="boolean">true</item>
-                    <item name="es_kordon_tipi" xsi:type="boolean">true</item>
-                    <item name="manufacturer" xsi:type="boolean">true</item>
-                    <item name="price_range" xsi:type="boolean">true</item>
-                    <item name="stock_status" xsi:type="boolean">true</item>
-                </item>
-                <item name="CategoryTree" xsi:type="array">
-                    <item name="children" xsi:type="boolean">true</item>
-                    <item name="product_count" xsi:type="boolean">true</item>
-                    <item name="breadcrumbs" xsi:type="boolean">true</item>
-                </item>
-                <item name="Cart" xsi:type="array">
-                    <item name="items" xsi:type="boolean">true</item>
-                    <item name="prices" xsi:type="boolean">true</item>
-                    <item name="shipping_addresses" xsi:type="boolean">true</item>
-                </item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Cart Field Resolvers -->
-    <type name="Magento\QuoteGraphQl\Model\Resolver\Cart">
-        <arguments>
-            <argument name="fieldResolvers" xsi:type="array">
-                <item name="items" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Cart\ItemsResolver</item>
-                <item name="prices" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Cart\PricesResolver</item>
-                <item name="shipping_addresses" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Cart\ShippingAddressesResolver</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Checkout Field Resolvers -->
-    <type name="Magento\QuoteGraphQl\Model\Resolver\Checkout">
-        <arguments>
-            <argument name="fieldResolvers" xsi:type="array">
-                <item name="available_payment_methods" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Checkout\PaymentMethodsResolver</item>
-                <item name="billing_address" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Checkout\BillingAddressResolver</item>
-                <item name="selected_payment_method" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Checkout\SelectedPaymentMethodResolver</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Order Field Resolvers -->
-    <type name="Magento\SalesGraphQl\Model\Resolver\CustomerOrders">
-        <arguments>
-            <argument name="fieldResolvers" xsi:type="array">
-                <item name="items" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\OrderResolver</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <type name="Magento\SalesGraphQl\Model\Resolver\Order">
-        <arguments>
-            <argument name="fieldResolvers" xsi:type="array">
-                <item name="items" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\ItemsResolver</item>
-                <item name="shipments" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\ShipmentsResolver</item>
-                <item name="invoices" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\InvoicesResolver</item>
-                <item name="credit_memos" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\CreditMemosResolver</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Credit Memo Field Resolvers -->
-    <type name="Magento\SalesGraphQl\Model\Resolver\CreditMemo">
-        <arguments>
-            <argument name="fieldResolvers" xsi:type="array">
-                <item name="items" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\CreditMemoItemsResolver</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Invoice Field Resolvers -->
-    <type name="Magento\SalesGraphQl\Model\Resolver\Invoice">
-        <arguments>
-            <argument name="fieldResolvers" xsi:type="array">
-                <item name="items" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Order\InvoiceItemsResolver</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Performance Metrics Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\Performance\QueryTimer">
-        <arguments>
-            <argument name="logger" xsi:type="object">Magento\Framework\Logger\Monolog</argument>
-            <argument name="slowQueryThreshold" xsi:type="number">1000</argument>
-        </arguments>
-    </type>
-
-    <!-- Performance Metrics Resolver -->
-    <type name="Sterk\GraphQlPerformance\Model\Resolver\PerformanceMetricsResolver">
-        <arguments>
-            <argument name="queryTimer" xsi:type="object">Sterk\GraphQlPerformance\Model\Performance\QueryTimer</argument>
-            <argument name="cache" xsi:type="object">Sterk\GraphQlPerformance\Model\Cache\ResolverCache</argument>
-            <argument name="connectionPool" xsi:type="object">Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPool</argument>
-        </arguments>
-    </type>
-
-    <!-- Frequent Data Loaders -->
-    <type name="Sterk\GraphQlPerformance\Model\DataLoader\FrequentProductDataLoader">
-        <arguments>
-            <argument name="promiseAdapter" xsi:type="object">GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter</argument>
-            <argument name="cacheLifetime" xsi:type="number">3600</argument>
-        </arguments>
-    </type>
-
-    <type name="Sterk\GraphQlPerformance\Model\DataLoader\FrequentCategoryDataLoader">
-        <arguments>
-            <argument name="promiseAdapter" xsi:type="object">GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter</argument>
-            <argument name="cacheLifetime" xsi:type="number">7200</argument>
-        </arguments>
-    </type>
-
-    <type name="Sterk\GraphQlPerformance\Model\DataLoader\CustomerDataLoader">
-        <arguments>
-            <argument name="promiseAdapter" xsi:type="object">GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter</argument>
-            <argument name="cacheLifetime" xsi:type="number">3600</argument>
-        </arguments>
-    </type>
-
-    <type name="Sterk\GraphQlPerformance\Model\DataLoader\CmsDataLoader">
-        <arguments>
-            <argument name="promiseAdapter" xsi:type="object">GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter</argument>
-            <argument name="cacheLifetime" xsi:type="number">86400</argument>
-        </arguments>
-    </type>
-
-    <!-- Cache Services -->
-    <type name="Sterk\GraphQlPerformance\Model\Cache\CacheWarmer">
-        <arguments>
-            <argument name="logger" xsi:type="object">Magento\Framework\Logger\Monolog</argument>
-        </arguments>
-    </type>
-
-    <type name="Sterk\GraphQlPerformance\Plugin\GraphQl\QueryCachePlugin">
-        <arguments>
-            <argument name="tagManager" xsi:type="object">Sterk\GraphQlPerformance\Model\Cache\TagManager</argument>
-        </arguments>
-    </type>
-
-    <!-- Query Cache Configuration -->
-    <type name="Magento\Framework\GraphQl\Query\QueryProcessor">
-        <plugin name="sterk_graphql_query_cache"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\QueryCachePlugin"
-                sortOrder="5"/>
-    </type>
-
-    <!-- Query Complexity Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\QueryComplexity\ComplexityValidator">
-        <arguments>
-            <argument name="maxComplexity" xsi:type="number">300</argument>
-            <argument name="maxDepth" xsi:type="number">20</argument>
-        </arguments>
-    </type>
-
-    <!-- Field Complexity Configurations -->
-    <type name="Sterk\GraphQlPerformance\Model\QueryComplexity\ComplexityCalculator">
-        <arguments>
-            <argument name="fieldComplexityMap" xsi:type="array">
-                <item name="products" xsi:type="array">
-                    <item name="base" xsi:type="number">3</item>
-                    <item name="multiplier" xsi:type="number">2</item>
-                    <item name="attributes" xsi:type="array">
-                        <item name="description" xsi:type="number">2</item>
-                        <item name="media_gallery" xsi:type="number">3</item>
-                        <item name="price_range" xsi:type="number">2</item>
-                        <item name="categories" xsi:type="number">2</item>
-                    </item>
-                </item>
-                <item name="categories" xsi:type="array">
-                    <item name="base" xsi:type="number">2</item>
-                    <item name="multiplier" xsi:type="number">1.5</item>
-                    <item name="attributes" xsi:type="array">
-                        <item name="children" xsi:type="number">3</item>
-                        <item name="products" xsi:type="number">5</item>
-                    </item>
-                </item>
-                <item name="brandCategories" xsi:type="array">
-                    <item name="base" xsi:type="number">2</item>
-                    <item name="multiplier" xsi:type="number">1.5</item>
-                </item>
-                <item name="cart" xsi:type="array">
-                    <item name="base" xsi:type="number">3</item>
-                    <item name="attributes" xsi:type="array">
-                        <item name="items" xsi:type="number">2</item>
-                        <item name="prices" xsi:type="number">2</item>
-                        <item name="shipping_addresses" xsi:type="number">2</item>
-                    </item>
+                    <item name="es_saat_mekanizma" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver</item>
+                    <item name="es_kasa_capi" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver</item>
+                    <item name="es_kasa_cinsi" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver</item>
+                    <item name="es_kordon_tipi" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver</item>
+                    <item name="es_swiss_made" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver</item>
+                    <item name="manufacturer" xsi:type="object">Sterk\GraphQlPerformance\Model\Resolver\FieldResolver\Product\WatchAttributeResolver</item>
                 </item>
             </argument>
         </arguments>

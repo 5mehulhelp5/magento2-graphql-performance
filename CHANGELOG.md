@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.9] - 2024-03-13
+
+### Added
+- Added specialized watch attribute resolver with optimized caching
+- Added Redis cluster support with automatic sharding
+- Added watch-specific attribute grouping for better performance
+- Added Redis cluster configuration options
+
+### Changed
+- Optimized caching strategy for watch-related attributes
+- Improved Redis connection handling with failover support
+- Enhanced attribute loading with batch processing
+
 ## [1.1.8] - 2024-03-13
 
 ### Added

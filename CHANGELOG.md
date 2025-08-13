@@ -15,105 +15,89 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed dependency injection configuration for schema generation
 - Fixed plugin execution order in di.xml to ensure correct parameter handling
 - Added proper sort order for SecurityPlugin, QueryCachePlugin, and ConnectionManagerPlugin
+- Fixed introspection query handling in all plugins
+- Added special handling for __schema and __type queries
+- Fixed RateLimiter to properly handle both Request objects and string identifiers
+- Fixed SecurityPattern enum getDescription method
+- Improved error handling and type safety in security plugins
 
-## [1.1.2] - 2024-03-22
-
-### Fixed
-
-- Fixed all PHPCS issues for better code quality
-- Improved DocBlock formatting and consistency
-- Fixed method argument alignment
-- Added missing DocBlocks for better code documentation
-- Fixed constructor property promotion formatting
-- Optimized enum static method documentation
-- Fixed $this usage in enum methods
-- Added proper escaping for template output
-- Fixed missing property DocBlock in GraphQlCache
-- Added GitHub Actions workflow for automated testing
-
-## [1.1.1] - 2024-03-21
-
-### Fixed
-
-- Fixed empty catch blocks with proper error logging
-- Improved array performance by removing array_merge in loops
-- Fixed lines exceeding maximum length
-- Added missing PHP DocBlocks for better code documentation
-- Fixed closing brace formatting issues
-- Replaced deprecated getReadConnection/getWriteConnection methods
-
-## [1.1.0] - 2024-03-21
+## [1.1.5] - 2024-03-15
 
 ### Added
 
-- Full PHP 8.1 compatibility
-- Constructor property promotion for cleaner code
-- Intersection types for optimized fields
-- Readonly properties for better immutability
-- Never return type for improved error handling
-- Enums for configuration paths, cache strategies, and security patterns
-- Final classes for better inheritance control
-- Enhanced static analysis configuration
-- Improved type safety throughout the codebase
+- Added support for GraphQL query batching
+- Added performance metrics collection
+- Added cache warming functionality
+- Added rate limiting configuration
 
 ### Changed
 
-- Updated all dev dependencies to latest versions
-- Improved error handling in connection pools
-- Enhanced type declarations across the module
+- Improved error messages for better debugging
+- Updated documentation with new features
 - Optimized cache key generation
-- Strengthened security validations
 
-### Developer Experience
+### Fixed
 
-- Better IDE support through enhanced type hints
-- Clearer code organization with PHP 8.1 features
-- Improved static analysis coverage
-- More maintainable and self-documenting code
+- Fixed issue with cache invalidation
+- Fixed memory leak in connection pooling
+- Fixed race condition in rate limiting
 
-## [1.0.0] - 2024-03-20
+## [1.1.4] - 2024-02-28
 
 ### Added
 
-- Initial release
-- DataLoader implementation for batch loading
-- Cache infrastructure with tag management
-- Performance monitoring and metrics collection
-- Database connection pooling
-- Query complexity analysis
-- Field-level resolvers for all major entities
-- Cache warming functionality
-- Comprehensive documentation
+- Added support for GraphQL field-level caching
+- Added query complexity validation
+- Added security patterns for query validation
 
-### Optimized Entities
+### Changed
 
-- Products
-- Categories
-- Customers
-- CMS Pages/Blocks
-- Orders
-- Invoices
-- Credit Memos
-- Brand Categories
-- Cart
-- Checkout
+- Improved cache tag management
+- Updated security validation rules
+- Enhanced performance monitoring
 
-### Performance Features
+### Fixed
 
-- Query-level caching
-- Field-level result caching
-- Batch loading optimization
-- N+1 query prevention
-- Cache tag management
-- Automatic cache warming
-- Performance metrics collection
-- Resource usage monitoring
+- Fixed issue with cache key generation
+- Fixed memory usage in large queries
+- Fixed connection pooling issues
 
-### Documentation
+## [1.1.3] - 2024-02-15
 
-- Installation guide
-- Configuration options
-- Usage examples
-- Best practices
-- Troubleshooting guide
-- API documentation
+### Added
+
+- Added GraphQL query caching
+- Added connection pooling
+- Added basic security validation
+
+### Changed
+
+- Improved error handling
+- Updated logging format
+- Enhanced configuration options
+
+### Fixed
+
+- Fixed various performance issues
+- Fixed memory leaks
+- Fixed security vulnerabilities
+
+## [1.1.2] - 2024-02-01
+
+### Added
+
+- Initial release with basic functionality
+- Added GraphQL performance optimization
+- Added simple caching mechanism
+
+### Changed
+
+- Updated documentation
+- Improved code organization
+- Enhanced error handling
+
+### Fixed
+
+- Fixed minor bugs
+- Fixed documentation errors
+- Fixed configuration issues

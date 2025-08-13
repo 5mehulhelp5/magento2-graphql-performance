@@ -36,11 +36,11 @@ class RateLimiter
     /**
      * Check if request should be rate limited
      *
-     * @param  string $identifier
+     * @param  RequestInterface|string|null $identifier
      * @return bool
      * @throws LocalizedException
      */
-    public function shouldLimit(string $identifier = ''): bool
+    public function shouldLimit(RequestInterface|string|null $identifier = null): bool
     {
         if (!$this->isRateLimitingEnabled()) {
             return false;
@@ -62,16 +62,45 @@ class RateLimiter
     /**
      * Generate cache key for rate limiting
      *
-     * @param  string $identifier
+     * @param  RequestInterface|string|null $identifier
      * @return string
      */
-    private function generateCacheKey(string $identifier = ''): string
+    private function generateCacheKey(RequestInterface|string|null $identifier = null): string
     {
-        if (empty($identifier)) {
+        if ($identifier instanceof RequestInterface) {
+            $identifier = $this->getClientIdentifierFromRequest($identifier);
+        } elseif (empty($identifier)) {
             $identifier = $this->getClientIdentifier();
         }
 
         return self::CACHE_KEY_PREFIX . hash('sha256', $identifier . '_' . floor(time() / self::WINDOW_SIZE));
+    }
+
+    /**
+     * Get client identifier from request
+     *
+     * @param  RequestInterface $request
+     * @return string
+     */
+    private function getClientIdentifierFromRequest(RequestInterface $request): string
+    {
+        $identifiers = [];
+
+        if ($this->config->getQueryConfig('rate_limiting/by_ip')) {
+            $identifiers[] = $request->getClientIp();
+        }
+
+        if ($this->config->getQueryConfig('rate_limiting/by_token')) {
+            $token = $request->getHeader('Authorization');
+            if ($token) {
+                $identifiers[] = $token;
+            }
+        }
+
+        // Add user agent as additional entropy
+        $identifiers[] = $request->getHeader('User-Agent');
+
+        return implode('_', array_filter($identifiers));
     }
 
     /**
@@ -81,23 +110,7 @@ class RateLimiter
      */
     private function getClientIdentifier(): string
     {
-        $identifiers = [];
-
-        if ($this->config->getQueryConfig('rate_limiting/by_ip')) {
-            $identifiers[] = $this->request->getClientIp();
-        }
-
-        if ($this->config->getQueryConfig('rate_limiting/by_token')) {
-            $token = $this->request->getHeader('Authorization');
-            if ($token) {
-                $identifiers[] = $token;
-            }
-        }
-
-        // Add user agent as additional entropy
-        $identifiers[] = $this->request->getHeader('User-Agent');
-
-        return implode('_', array_filter($identifiers));
+        return $this->getClientIdentifierFromRequest($this->request);
     }
 
     /**
@@ -140,10 +153,10 @@ class RateLimiter
     /**
      * Reset rate limit for identifier
      *
-     * @param  string $identifier
+     * @param  RequestInterface|string|null $identifier
      * @return bool
      */
-    public function resetLimit(string $identifier = ''): bool
+    public function resetLimit(RequestInterface|string|null $identifier = null): bool
     {
         $key = $this->generateCacheKey($identifier);
         return $this->cache->remove($key);
@@ -152,10 +165,10 @@ class RateLimiter
     /**
      * Get current request count
      *
-     * @param  string $identifier
+     * @param  RequestInterface|string|null $identifier
      * @return int
      */
-    public function getCurrentCount(string $identifier = ''): int
+    public function getCurrentCount(RequestInterface|string|null $identifier = null): int
     {
         $key = $this->generateCacheKey($identifier);
         return (int)$this->cache->load($key);
@@ -164,10 +177,10 @@ class RateLimiter
     /**
      * Get remaining requests allowed
      *
-     * @param  string $identifier
+     * @param  RequestInterface|string|null $identifier
      * @return int
      */
-    public function getRemainingRequests(string $identifier = ''): int
+    public function getRemainingRequests(RequestInterface|string|null $identifier = null): int
     {
         $maxRequests = $this->getMaxRequests();
         $currentCount = $this->getCurrentCount($identifier);

@@ -32,6 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed schema.graphqls to include type resolver directives
 - Fixed ResolveInfo namespace in QueryComplexityValidatorPlugin
 - Improved error handling and type safety in security plugins
+- Fixed RequestValidator to handle non-string variables in preg_match
+- Fixed QueryCachePlugin to return integer cache lifetime values
+- Added special handling for numeric array indices in variable validation
 
 ## [1.1.5] - 2024-03-15
 

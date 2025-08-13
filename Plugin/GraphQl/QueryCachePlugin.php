@@ -602,64 +602,7 @@ class QueryCachePlugin
      *
      * @return array
      */
-    private function getDefaultAggregations(): array
-    {
-        return [
-            [
-                'attribute_code' => 'manufacturer',
-                'label' => 'Manufacturer',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_kasa_capi',
-                'label' => 'Kasa Çapı',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_saat_mekanizma',
-                'label' => 'Saat Mekanizması',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_kasa_cinsi',
-                'label' => 'Kasa Cinsi',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_kordon_tipi',
-                'label' => 'Kordon Tipi',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_swiss_made',
-                'label' => 'Swiss Made',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_webe_ozel',
-                'label' => "Web'e Özel",
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_outlet_urun',
-                'label' => 'Outlet Ürün',
-                'options' => []
-            ],
-            [
-                'attribute_code' => 'es_teklife_acik',
-                'label' => 'Teklife Açık',
-                'options' => []
-            ]
-        ];
-    }
 
-    /**
-     * Handle GetCategoryUidByName query
-     *
-     * @param array $result
-     * @param array $variables
-     * @return array
-     */
     private function handleCategoryByName(array $result, array $variables): array
     {
         $name = $variables['name'] ?? '';
@@ -980,7 +923,8 @@ class QueryCachePlugin
      * @param array|null $extensions
      * @return array
      */
-    private function handleProductList(
+
+    function handleProductList(
         array $result,
         array $variables,
         Schema $schema,
@@ -1028,13 +972,14 @@ class QueryCachePlugin
         return $result;
     }
 
-    private function getDefaultAggregations(): array
+    function getDefaultAggregations(): array
     {
         return [
             [
                 'attribute_code' => 'manufacturer',
                 'label' => 'Manufacturer',
-                'options' => []
+                'options' => [],
+                '__typename' => 'Aggregation'
             ],
             [
                 'attribute_code' => 'es_kasa_capi',
@@ -1078,4 +1023,5 @@ class QueryCachePlugin
             ]
         ];
     }
+}
 }

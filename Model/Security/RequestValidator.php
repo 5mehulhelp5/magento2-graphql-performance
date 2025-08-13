@@ -164,7 +164,7 @@ class RequestValidator
             'url_path',
             'identifier',
             'search',
-            
+
             // Edip Saat specific fields
             'es_swiss_made',
             'es_webe_ozel',

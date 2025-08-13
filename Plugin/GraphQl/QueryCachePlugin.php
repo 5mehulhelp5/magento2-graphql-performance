@@ -190,7 +190,7 @@ class QueryCachePlugin
             if (stripos($query, 'stock_status') !== false || stripos($query, 'price_range') !== false) {
                 return 300; // 5 minutes for dynamic data
             }
-            
+
             // Shorter cache for filtered product queries
             if (stripos($query, 'es_outlet_urun') !== false || stripos($query, 'es_webe_ozel') !== false) {
                 return 600; // 10 minutes for filtered products

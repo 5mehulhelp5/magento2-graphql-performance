@@ -59,8 +59,8 @@ class QueryCachePlugin
             return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 
-        // Skip caching for mutations
-        if ($this->isMutation($source)) {
+        // Skip caching for mutations and introspection queries
+        if ($this->isMutation($source) || stripos($source, '__schema') !== false || stripos($source, '__type') !== false) {
             return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 

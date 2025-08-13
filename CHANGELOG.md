@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.8] - 2024-03-13
+
+### Fixed
+- Fixed introspection query handling in QueryCachePlugin
+- Fixed schema generation issues with GraphQL Mesh
+
 ## [1.1.7] - 2024-03-13
 
 ### Added

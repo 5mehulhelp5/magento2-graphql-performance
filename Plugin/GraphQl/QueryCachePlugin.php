@@ -89,7 +89,34 @@ class QueryCachePlugin
 
             // Handle categories
             if (stripos($source, 'categories') !== false) {
-                // Try to normalize the URL path
+                // Handle category lookup by name
+                if (isset($variables['filters']['name']['match'])) {
+                    $name = $variables['filters']['name']['match'];
+                    // Log category name lookup
+                    $this->logger->info('Category name lookup', [
+                        'name' => $name,
+                        'query' => $source
+                    ]);
+
+                    // If no results, return empty structure
+                    if (!isset($result['data']['categories']) || empty($result['data']['categories']['items'])) {
+                        return [
+                            'data' => [
+                                'categories' => [
+                                    'items' => [],
+                                    'total_count' => 0,
+                                    'page_info' => [
+                                        'total_pages' => 0,
+                                        'current_page' => 1,
+                                        'page_size' => 20
+                                    ]
+                                ]
+                            ]
+                        ];
+                    }
+                }
+
+                // Handle category lookup by URL path
                 if (isset($variables['url'])) {
                     $path = $variables['url'];
                     // Remove leading/trailing slashes
@@ -229,7 +256,7 @@ class QueryCachePlugin
                         }
                     }
 
-                    // Handle URL key based product detail
+                                        // Handle URL key based product detail
                     if (isset($filters['url_key']['eq'])) {
                         $urlKey = $filters['url_key']['eq'];
 
@@ -241,6 +268,39 @@ class QueryCachePlugin
                                 $filters['url_key']['eq'] = $normalizedUrlKey;
                                 $variables['filter'] = $filters;
                                 $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
+                            }
+
+                            // If still not found, try to get related info
+                            if (empty($result['data']['products']['items'])) {
+                                // Try to get manufacturer info if present in URL
+                                if (preg_match('/^([a-zA-Z0-9-]+)-[a-zA-Z0-9-]+$/', $urlKey, $matches)) {
+                                    $brandName = str_replace('-', ' ', $matches[1]);
+                                    $brandQuery = 'query ($name: String!) { products(filter: {manufacturer: {like: $name}}, pageSize: 1) { items { manufacturer { label } } } }';
+                                    $brandVars = ['name' => $brandName];
+                                    $brandResult = $proceed($schema, $brandQuery, $context, $brandVars, null, $extensions);
+
+                                    if (!empty($brandResult['data']['products']['items'][0]['manufacturer'])) {
+                                        return [
+                                            'data' => [
+                                                'products' => [
+                                                    'items' => [],
+                                                    'total_count' => 0,
+                                                    'manufacturer_info' => $brandResult['data']['products']['items'][0]['manufacturer']
+                                                ]
+                                            ],
+                                            'errors' => [
+                                                [
+                                                    'message' => __('Product not found: %1', $urlKey),
+                                                    'extensions' => [
+                                                        'category' => 'graphql-no-such-entity',
+                                                        'url_key' => $urlKey,
+                                                        'manufacturer' => $brandName
+                                                    ]
+                                                ]
+                                            ]
+                                        ];
+                                    }
+                                }
                             }
                         }
                     }
@@ -255,6 +315,13 @@ class QueryCachePlugin
                 }
                 if (!isset($result['data']['products']['aggregations'])) {
                     $result['data']['products']['aggregations'] = $this->getDefaultAggregations();
+                } else {
+                    // Ensure each aggregation has at least an empty options array
+                    foreach ($result['data']['products']['aggregations'] as &$aggregation) {
+                        if (!isset($aggregation['options'])) {
+                            $aggregation['options'] = [];
+                        }
+                    }
                 }
                 if (!isset($result['data']['products']['page_info'])) {
                     $result['data']['products']['page_info'] = [

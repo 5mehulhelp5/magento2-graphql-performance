@@ -30,25 +30,25 @@ take_backup() {
 # Function to update the module
 update_module() {
     log "Updating GraphQL Performance module..."
-    
+
     # Remove existing module files
     if [ -d "app/code/Sterk/GraphQlPerformance" ]; then
         rm -rf app/code/Sterk/GraphQlPerformance
     fi
-    
+
     # Create module directory if it doesn't exist
     mkdir -p app/code/Sterk/GraphQlPerformance
-    
+
     # Download and extract the new version
     curl -L https://github.com/veysiyildiz/magento2-graphql-performance/archive/v1.1.3.tar.gz | tar xz --strip-components=1 -C app/code/Sterk/GraphQlPerformance
-    
+
     log "Module files updated successfully"
 }
 
 # Function to update Magento
 update_magento() {
     log "Updating Magento..."
-    
+
     php bin/magento maintenance:enable
     php bin/magento cache:flush
     php bin/magento setup:upgrade
@@ -56,26 +56,26 @@ update_magento() {
     php bin/magento setup:static-content:deploy -f
     php bin/magento cache:flush
     php bin/magento maintenance:disable
-    
+
     log "Magento updated successfully"
 }
 
 # Main execution
 main() {
     log "Starting update process..."
-    
+
     # Check if we're in a Magento directory
     check_magento
-    
+
     # Take backup
     take_backup
-    
+
     # Update module
     update_module
-    
+
     # Update Magento
     update_magento
-    
+
     log "Update completed successfully!"
 }
 

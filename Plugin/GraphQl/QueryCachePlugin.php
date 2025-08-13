@@ -78,11 +78,12 @@ class QueryCachePlugin
             return $cachedResult;
         }
 
-        // Execute query
-        $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
+        try {
+            // Execute query
+            $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
 
-        // Cache the result if no errors
-        if (!isset($result['errors'])) {
+            // Cache the result if no errors
+            if (!isset($result['errors'])) {
             $lifetime = $this->getCacheLifetime($source);
             $tags = $this->getCacheTags($result);
 
@@ -107,6 +108,25 @@ class QueryCachePlugin
         }
 
         return $result;
+        } catch (\Exception $e) {
+            $this->logger->error('GraphQL query error', [
+                'query' => $source,
+                'operation' => $operationName,
+                'variables' => $variables,
+                'error' => $e->getMessage()
+            ]);
+            return [
+                'data' => null,
+                'errors' => [
+                    [
+                        'message' => $e->getMessage(),
+                        'extensions' => [
+                            'category' => 'graphql'
+                        ]
+                    ]
+                ]
+            ];
+        }
     }
 
     /**

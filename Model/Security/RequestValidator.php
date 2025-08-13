@@ -179,6 +179,28 @@ class RequestValidator
     private function isIntrospectionQuery(string $query): bool
     {
         $normalizedQuery = strtolower(preg_replace('/\s+/', ' ', $query));
-        return str_contains($normalizedQuery, '__schema') || str_contains($normalizedQuery, '__type');
+
+        // Skip validation for introspection queries
+        if (str_contains($normalizedQuery, '__schema') || str_contains($normalizedQuery, '__type')) {
+            return true;
+        }
+
+        // Skip validation for standard Magento queries
+        $standardQueries = [
+            'products(',
+            'categories(',
+            'storeconfig',
+            'brandcategories(',
+            'cmsblocks(',
+            'cmspage('
+        ];
+
+        foreach ($standardQueries as $standardQuery) {
+            if (str_contains($normalizedQuery, $standardQuery)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

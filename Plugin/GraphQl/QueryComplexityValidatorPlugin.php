@@ -48,7 +48,7 @@ class QueryComplexityValidatorPlugin
         ?ContextInterface $context = null,
         ?array $extensions = null
     ): array {
-        if ($source) {
+        if ($source && !$this->isIntrospectionQuery($source)) {
             // Parse the query to get AST
             $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
 
@@ -79,5 +79,16 @@ class QueryComplexityValidatorPlugin
 
         // Proceed with query execution
         return $proceed($schema, $source, $operationName, $variables, $context, $extensions);
+    }
+
+    /**
+     * Check if the query is an introspection query
+     *
+     * @param string $source
+     * @return bool
+     */
+    private function isIntrospectionQuery(string $source): bool
+    {
+        return str_contains($source, '__schema') || str_contains($source, '__type');
     }
 }

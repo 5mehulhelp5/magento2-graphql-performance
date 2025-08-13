@@ -109,8 +109,13 @@ class QueryCachePlugin
 
             // Handle categories
             if (stripos($source, 'categories') !== false) {
-                // Handle category lookup by name
-                if (isset($variables['filters']['name']['match'])) {
+                // Handle category lookup by URL path or name
+                if (isset($variables['url']) || isset($variables['filters']['name']['match'])) {
+                    $path = $variables['url'] ?? $variables['filters']['name']['match'] ?? '';
+                    $this->logger->info('Category lookup attempt', [
+                        'path' => $path,
+                        'variables' => $variables
+                    ]);
                     $name = $variables['filters']['name']['match'];
                     // Log category name lookup
                     $this->logger->info('Category name lookup', [
@@ -207,8 +212,18 @@ class QueryCachePlugin
                                 'page_info' => [
                                     'total_pages' => 0,
                                     'current_page' => 1,
-                                    'page_size' => $variables['pageSize'] ?? 20
-                                ]
+                                    'page_size' => $variables['pageSize'] ?? 20,
+                                    '__typename' => 'SearchResultPageInfo'
+                                ],
+                                'aggregations' => [],
+                                'sort_fields' => [
+                                    'options' => [
+                                        ['label' => 'Position', 'value' => 'position'],
+                                        ['label' => 'Product Name', 'value' => 'name'],
+                                        ['label' => 'Price', 'value' => 'price']
+                                    ]
+                                ],
+                                '__typename' => 'CategoryResult'
                             ]
                         ],
                         'errors' => [
@@ -216,7 +231,8 @@ class QueryCachePlugin
                                 'message' => __('Category not found for path: %1', $path),
                                 'extensions' => [
                                     'category' => 'graphql-no-such-entity',
-                                    'path' => $path
+                                    'path' => $path,
+                                    'code' => 'CATEGORY_NOT_FOUND'
                                 ]
                             ]
                         ]
@@ -227,7 +243,16 @@ class QueryCachePlugin
             // Handle products
             if (stripos($source, 'products') !== false) {
                 // Handle product list query
-                if (isset($variables['filter']) || isset($variables['filters'])) {
+                if (isset($variables['urlKey']) || isset($variables['filter']) || isset($variables['filters'])) {
+                    $filters = $variables['filter'] ?? $variables['filters'] ?? [];
+                    $urlKey = $variables['urlKey'] ?? $filters['url_key']['eq'] ?? null;
+
+                    // Log product lookup attempt
+                    $this->logger->info('Product lookup attempt', [
+                        'url_key' => $urlKey,
+                        'filters' => $filters,
+                        'variables' => $variables
+                    ]);
                     $filters = $variables['filter'] ?? $variables['filters'] ?? [];
 
                     // Log product search attempt
@@ -367,21 +392,75 @@ class QueryCachePlugin
             }
 
             // Handle store config
-            if (stripos($source, 'storeConfig') !== false && !isset($result['data']['storeConfig'])) {
-                $this->logger->warning('StoreConfig query returned no data');
-                return [
-                    'data' => [
-                        'storeConfig' => [
-                            'store_code' => 'default',
-                            'locale' => 'tr_TR',
-                            'base_currency_code' => 'TRY',
-                            'default_display_currency_code' => 'TRY',
-                            'grid_per_page' => 24,
-                            'grid_per_page_values' => '12,24,36',
-                            'list_per_page' => 24
+            if (stripos($source, 'storeConfig') !== false) {
+                if (!isset($result['data']['storeConfig']) || empty($result['data']['storeConfig'])) {
+                    $this->logger->warning('StoreConfig query returned no data');
+                    return [
+                        'data' => [
+                            'storeConfig' => [
+                                'website_name' => 'Edip Saat',
+                                'store_code' => 'default',
+                                'store_name' => 'Edip Saat',
+                                'locale' => 'tr_TR',
+                                'base_currency_code' => 'TRY',
+                                'default_display_currency_code' => 'TRY',
+                                'title_suffix' => ' | Edip Saat',
+                                'title_prefix' => '',
+                                'title_separator' => ' - ',
+                                'default_title' => 'Edip Saat',
+                                'cms_home_page' => 'home',
+                                'catalog_default_sort_by' => 'position',
+                                'category_url_suffix' => '',
+                                'product_url_suffix' => '',
+                                'secure_base_link_url' => 'https://staging-worker.edipsaat.com/',
+                                'secure_base_url' => 'https://staging-worker.edipsaat.com/',
+                                'root_category_uid' => 'Mg==',
+                                'weight_unit' => 'kgs',
+                                'product_reviews_enabled' => true,
+                                'allow_guests_to_write_product_reviews' => true,
+                                'grid_per_page' => 24,
+                                'grid_per_page_values' => '12,24,36',
+                                'list_per_page' => 24,
+                                'create_account_confirmation' => false,
+                                'order_cancellation_enabled' => true,
+                                'order_cancellation_reasons' => [
+                                    [
+                                        'description' => 'Ürünü artık istemiyorum',
+                                        '__typename' => 'OrderCancellationReason'
+                                    ],
+                                    [
+                                        'description' => 'Yanlış ürün seçtim',
+                                        '__typename' => 'OrderCancellationReason'
+                                    ],
+                                    [
+                                        'description' => 'Diğer',
+                                        '__typename' => 'OrderCancellationReason'
+                                    ]
+                                ],
+                                'autocomplete_on_storefront' => true,
+                                'minimum_password_length' => 8,
+                                'required_character_classes_number' => 3,
+                                'magento_wishlist_general_is_enabled' => true,
+                                '__typename' => 'StoreConfig'
+                            ]
                         ]
-                    ]
-                ];
+                    ];
+            }
+
+            // Handle CMS blocks
+            if (stripos($source, 'cmsBlocks') !== false) {
+                if (!isset($result['data']['cmsBlocks']) || empty($result['data']['cmsBlocks']['items'])) {
+                    $identifiers = $variables['identifiers'] ?? [];
+                    $this->logger->info('CMS blocks not found', ['identifiers' => $identifiers]);
+                    return [
+                        'data' => [
+                            'cmsBlocks' => [
+                                'items' => [],
+                                '__typename' => 'CmsBlocks'
+                            ]
+                        ]
+                    ];
+                }
             }
 
             // Handle CMS pages
@@ -401,32 +480,32 @@ class QueryCachePlugin
                 ];
             }
 
-            // Cache the result if no errors
-            if (!isset($result['errors'])) {
-            $lifetime = $this->getCacheLifetime($source);
-            $tags = $this->getCacheTags($result);
+            // Cache the result if valid
+            if (!isset($result['errors']) && isset($result['data'])) {
+                $lifetime = $this->getCacheLifetime($source);
+                $tags = $this->getCacheTags($result);
 
-            $this->queryCache->saveQueryResult(
-                $source,
-                $variables ?? [],
-                $result,
-                $tags,
-                $lifetime
-            );
+                $this->queryCache->saveQueryResult(
+                    $source,
+                    $variables ?? [],
+                    $result,
+                    $tags,
+                    $lifetime
+                );
 
-            $this->logger->debug(
-                'GraphQL query cached',
-                [
-                    'query' => $source,
-                    'operation' => $operationName,
-                    'variables' => $variables,
-                    'lifetime' => $lifetime,
-                    'tags' => $tags
-                ]
-            );
-        }
+                $this->logger->debug(
+                    'GraphQL query cached',
+                    [
+                        'query' => $source,
+                        'operation' => $operationName,
+                        'variables' => $variables,
+                        'lifetime' => $lifetime,
+                        'tags' => $tags
+                    ]
+                );
+            }
 
-        return $result;
+            return $result;
         } catch (\Exception $e) {
             $context = [
                 'query' => $source,
@@ -596,12 +675,6 @@ class QueryCachePlugin
 
         return $urlKey;
     }
-
-    /**
-     * Get default aggregations for product listing
-     *
-     * @return array
-     */
 
     private function handleCategoryByName(array $result, array $variables): array
     {
@@ -924,7 +997,7 @@ class QueryCachePlugin
      * @return array
      */
 
-    function handleProductList(
+    private function handleProductList(
         array $result,
         array $variables,
         Schema $schema,
@@ -972,7 +1045,7 @@ class QueryCachePlugin
         return $result;
     }
 
-    function getDefaultAggregations(): array
+    private function getDefaultAggregations(): array
     {
         return [
             [

@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 
 use Magento\Framework\GraphQl\Query\QueryProcessor;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Schema;
 use Sterk\GraphQlPerformance\Model\Performance\QueryOptimizer;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 use Sterk\GraphQlPerformance\Model\Cache\ResolverCache;
@@ -38,31 +40,39 @@ class PerformancePlugin
      * Optimize query before processing
      *
      * @param QueryProcessor $subject Query processor instance
-     * @param string $source GraphQL query source
-     * @param string|null $operationName Operation name
+     * @param Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
+     * @param ContextInterface|null $context Query context
      * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function beforeProcess(
         QueryProcessor $subject,
-        string $source,
-        ?string $operationName = null,
+        Schema $schema,
+        ?string $source = null,
+        ?ContextInterface $context = null,
         ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
+        if (!$source) {
+            return [$schema, $source, $context, $variables, $operationName, $extensions];
+        }
+
         $this->queryTimer->start(self::TIMING_KEY);
 
         try {
             $result = $this->tryGetFromCache($source, $variables);
             if ($result !== null) {
-                return [$source, $operationName, $variables, $extensions, $result];
+                return [$schema, $source, $context, $variables, $operationName, $extensions, $result];
             }
 
             $optimizedQuery = $this->optimizeQuery($source, $variables);
-            return [$optimizedQuery[0], $operationName, $optimizedQuery[1], $extensions];
+            return [$schema, $optimizedQuery[0], $context, $optimizedQuery[1], $operationName, $extensions];
         } catch (\Exception $e) {
-            return [$source, $operationName, $variables, $extensions];
+            return [$schema, $source, $context, $variables, $operationName, $extensions];
         }
     }
 
@@ -71,24 +81,30 @@ class PerformancePlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param array $result Query result
-     * @param string $source GraphQL query source
-     * @param string|null $operationName Operation name
+     * @param Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
+     * @param ContextInterface|null $context Query context
      * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function afterProcess(
         QueryProcessor $subject,
         array $result,
-        string $source,
-        ?string $operationName = null,
+        Schema $schema,
+        ?string $source = null,
+        ?ContextInterface $context = null,
         ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
-        try {
-            $this->cacheResultIfValid($result, $source, $variables);
-        } finally {
-            $this->queryTimer->stop(self::TIMING_KEY);
+        if ($source) {
+            try {
+                $this->cacheResultIfValid($result, $source, $variables);
+            } finally {
+                $this->queryTimer->stop(self::TIMING_KEY);
+            }
         }
 
         return $result;

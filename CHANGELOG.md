@@ -25,6 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added isAuthRequired method to Config class
 - Fixed QueryComplexityValidatorPlugin to skip validation for introspection queries
 - Fixed QueryComplexityValidatorPlugin parameter order to match Magento's expectations
+- Fixed PerformanceMonitorPlugin parameter order to match Magento's expectations
+- Fixed PerformancePlugin parameter order to match Magento's expectations
+- Added null checks for source parameter in all plugins
 - Improved error handling and type safety in security plugins
 
 ## [1.1.5] - 2024-03-15

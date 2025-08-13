@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 
 use Magento\Framework\GraphQl\Query\QueryProcessor;
+use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Schema;
 use Sterk\GraphQlPerformance\Model\Performance\QueryTimer;
 
 /**
@@ -28,28 +30,38 @@ class PerformanceMonitorPlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param string $source GraphQL query source
-     * @param string|null $operationName Operation name
+     * @param Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
+     * @param ContextInterface|null $context Query context
      * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        string $source,
-        ?string $operationName = null,
+        Schema $schema,
+        ?string $source = null,
+        ?ContextInterface $context = null,
         ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
-        $this->queryTimer->start($operationName ?? 'anonymous', $source);
+        if ($source) {
+            $this->queryTimer->start($operationName ?? 'anonymous', $source);
+        }
 
         try {
-            $result = $proceed($source, $operationName, $variables, $extensions);
-            $this->queryTimer->stop($operationName ?? 'anonymous', $source);
+            $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
+            if ($source) {
+                $this->queryTimer->stop($operationName ?? 'anonymous', $source);
+            }
             return $result;
         } catch (\Exception $e) {
-            $this->queryTimer->stop($operationName ?? 'anonymous', $source);
+            if ($source) {
+                $this->queryTimer->stop($operationName ?? 'anonymous', $source);
+            }
             throw $e;
         }
     }

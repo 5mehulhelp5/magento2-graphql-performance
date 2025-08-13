@@ -35,13 +35,13 @@ type ConnectionPoolStats {
     wait_count: Int!
 }
 
-interface CacheableField {
+interface CacheableField @typeResolver(class: "Sterk\\GraphQlPerformance\\Model\\TypeResolver\\CacheableFieldResolver") {
     cache_hash: String!
     cache_ttl: Int!
     cache_tags: [String!]!
 }
 
-interface BatchLoadableField {
+interface BatchLoadableField @typeResolver(class: "Sterk\\GraphQlPerformance\\Model\\TypeResolver\\BatchLoadableFieldResolver") {
     batch_key: String!
     batch_size: Int!
 }

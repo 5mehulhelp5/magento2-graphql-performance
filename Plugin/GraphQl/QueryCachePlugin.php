@@ -82,12 +82,88 @@ class QueryCachePlugin
             // Execute query
             $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
 
-            // Handle empty results for categories and products
-            if (isset($result['data'])) {
-                if (isset($result['data']['categories']) && empty($result['data']['categories']['items'])) {
+            // Handle empty or null results
+            if (!isset($result['data'])) {
+                $result['data'] = [];
+            }
+
+            // Handle categories
+            if (stripos($source, 'categories') !== false) {
+                // Try to normalize the URL path
+                if (isset($variables['url'])) {
+                    $path = $variables['url'];
+                    // Remove leading/trailing slashes
+                    $path = trim($path, '/');
+                    // Convert Turkish characters to their URL-safe equivalents
+                    $turkishChars = ['ı', 'ğ', 'ü', 'ş', 'ö', 'ç', 'İ', 'Ğ', 'Ü', 'Ş', 'Ö', 'Ç'];
+                    $englishChars = ['i', 'g', 'u', 's', 'o', 'c', 'i', 'g', 'u', 's', 'o', 'c'];
+                    $path = str_replace($turkishChars, $englishChars, $path);
+                    // Update the variables array with normalized path
+                    $variables['url'] = $path;
+                    // Try the query again with normalized path
+                    $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
+                }
+
+                if (!isset($result['data']['categories']) || empty($result['data']['categories']['items'])) {
                     $path = $variables['url'] ?? '';
+
+                    // Log the category lookup attempt
+                    $this->logger->info('Category lookup failed', [
+                        'path' => $path,
+                        'original_query' => $source,
+                        'variables' => $variables
+                    ]);
+
+                    // Try to get parent category if this is a subcategory
+                    $pathParts = explode('/', $path);
+                    if (count($pathParts) > 1) {
+                        array_pop($pathParts);
+                        $parentPath = implode('/', $pathParts);
+                        $variables['url'] = $parentPath;
+                        $parentResult = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
+
+                        if (isset($parentResult['data']['categories']['items'][0])) {
+                            // Parent category exists, return 404 with parent info
+                            return [
+                                'data' => [
+                                    'categories' => [
+                                        'items' => [],
+                                        'total_count' => 0,
+                                        'page_info' => [
+                                            'total_pages' => 0,
+                                            'current_page' => 1,
+                                            'page_size' => $variables['pageSize'] ?? 20
+                                        ],
+                                        'parent_category' => $parentResult['data']['categories']['items'][0]
+                                    ]
+                                ],
+                                'errors' => [
+                                    [
+                                        'message' => __('Category not found for path: %1', $path),
+                                        'extensions' => [
+                                            'category' => 'graphql-no-such-entity',
+                                            'path' => $path,
+                                            'parent_path' => $parentPath
+                                        ]
+                                    ]
+                                ]
+                            ];
+                        }
+                    }
+
+                    // No parent found or not a subcategory
                     return [
-                        'data' => null,
+                        'data' => [
+                            'categories' => [
+                                'items' => [],
+                                'total_count' => 0,
+                                'page_info' => [
+                                    'total_pages' => 0,
+                                    'current_page' => 1,
+                                    'page_size' => $variables['pageSize'] ?? 20
+                                ]
+                            ]
+                        ],
                         'errors' => [
                             [
                                 'message' => __('Category not found for path: %1', $path),
@@ -99,23 +175,143 @@ class QueryCachePlugin
                         ]
                     ];
                 }
+            }
 
-                if (isset($result['data']['products']) && empty($result['data']['products']['items'])) {
-                    $categoryId = $variables['filters']['category_uid']['eq'] ?? '';
-                    return [
-                        'data' => [
-                            'products' => [
-                                'items' => [],
-                                'total_count' => 0,
-                                'page_info' => [
-                                    'total_pages' => 0,
-                                    'current_page' => 1,
-                                    'page_size' => $variables['pageSize'] ?? 24
-                                ]
-                            ]
+            // Handle products
+            if (stripos($source, 'products') !== false) {
+                // Handle product list query
+                if (isset($variables['filter']) || isset($variables['filters'])) {
+                    $filters = $variables['filter'] ?? $variables['filters'] ?? [];
+
+                    // Log product search attempt
+                    $this->logger->info('Product search', [
+                        'filters' => $filters,
+                        'sort' => $variables['sort'] ?? null,
+                        'search' => $variables['search'] ?? null,
+                        'page' => $variables['currentPage'] ?? 1
+                    ]);
+
+                    // Handle category-based product listing
+                    if (isset($filters['category_uid']['eq'])) {
+                        $categoryId = $filters['category_uid']['eq'];
+
+                        // If no products found for category, try to get category info
+                        if (empty($result['data']['products']['items'])) {
+                            $categoryQuery = 'query ($id: String!) { categories(filters: {uid: {eq: $id}}) { items { uid name url_path } } }';
+                            $categoryVars = ['id' => $categoryId];
+                            $categoryResult = $proceed($schema, $categoryQuery, $context, $categoryVars, null, $extensions);
+
+                            if (!empty($categoryResult['data']['categories']['items'])) {
+                                $category = $categoryResult['data']['categories']['items'][0];
+                                return [
+                                    'data' => [
+                                        'products' => [
+                                            'items' => [],
+                                            'total_count' => 0,
+                                            'page_info' => [
+                                                'total_pages' => 0,
+                                                'current_page' => $variables['currentPage'] ?? 1,
+                                                'page_size' => $variables['pageSize'] ?? 24
+                                            ],
+                                            'aggregations' => [],
+                                            'sort_fields' => [
+                                                'options' => [
+                                                    ['label' => 'Position', 'value' => 'position'],
+                                                    ['label' => 'Product Name', 'value' => 'name'],
+                                                    ['label' => 'Price', 'value' => 'price']
+                                                ]
+                                            ],
+                                            'category' => $category
+                                        ]
+                                    ]
+                                ];
+                            }
+                        }
+                    }
+
+                    // Handle URL key based product detail
+                    if (isset($filters['url_key']['eq'])) {
+                        $urlKey = $filters['url_key']['eq'];
+
+                        // If product not found by URL key
+                        if (empty($result['data']['products']['items'])) {
+                            // Try to normalize the URL key
+                            $normalizedUrlKey = $this->normalizeUrlKey($urlKey);
+                            if ($normalizedUrlKey !== $urlKey) {
+                                $filters['url_key']['eq'] = $normalizedUrlKey;
+                                $variables['filter'] = $filters;
+                                $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
+                            }
+                        }
+                    }
+                }
+
+                // Ensure all required fields are present
+                if (!isset($result['data']['products'])) {
+                    $result['data']['products'] = [];
+                }
+                if (!isset($result['data']['products']['items'])) {
+                    $result['data']['products']['items'] = [];
+                }
+                if (!isset($result['data']['products']['aggregations'])) {
+                    $result['data']['products']['aggregations'] = $this->getDefaultAggregations();
+                }
+                if (!isset($result['data']['products']['page_info'])) {
+                    $result['data']['products']['page_info'] = [
+                        'total_pages' => 0,
+                        'current_page' => $variables['currentPage'] ?? 1,
+                        'page_size' => $variables['pageSize'] ?? 24
+                    ];
+                }
+                if (!isset($result['data']['products']['total_count'])) {
+                    $result['data']['products']['total_count'] = 0;
+                }
+                if (!isset($result['data']['products']['sort_fields'])) {
+                    $result['data']['products']['sort_fields'] = [
+                        'options' => [
+                            ['label' => 'Position', 'value' => 'position'],
+                            ['label' => 'Product Name', 'value' => 'name'],
+                            ['label' => 'Price', 'value' => 'price'],
+                            ['label' => 'Newest', 'value' => 'created_at'],
+                            ['label' => 'Best Sellers', 'value' => 'bestsellers']
                         ]
                     ];
                 }
+            }
+
+            // Handle store config
+            if (stripos($source, 'storeConfig') !== false && !isset($result['data']['storeConfig'])) {
+                $this->logger->warning('StoreConfig query returned no data');
+                return [
+                    'data' => [
+                        'storeConfig' => [
+                            'store_code' => 'default',
+                            'locale' => 'tr_TR',
+                            'base_currency_code' => 'TRY',
+                            'default_display_currency_code' => 'TRY',
+                            'grid_per_page' => 24,
+                            'grid_per_page_values' => '12,24,36',
+                            'list_per_page' => 24
+                        ]
+                    ]
+                ];
+            }
+
+            // Handle CMS pages
+            if (stripos($source, 'cmsPage') !== false && !isset($result['data']['cmsPage'])) {
+                $identifier = $variables['identifier'] ?? '';
+                return [
+                    'data' => null,
+                    'errors' => [
+                        [
+                            'message' => __('No CMS page found for identifier: %1', $identifier),
+                            'extensions' => [
+                                'category' => 'graphql-no-such-entity',
+                                'identifier' => $identifier
+                            ]
+                        ]
+                    ]
+                ];
             }
 
             // Cache the result if no errors
@@ -145,12 +341,27 @@ class QueryCachePlugin
 
         return $result;
         } catch (\Exception $e) {
-            $this->logger->error('GraphQL query error', [
+            $context = [
                 'query' => $source,
                 'operation' => $operationName,
                 'variables' => $variables,
-                'error' => $e->getMessage()
-            ]);
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ];
+
+            // Log detailed error information
+            $this->logger->error('GraphQL query error: ' . $e->getMessage(), $context);
+
+            // Log specific error types
+            if ($e instanceof \Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException) {
+                $this->logger->info('Entity not found', $context);
+            } elseif ($e instanceof \Magento\Framework\GraphQl\Exception\GraphQlAuthorizationException) {
+                $this->logger->warning('Authorization error', $context);
+            } elseif ($e instanceof \Magento\Framework\GraphQl\Exception\GraphQlInputException) {
+                $this->logger->warning('Invalid input', $context);
+            }
             return [
                 'data' => null,
                 'errors' => [
@@ -238,6 +449,13 @@ class QueryCachePlugin
                     if (isset($product['id'])) {
                         $tags[] = 'catalog_product_' . $product['id'];
                     }
+                    if (isset($product['uid'])) {
+                        $tags[] = 'catalog_product_' . $product['uid'];
+                    }
+                    // Add manufacturer tag for better cache invalidation
+                    if (isset($product['manufacturer']['label'])) {
+                        $tags[] = 'manufacturer_' . strtolower(str_replace(' ', '_', $product['manufacturer']['label']));
+                    }
                 }
             }
 
@@ -246,6 +464,9 @@ class QueryCachePlugin
                 foreach ($result['data']['categories']['items'] ?? [] as $category) {
                     if (isset($category['id'])) {
                         $tags[] = 'catalog_category_' . $category['id'];
+                    }
+                    if (isset($category['uid'])) {
+                        $tags[] = 'catalog_category_' . $category['uid'];
                     }
                 }
             }
@@ -259,5 +480,89 @@ class QueryCachePlugin
         }
 
         return array_unique($tags);
+    }
+
+    /**
+     * Normalize URL key for product lookup
+     *
+     * @param string $urlKey
+     * @return string
+     */
+    private function normalizeUrlKey(string $urlKey): string
+    {
+        // Remove leading/trailing slashes and spaces
+        $urlKey = trim($urlKey, '/ ');
+
+        // Convert Turkish characters to URL-safe equivalents
+        $turkishChars = ['ı', 'ğ', 'ü', 'ş', 'ö', 'ç', 'İ', 'Ğ', 'Ü', 'Ş', 'Ö', 'Ç'];
+        $englishChars = ['i', 'g', 'u', 's', 'o', 'c', 'i', 'g', 'u', 's', 'o', 'c'];
+        $urlKey = str_replace($turkishChars, $englishChars, $urlKey);
+
+        // Convert to lowercase and replace spaces with hyphens
+        $urlKey = strtolower(str_replace(' ', '-', $urlKey));
+
+        // Remove any invalid characters
+        $urlKey = preg_replace('/[^a-z0-9\-]/', '', $urlKey);
+
+        // Remove multiple consecutive hyphens
+        $urlKey = preg_replace('/-+/', '-', $urlKey);
+
+        return $urlKey;
+    }
+
+    /**
+     * Get default aggregations for product listing
+     *
+     * @return array
+     */
+    private function getDefaultAggregations(): array
+    {
+        return [
+            [
+                'attribute_code' => 'manufacturer',
+                'label' => 'Manufacturer',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_kasa_capi',
+                'label' => 'Kasa Çapı',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_saat_mekanizma',
+                'label' => 'Saat Mekanizması',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_kasa_cinsi',
+                'label' => 'Kasa Cinsi',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_kordon_tipi',
+                'label' => 'Kordon Tipi',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_swiss_made',
+                'label' => 'Swiss Made',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_webe_ozel',
+                'label' => 'Web\'e Özel',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_outlet_urun',
+                'label' => 'Outlet Ürün',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_teklife_acik',
+                'label' => 'Teklife Açık',
+                'options' => []
+            ]
+        ];
     }
 }

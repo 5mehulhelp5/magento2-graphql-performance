@@ -104,7 +104,7 @@ class CacheWarmer
     public function warmupCache(): void
     {
         foreach ($this->storeManager->getStores() as $store) {
-            $this->warmupStoreCache($store->getId());
+            $this->warmupStoreCache((int) $store->getId());
         }
     }
 

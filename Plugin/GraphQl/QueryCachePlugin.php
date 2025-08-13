@@ -609,18 +609,80 @@ class QueryCachePlugin
      * @param array $variables
      * @return array
      */
-    private function handleCategoryByName(array $result, array $variables): array
+        private function handleCategoryByName(array $result, array $variables): array
     {
         $name = $variables['name'] ?? '';
 
-        // Always return a valid structure
+        // Default category structure
+        $defaultCategory = [
+            'items' => [],
+            'total_count' => 0,
+            'page_info' => [
+                'total_pages' => 0,
+                'current_page' => 1,
+                'page_size' => 20,
+                '__typename' => 'SearchResultPageInfo'
+            ],
+            '__typename' => 'CategoryResult'
+        ];
+
+        // If no data or empty items
+        if (!isset($result['data']['categories']) || empty($result['data']['categories']['items'])) {
+            $this->logger->info('No categories found for name: ' . $name);
+
+            // Try to find parent category
+            if ($name && strpos($name, '/') !== false) {
+                $parts = explode('/', $name);
+                array_pop($parts);
+                $parentName = implode('/', $parts);
+
+                $this->logger->info('Trying parent category: ' . $parentName);
+
+                return [
+                    'data' => [
+                        'categories' => array_merge($defaultCategory, [
+                            'parent_name' => $parentName
+                        ])
+                    ],
+                    'errors' => [
+                        [
+                            'message' => __('Category not found: %1', $name),
+                            'extensions' => [
+                                'category' => 'graphql-no-such-entity',
+                                'name' => $name,
+                                'parent_name' => $parentName
+                            ]
+                        ]
+                    ]
+                ];
+            }
+
+            // Return default structure for non-nested categories
+            return [
+                'data' => [
+                    'categories' => $defaultCategory
+                ]
+            ];
+        }
+
+        // Ensure all required fields are present
+        $categoryData = array_merge(
+            $defaultCategory,
+            $result['data']['categories'],
+            [
+                'total_count' => count($result['data']['categories']['items']),
+                'page_info' => [
+                    'total_pages' => ceil(count($result['data']['categories']['items']) / 20),
+                    'current_page' => 1,
+                    'page_size' => 20,
+                    '__typename' => 'SearchResultPageInfo'
+                ]
+            ]
+        );
+
         return [
             'data' => [
-                'categories' => [
-                    'items' => $result['data']['categories']['items'] ?? [],
-                    'total_count' => count($result['data']['categories']['items'] ?? []),
-                    '__typename' => 'CategoryResult'
-                ]
+                'categories' => $categoryData
             ]
         ];
     }
@@ -633,41 +695,67 @@ class QueryCachePlugin
      */
     private function handleStoreConfig(array $result): array
     {
-        if (!isset($result['data']['storeConfig'])) {
+        $defaultConfig = [
+            'website_name' => 'Edip Saat',
+            'store_code' => 'default',
+            'store_name' => 'Edip Saat',
+            'locale' => 'tr_TR',
+            'base_currency_code' => 'TRY',
+            'default_display_currency_code' => 'TRY',
+            'title_suffix' => ' | Edip Saat',
+            'title_prefix' => '',
+            'title_separator' => ' - ',
+            'default_title' => 'Edip Saat',
+            'cms_home_page' => 'home',
+            'catalog_default_sort_by' => 'position',
+            'category_url_suffix' => '',
+            'product_url_suffix' => '',
+            'secure_base_link_url' => 'https://staging-worker.edipsaat.com/',
+            'secure_base_url' => 'https://staging-worker.edipsaat.com/',
+            'root_category_uid' => 'Mg==',
+            'weight_unit' => 'kgs',
+            'product_reviews_enabled' => true,
+            'allow_guests_to_write_product_reviews' => true,
+            'grid_per_page' => 24,
+            'grid_per_page_values' => '12,24,36',
+            'list_per_page' => 24,
+            'create_account_confirmation' => false,
+            'order_cancellation_enabled' => true,
+            'order_cancellation_reasons' => [
+                [
+                    'description' => 'Ürünü artık istemiyorum',
+                    '__typename' => 'OrderCancellationReason'
+                ],
+                [
+                    'description' => 'Yanlış ürün seçtim',
+                    '__typename' => 'OrderCancellationReason'
+                ],
+                [
+                    'description' => 'Diğer',
+                    '__typename' => 'OrderCancellationReason'
+                ]
+            ],
+            'autocomplete_on_storefront' => true,
+            'minimum_password_length' => 8,
+            'required_character_classes_number' => 3,
+            'magento_wishlist_general_is_enabled' => true,
+            '__typename' => 'StoreConfig'
+        ];
+
+        if (!isset($result['data']['storeConfig']) || empty($result['data']['storeConfig'])) {
+            $this->logger->info('Using default store config');
             return [
                 'data' => [
-                    'storeConfig' => [
-                        'store_code' => 'default',
-                        'store_name' => 'Edip Saat',
-                        'locale' => 'tr_TR',
-                        'base_currency_code' => 'TRY',
-                        'default_display_currency_code' => 'TRY',
-                        'title_suffix' => ' | Edip Saat',
-                        'title_prefix' => '',
-                        'title_separator' => ' - ',
-                        'default_title' => 'Edip Saat',
-                        'grid_per_page' => 24,
-                        'grid_per_page_values' => '12,24,36',
-                        'list_per_page' => 24,
-                        'category_url_suffix' => '',
-                        'product_url_suffix' => '',
-                        'secure_base_link_url' => 'https://staging-worker.edipsaat.com/',
-                        'secure_base_url' => 'https://staging-worker.edipsaat.com/',
-                        'root_category_uid' => 'Mg==',
-                        'weight_unit' => 'kgs',
-                        'product_reviews_enabled' => true,
-                        'allow_guests_to_write_product_reviews' => true,
-                        'create_account_confirmation' => false,
-                        'order_cancellation_enabled' => true,
-                        'autocomplete_on_storefront' => true,
-                        'minimum_password_length' => 8,
-                        'required_character_classes_number' => 3,
-                        'magento_wishlist_general_is_enabled' => true,
-                        '__typename' => 'StoreConfig'
-                    ]
+                    'storeConfig' => $defaultConfig
                 ]
             ];
         }
+
+        // Merge with defaults to ensure all fields are present
+        $result['data']['storeConfig'] = array_merge(
+            $defaultConfig,
+            $result['data']['storeConfig']
+        );
 
         return $result;
     }

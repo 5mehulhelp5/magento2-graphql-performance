@@ -37,6 +37,6 @@ class ConfigChange implements ObserverInterface
         $this->cache->clean(['config_change']);
 
         // Re-warm cache if warming is enabled
-        $this->cacheWarmer->warm();
+        $this->cacheWarmer->warmupCache();
     }
 }

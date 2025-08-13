@@ -5,6 +5,7 @@ namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 
 use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\GraphQl\Query\QueryProcessor\QueryContext;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionManager;
 
 /**
@@ -31,7 +32,7 @@ class ConnectionManagerPlugin
      * @param \Closure $proceed Original method
      * @param \Magento\Framework\GraphQl\Schema $schema GraphQL schema
      * @param string|null $source GraphQL query source
-     * @param string|null $operationName Operation name
+     * @param string|\Magento\Framework\GraphQl\Query\QueryProcessor\QueryContext|null $operationName Operation name or context
      * @param array|null $variables Query variables
      * @param array|null $extensions GraphQL extensions
      * @return array
@@ -41,7 +42,7 @@ class ConnectionManagerPlugin
         \Closure $proceed,
         \Magento\Framework\GraphQl\Schema $schema,
         ?string $source = null,
-        ?string $operationName = null,
+        $operationName = null,
         ?array $variables = null,
         ?array $extensions = null
     ): array {

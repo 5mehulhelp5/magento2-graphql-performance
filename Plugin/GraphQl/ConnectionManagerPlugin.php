@@ -29,8 +29,8 @@ class ConnectionManagerPlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param RequestInterface $request Request object
-     * @param string|null $query GraphQL query
+     * @param \Magento\Framework\GraphQl\Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
      * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
      * @param array|null $extensions GraphQL extensions
@@ -39,19 +39,19 @@ class ConnectionManagerPlugin
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        string $source,
+        \Magento\Framework\GraphQl\Schema $schema,
+        ?string $source = null,
         ?string $operationName = null,
         ?array $variables = null,
         ?array $extensions = null
     ): array {
         // Parse the query to determine operation type
         try {
-            $query = $request->getContent();
-            if (empty($query)) {
-                return $proceed($request, $variables, $operationName, $extensions);
+            if (empty($source)) {
+                return $proceed($schema, $source, $operationName, $variables, $extensions);
             }
 
-            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($query));
+            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
             $isMutation = false;
 
             foreach ($documentNode->definitions as $definition) {
@@ -62,7 +62,7 @@ class ConnectionManagerPlugin
             }
         } catch (\Exception $e) {
             // If parsing fails, proceed with original request
-            return $proceed($request, $variables, $operationName, $extensions);
+            return $proceed($schema, $source, $operationName, $variables, $extensions);
         }
 
         try {
@@ -75,7 +75,7 @@ class ConnectionManagerPlugin
             }
 
             // Execute the query
-            $result = $proceed($request, $variables, $operationName, $extensions);
+            $result = $proceed($schema, $source, $operationName, $variables, $extensions);
 
             // Handle transaction for mutations
             if ($isMutation) {

@@ -2,6 +2,17 @@
 
 ## [1.1.8] - 2024-03-13
 
+### Added
+- Added support for @skip_cache directive to bypass caching
+- Added ability to skip cache via extensions parameter
+- Added more detailed error categorization and logging
+- Added graceful fallback for cache-related errors
+
+### Changed
+- Made query caching behavior more flexible and configurable
+- Improved error handling to attempt non-cached execution on failure
+- Enhanced error messages with operation names and query hashes
+
 ### Fixed
 - Fixed introspection query handling in QueryCachePlugin
 - Fixed schema generation issues with GraphQL Mesh

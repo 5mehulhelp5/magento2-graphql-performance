@@ -59,8 +59,18 @@ class QueryCachePlugin
             return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 
-        // Skip caching for mutations and introspection queries
-        if ($this->isMutation($source) || stripos($source, '__schema') !== false || stripos($source, '__type') !== false) {
+        // Skip caching for special queries
+        if (
+            // Skip mutations
+            $this->isMutation($source) ||
+            // Skip introspection queries
+            stripos($source, '__schema') !== false ||
+            stripos($source, '__type') !== false ||
+            // Skip if explicitly requested via extensions
+            ($extensions['skip_cache'] ?? false) ||
+            // Skip if query contains @skip_cache directive
+            stripos($source, '@skip_cache') !== false
+        ) {
             return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 
@@ -507,38 +517,52 @@ class QueryCachePlugin
 
             return $result;
         } catch (\Exception $e) {
-            $context = [
-                'query' => $source,
-                'operation' => $operationName,
-                'variables' => $variables,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ];
+            // Try to proceed without caching on error
+            try {
+                $this->logger->info('Attempting to proceed without caching due to error', [
+                    'query' => $source,
+                    'operation' => $operationName,
+                    'error' => $e->getMessage()
+                ]);
+                return $proceed($schema, $source, $context, $variables, $operationName, array_merge($extensions ?? [], ['skip_cache' => true]));
+            } catch (\Exception $fallbackError) {
+                $context = [
+                    'query' => $source,
+                    'operation' => $operationName,
+                    'variables' => $variables,
+                    'error' => $fallbackError->getMessage(),
+                    'original_error' => $e->getMessage()
+                ];
 
-            // Log detailed error information
-            $this->logger->error('GraphQL query error: ' . $e->getMessage(), $context);
+                // Log error with appropriate level based on type
+                if ($fallbackError instanceof \Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException) {
+                    $this->logger->info('Entity not found', $context);
+                    $category = 'graphql-no-such-entity';
+                } elseif ($fallbackError instanceof \Magento\Framework\GraphQl\Exception\GraphQlAuthorizationException) {
+                    $this->logger->warning('Authorization error', $context);
+                    $category = 'graphql-auth';
+                } elseif ($fallbackError instanceof \Magento\Framework\GraphQl\Exception\GraphQlInputException) {
+                    $this->logger->warning('Invalid input', $context);
+                    $category = 'graphql-input';
+                } else {
+                    $this->logger->error('GraphQL query error', $context);
+                    $category = 'graphql';
+                }
 
-            // Log specific error types
-            if ($e instanceof \Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException) {
-                $this->logger->info('Entity not found', $context);
-            } elseif ($e instanceof \Magento\Framework\GraphQl\Exception\GraphQlAuthorizationException) {
-                $this->logger->warning('Authorization error', $context);
-            } elseif ($e instanceof \Magento\Framework\GraphQl\Exception\GraphQlInputException) {
-                $this->logger->warning('Invalid input', $context);
-            }
-            return [
-                'data' => null,
-                'errors' => [
-                    [
-                        'message' => $e->getMessage(),
-                        'extensions' => [
-                            'category' => 'graphql'
+                return [
+                    'data' => null,
+                    'errors' => [
+                        [
+                            'message' => $fallbackError->getMessage(),
+                            'extensions' => [
+                                'category' => $category,
+                                'operation' => $operationName,
+                                'query_hash' => substr(md5($source), 0, 8)
+                            ]
                         ]
                     ]
-                ]
-            ];
+                ];
+            }
         }
     }
 

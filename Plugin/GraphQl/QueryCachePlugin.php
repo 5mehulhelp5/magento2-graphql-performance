@@ -142,9 +142,9 @@ class QueryCachePlugin
                     // Remove leading/trailing slashes
                     $path = trim($path, '/');
                     // Convert Turkish characters to their URL-safe equivalents
-                    $turkishChars = ['ı', 'ğ', 'ü', 'ş', 'ö', 'ç', 'İ', 'Ğ', 'Ü', 'Ş', 'Ö', 'Ç'];
-                    $englishChars = ['i', 'g', 'u', 's', 'o', 'c', 'i', 'g', 'u', 's', 'o', 'c'];
-                    $path = str_replace($turkishChars, $englishChars, $path);
+                    $turkishChars = ['ı', 'ğ', 'ü', 'ş', 'ö', 'ç', 'İ', 'Ğ', 'Ü', 'Ş', 'Ö', 'Ç', ' '];
+                    $englishChars = ['i', 'g', 'u', 's', 'o', 'c', 'i', 'g', 'u', 's', 'o', 'c', '-'];
+                    $path = mb_strtolower(str_replace($turkishChars, $englishChars, $path), 'UTF-8');
                     // Update the variables array with normalized path
                     $variables['url'] = $path;
                     // Try the query again with normalized path
@@ -581,9 +581,9 @@ class QueryCachePlugin
         $urlKey = trim($urlKey, '/ ');
 
         // Convert Turkish characters to URL-safe equivalents
-        $turkishChars = ['ı', 'ğ', 'ü', 'ş', 'ö', 'ç', 'İ', 'Ğ', 'Ü', 'Ş', 'Ö', 'Ç'];
-        $englishChars = ['i', 'g', 'u', 's', 'o', 'c', 'i', 'g', 'u', 's', 'o', 'c'];
-        $urlKey = str_replace($turkishChars, $englishChars, $urlKey);
+        $turkishChars = ['ı', 'ğ', 'ü', 'ş', 'ö', 'ç', 'İ', 'Ğ', 'Ü', 'Ş', 'Ö', 'Ç', ' '];
+        $englishChars = ['i', 'g', 'u', 's', 'o', 'c', 'i', 'g', 'u', 's', 'o', 'c', '-'];
+        $urlKey = mb_strtolower(str_replace($turkishChars, $englishChars, $urlKey), 'UTF-8');
 
         // Convert to lowercase and replace spaces with hyphens
         $urlKey = strtolower(str_replace(' ', '-', $urlKey));
@@ -602,6 +602,57 @@ class QueryCachePlugin
      *
      * @return array
      */
+    private function getDefaultAggregations(): array
+    {
+        return [
+            [
+                'attribute_code' => 'manufacturer',
+                'label' => 'Manufacturer',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_kasa_capi',
+                'label' => 'Kasa Çapı',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_saat_mekanizma',
+                'label' => 'Saat Mekanizması',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_kasa_cinsi',
+                'label' => 'Kasa Cinsi',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_kordon_tipi',
+                'label' => 'Kordon Tipi',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_swiss_made',
+                'label' => 'Swiss Made',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_webe_ozel',
+                'label' => "Web'e Özel",
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_outlet_urun',
+                'label' => 'Outlet Ürün',
+                'options' => []
+            ],
+            [
+                'attribute_code' => 'es_teklife_acik',
+                'label' => 'Teklife Açık',
+                'options' => []
+            ]
+        ];
+    }
+
     /**
      * Handle GetCategoryUidByName query
      *
@@ -609,7 +660,7 @@ class QueryCachePlugin
      * @param array $variables
      * @return array
      */
-        private function handleCategoryByName(array $result, array $variables): array
+    private function handleCategoryByName(array $result, array $variables): array
     {
         $name = $variables['name'] ?? '';
 
@@ -832,31 +883,40 @@ class QueryCachePlugin
                         'maximum_price' => [
                             'final_price' => [
                                 'value' => 0,
-                                'currency' => 'TRY'
+                                'currency' => 'TRY',
+                                '__typename' => 'Money'
                             ],
                             'regular_price' => [
                                 'value' => 0,
-                                'currency' => 'TRY'
+                                'currency' => 'TRY',
+                                '__typename' => 'Money'
                             ],
                             'discount' => [
                                 'amount_off' => 0,
-                                'percent_off' => 0
-                            ]
+                                'percent_off' => 0,
+                                '__typename' => 'ProductDiscount'
+                            ],
+                            '__typename' => 'ProductPrice'
                         ],
                         'minimum_price' => [
                             'final_price' => [
                                 'value' => 0,
-                                'currency' => 'TRY'
+                                'currency' => 'TRY',
+                                '__typename' => 'Money'
                             ],
                             'regular_price' => [
                                 'value' => 0,
-                                'currency' => 'TRY'
+                                'currency' => 'TRY',
+                                '__typename' => 'Money'
                             ],
                             'discount' => [
                                 'amount_off' => 0,
-                                'percent_off' => 0
-                            ]
-                        ]
+                                'percent_off' => 0,
+                                '__typename' => 'ProductDiscount'
+                            ],
+                            '__typename' => 'ProductPrice'
+                        ],
+                        '__typename' => 'PriceRange'
                     ];
                 }
 

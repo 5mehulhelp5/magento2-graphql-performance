@@ -82,6 +82,42 @@ class QueryCachePlugin
             // Execute query
             $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
 
+            // Handle empty results for categories and products
+            if (isset($result['data'])) {
+                if (isset($result['data']['categories']) && empty($result['data']['categories']['items'])) {
+                    $path = $variables['url'] ?? '';
+                    return [
+                        'data' => null,
+                        'errors' => [
+                            [
+                                'message' => __('Category not found for path: %1', $path),
+                                'extensions' => [
+                                    'category' => 'graphql-no-such-entity',
+                                    'path' => $path
+                                ]
+                            ]
+                        ]
+                    ];
+                }
+
+                if (isset($result['data']['products']) && empty($result['data']['products']['items'])) {
+                    $categoryId = $variables['filters']['category_uid']['eq'] ?? '';
+                    return [
+                        'data' => [
+                            'products' => [
+                                'items' => [],
+                                'total_count' => 0,
+                                'page_info' => [
+                                    'total_pages' => 0,
+                                    'current_page' => 1,
+                                    'page_size' => $variables['pageSize'] ?? 24
+                                ]
+                            ]
+                        ]
+                    ];
+                }
+            }
+
             // Cache the result if no errors
             if (!isset($result['errors'])) {
             $lifetime = $this->getCacheLifetime($source);

@@ -123,6 +123,11 @@ class RequestValidator
      */
     private function validateStringValue(string $value, string $key): void
     {
+        // Skip validation for known safe values
+        if ($this->isSafeValue($key, $value)) {
+            return;
+        }
+
         // Check for potential SQL injection
         if (preg_match('/(union|select|insert|update|delete|drop|alter|create|rename)\s/i', $value)) {
             throw new LocalizedException(
@@ -136,6 +141,48 @@ class RequestValidator
                 __('Invalid value for variable: %1', $key)
             );
         }
+    }
+
+    /**
+     * Check if the value is known to be safe
+     *
+     * @param string $key Variable name
+     * @param string $value Variable value
+     * @return bool
+     */
+    private function isSafeValue(string $key, string $value): bool
+    {
+        // Safe keys that can contain special characters
+        $safeKeys = [
+            'name',
+            'match',
+            'eq',
+            'like',
+            'url',
+            'url_key',
+            'url_path',
+            'identifier',
+            'search'
+        ];
+
+        if (in_array($key, $safeKeys)) {
+            return true;
+        }
+
+        // Safe patterns for values
+        $safePatterns = [
+            '/^[a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s\-_\/]+$/u', // Turkish characters, numbers, spaces, hyphens, underscores, slashes
+            '/^[0-9]+$/', // Numbers only
+            '/^[A-Z0-9]{3,}$/' // Category UIDs (e.g., NTc5)
+        ];
+
+        foreach ($safePatterns as $pattern) {
+            if (preg_match($pattern, $value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

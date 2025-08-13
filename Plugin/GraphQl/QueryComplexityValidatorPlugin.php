@@ -30,48 +30,54 @@ class QueryComplexityValidatorPlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param string $source GraphQL query source
+     * @param Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
      * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
+     * @param ContextInterface|null $context Query context
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        string $source,
+        Schema $schema,
+        ?string $source = null,
         ?string $operationName = null,
         ?array $variables = null,
+        ?ContextInterface $context = null,
         ?array $extensions = null
     ): array {
-        // Parse the query to get AST
-        $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
+        if ($source) {
+            // Parse the query to get AST
+            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
 
-        // Get operation
-        $operation = null;
-        foreach ($documentNode->definitions as $definition) {
-            if ($definition->kind === 'OperationDefinition') {
-                if ($operationName === null || $definition->name->value === $operationName) {
-                    $operation = $definition;
-                    break;
+            // Get operation
+            $operation = null;
+            foreach ($documentNode->definitions as $definition) {
+                if ($definition->kind === 'OperationDefinition') {
+                    if ($operationName === null || $definition->name->value === $operationName) {
+                        $operation = $definition;
+                        break;
+                    }
                 }
+            }
+
+            if ($operation) {
+                // Create ResolveInfo
+                $info = new \Magento\Framework\GraphQl\Query\Resolver\ResolveInfo(
+                    $operation->name ? $operation->name->value : null,
+                    [],
+                    $schema->getType('Query'),
+                    $documentNode
+                );
+
+                // Validate complexity
+                $this->complexityValidator->validate($info);
             }
         }
 
-        if ($operation) {
-            // Create ResolveInfo
-            $info = new \Magento\Framework\GraphQl\Query\Resolver\ResolveInfo(
-                $operation->name ? $operation->name->value : null,
-                [],
-                $schema->getType('Query'),
-                $documentNode
-            );
-
-            // Validate complexity
-            $this->complexityValidator->validate($info);
-        }
-
         // Proceed with query execution
-        return $proceed($source, $operationName, $variables, $extensions);
+        return $proceed($schema, $source, $operationName, $variables, $context, $extensions);
     }
 }

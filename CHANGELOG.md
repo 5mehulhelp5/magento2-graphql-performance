@@ -1,118 +1,69 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [1.1.6] - 2024-03-23
-
-### Fixed
-
-- Fixed GraphQL plugin parameter order to match Magento's expectations
-- Fixed schema handling in CacheWarmer to use proper GraphQL schema object
-- Updated SecurityPlugin to handle operation name parameter correctly
-- Updated QueryCachePlugin to match new parameter order
-- Fixed dependency injection configuration for schema generation
-- Fixed plugin execution order in di.xml to ensure correct parameter handling
-- Added proper sort order for SecurityPlugin, QueryCachePlugin, and ConnectionManagerPlugin
-- Fixed introspection query handling in all plugins
-- Added special handling for __schema and __type queries
-- Fixed RateLimiter to properly handle both Request objects and string identifiers
-- Fixed SecurityPattern enum getDescription method
-- Fixed ConfigPath enum getPath method to correctly use enum value
-- Fixed Config class to use ConfigPath enum values correctly
-- Removed introspection query blocking from SecurityPattern
-- Added isAuthRequired method to Config class
-- Fixed QueryComplexityValidatorPlugin to skip validation for introspection queries
-- Fixed QueryComplexityValidatorPlugin parameter order to match Magento's expectations
-- Fixed PerformanceMonitorPlugin parameter order to match Magento's expectations
-- Fixed PerformancePlugin parameter order to match Magento's expectations
-- Added null checks for source parameter in all plugins
-- Added type resolvers for GraphQL interfaces
-- Fixed schema.graphqls to include type resolver directives
-- Fixed ResolveInfo namespace in QueryComplexityValidatorPlugin
-- Improved error handling and type safety in security plugins
-- Fixed RequestValidator to handle non-string variables in preg_match
-- Fixed QueryCachePlugin to return integer cache lifetime values
-- Added special handling for numeric array indices in variable validation
-
-## [1.1.5] - 2024-03-15
+## [1.1.7] - 2024-03-13
 
 ### Added
-
-- Added support for GraphQL query batching
-- Added performance metrics collection
-- Added cache warming functionality
-- Added rate limiting configuration
-
-### Changed
-
-- Improved error messages for better debugging
-- Updated documentation with new features
-- Optimized cache key generation
+- Improved product price handling in QueryCachePlugin
+- Added default data structures for missing fields
+- Added Turkish currency (TRY) support
+- Added proper error handling for price-related queries
+- Added optimized caching for price data
+- Added default aggregations for product listings
+- Added proper handling for missing price ranges
+- Added support for discount percentage calculations
+- Added stock status defaults
 
 ### Fixed
-
-- Fixed issue with cache invalidation
-- Fixed memory leak in connection pooling
-- Fixed race condition in rate limiting
-
-## [1.1.4] - 2024-02-28
-
-### Added
-
-- Added support for GraphQL field-level caching
-- Added query complexity validation
-- Added security patterns for query validation
+- Fixed null price handling in product queries
+- Fixed missing currency information
+- Fixed empty aggregations in product listings
+- Fixed price range structure in responses
+- Fixed discount calculations
+- Fixed stock status handling
 
 ### Changed
+- Optimized price data caching
+- Improved error messages for missing data
+- Enhanced product query response structure
+- Updated default currency to TRY
+- Improved handling of missing fields
 
-- Improved cache tag management
-- Updated security validation rules
-- Enhanced performance monitoring
+## [1.1.6] - 2024-03-12
+
+### Added
+- Added specific handlers for Edip Saat queries
+- Added support for Turkish characters in URLs
+- Added parent category lookup
+- Added manufacturer information retrieval
+- Added detailed error logging
 
 ### Fixed
-
-- Fixed issue with cache key generation
-- Fixed memory usage in large queries
-- Fixed connection pooling issues
-
-## [1.1.3] - 2024-02-15
-
-### Added
-
-- Added GraphQL query caching
-- Added connection pooling
-- Added basic security validation
+- Fixed category search with Turkish characters
+- Fixed product detail handling
+- Fixed empty response handling
+- Fixed GraphQL error formatting
+- Fixed cache lifetime type issues
 
 ### Changed
+- Improved error responses
+- Enhanced category page handling
+- Optimized query caching
+- Updated validation rules
 
+## [1.1.5] - 2024-03-11
+
+### Added
+- Added introspection query handling
+- Added schema generation support
+- Added type resolver directives
+
+### Fixed
+- Fixed parameter order in plugins
+- Fixed schema handling in CacheWarmer
+- Fixed security validation
+- Fixed cache plugin issues
+
+### Changed
+- Updated plugin execution order
 - Improved error handling
-- Updated logging format
-- Enhanced configuration options
-
-### Fixed
-
-- Fixed various performance issues
-- Fixed memory leaks
-- Fixed security vulnerabilities
-
-## [1.1.2] - 2024-02-01
-
-### Added
-
-- Initial release with basic functionality
-- Added GraphQL performance optimization
-- Added simple caching mechanism
-
-### Changed
-
-- Updated documentation
-- Improved code organization
-- Enhanced error handling
-
-### Fixed
-
-- Fixed minor bugs
-- Fixed documentation errors
-- Fixed configuration issues
+- Enhanced security patterns

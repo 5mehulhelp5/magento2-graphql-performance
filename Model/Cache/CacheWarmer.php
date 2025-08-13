@@ -7,6 +7,8 @@ use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\GraphQl\Schema;
+use Magento\Framework\GraphQl\Schema\SchemaGeneratorInterface;
 
 /**
  * Service class for warming GraphQL cache
@@ -87,12 +89,14 @@ class CacheWarmer
      * @param StoreManagerInterface $storeManager Store manager
      * @param ScopeConfigInterface $scopeConfig Configuration reader
      * @param LoggerInterface $logger Logger service
+     * @param SchemaGeneratorInterface $schemaGenerator Schema generator
      */
     public function __construct(
         private readonly QueryProcessor $queryProcessor,
         private readonly StoreManagerInterface $storeManager,
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly SchemaGeneratorInterface $schemaGenerator
     ) {
     }
 
@@ -156,10 +160,17 @@ class CacheWarmer
      */
     private function executeQuery(string $query, int $storeId): void
     {
+        // Get the schema for the current store
+        $schema = $this->schemaGenerator->generate();
+
+        // Execute the query with the correct parameter order
         $this->queryProcessor->process(
+            $schema,
             $query,
-            [],
-            [
+            null, // operationName
+            [], // variables
+            null, // context
+            [ // extensions
                 'store_id' => $storeId,
                 'cache_warmup' => true
             ]

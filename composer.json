@@ -1,96 +1,96 @@
 {
-    "name": "veysiyildiz/module-graphql-performance",
-    "description": "A comprehensive GraphQL performance optimization module for Magento 2",
-    "type": "magento2-module",
-    "version": "1.1.2",
-    "prefer-stable": true,
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Veysi YILDIZ",
-            "email": "veysiyildiz@gmail.com"
-        }
+  "name": "veysiyildiz/module-graphql-performance",
+  "description": "A comprehensive GraphQL performance optimization module for Magento 2",
+  "type": "magento2-module",
+  "version": "1.1.6",
+  "prefer-stable": true,
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Veysi YILDIZ",
+      "email": "veysiyildiz@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": "~7.4.0||~8.1.0",
+    "magento/framework": "^103.0.6",
+    "magento/module-graph-ql": "^100.4.6",
+    "magento/module-catalog-graph-ql": "^100.4.6",
+    "magento/module-store-graph-ql": "^100.4.3",
+    "magento/module-customer-graph-ql": "^100.4.6",
+    "magento/module-sales-graph-ql": "^100.4.6",
+    "magento/module-quote-graph-ql": "^100.4.6"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6",
+    "magento/magento-coding-standard": "^31.0",
+    "phpstan/phpstan": "^1.10",
+    "vimeo/psalm": "^5.0",
+    "squizlabs/php_codesniffer": "~3.7.2",
+    "phpcompatibility/php-compatibility": "^9.3",
+    "magento/magento2-functional-testing-framework": "^3.0",
+    "magento/framework": "^103.0.6",
+    "magento/module-integration": "^100.4.6",
+    "magento/module-catalog": "^104.0.6",
+    "magento/module-store": "^101.1.6",
+    "magento/module-customer": "^103.0.6"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "minimum-stability": "stable",
-    "require": {
-        "php": "~7.4.0||~8.1.0",
-        "magento/framework": "^103.0.6",
-        "magento/module-graph-ql": "^100.4.6",
-        "magento/module-catalog-graph-ql": "^100.4.6",
-        "magento/module-store-graph-ql": "^100.4.3",
-        "magento/module-customer-graph-ql": "^100.4.6",
-        "magento/module-sales-graph-ql": "^100.4.6",
-        "magento/module-quote-graph-ql": "^100.4.6"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.6",
-        "magento/magento-coding-standard": "^31.0",
-        "phpstan/phpstan": "^1.10",
-        "vimeo/psalm": "^5.0",
-        "squizlabs/php_codesniffer": "~3.7.2",
-        "phpcompatibility/php-compatibility": "^9.3",
-        "magento/magento2-functional-testing-framework": "^3.0",
-        "magento/framework": "^103.0.6",
-        "magento/module-integration": "^100.4.6",
-        "magento/module-catalog": "^104.0.6",
-        "magento/module-store": "^101.1.6",
-        "magento/module-customer": "^103.0.6"
-    },
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Sterk\\GraphQlPerformance\\": ""
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Sterk\\GraphQlPerformance\\Test\\": "Test/"
-        }
-    },
-    "scripts": {
-        "test": "phpunit",
-        "test-coverage": "phpunit --coverage-html coverage",
-        "phpcs": "phpcs --standard=Magento2 --ignore=vendor/* .",
-        "phpcbf": "phpcbf --standard=Magento2 --ignore=vendor/* .",
-        "phpstan": "phpstan analyse",
-        "psalm": "psalm"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "magento/composer-dependency-version-audit-plugin": true,
-            "magento/inventory-composer-installer": true,
-            "magento/composer-root-update-plugin": true,
-            "magento/magento-composer-installer": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
-    },
-    "support": {
-        "issues": "https://github.com/veysiyildiz/magento2-graphql-performance/issues",
-        "source": "https://github.com/veysiyildiz/magento2-graphql-performance",
-        "docs": "https://github.com/veysiyildiz/magento2-graphql-performance/wiki"
-    },
-    "keywords": [
-        "magento2",
-        "magento2-module",
-        "graphql",
-        "performance",
-        "caching",
-        "optimization"
-    ],
-    "homepage": "https://github.com/veysiyildiz/magento2-graphql-performance",
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://repo.magento.com"
-        }
-    ],
-    "funding": [
-        {
-            "type": "github",
-            "url": "https://github.com/sponsors/veysiyildiz"
-        }
-    ]
+    "psr-4": {
+      "Sterk\\GraphQlPerformance\\": ""
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sterk\\GraphQlPerformance\\Test\\": "Test/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test-coverage": "phpunit --coverage-html coverage",
+    "phpcs": "phpcs --standard=Magento2 --ignore=vendor/* .",
+    "phpcbf": "phpcbf --standard=Magento2 --ignore=vendor/* .",
+    "phpstan": "phpstan analyse",
+    "psalm": "psalm"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "magento/composer-dependency-version-audit-plugin": true,
+      "magento/inventory-composer-installer": true,
+      "magento/composer-root-update-plugin": true,
+      "magento/magento-composer-installer": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "support": {
+    "issues": "https://github.com/veysiyildiz/magento2-graphql-performance/issues",
+    "source": "https://github.com/veysiyildiz/magento2-graphql-performance",
+    "docs": "https://github.com/veysiyildiz/magento2-graphql-performance/wiki"
+  },
+  "keywords": [
+    "magento2",
+    "magento2-module",
+    "graphql",
+    "performance",
+    "caching",
+    "optimization"
+  ],
+  "homepage": "https://github.com/veysiyildiz/magento2-graphql-performance",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://repo.magento.com"
+    }
+  ],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/veysiyildiz"
+    }
+  ]
 }

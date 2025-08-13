@@ -1,11 +1,23 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.1.6] - 2024-03-23
+
+### Fixed
+
+- Fixed GraphQL plugin parameter order to match Magento's expectations
+- Fixed schema handling in CacheWarmer to use proper GraphQL schema object
+- Updated SecurityPlugin to handle operation name parameter correctly
+- Updated QueryCachePlugin to match new parameter order
+- Fixed dependency injection configuration for schema generation
 
 ## [1.1.2] - 2024-03-22
+
 ### Fixed
+
 - Fixed all PHPCS issues for better code quality
 - Improved DocBlock formatting and consistency
 - Fixed method argument alignment
@@ -18,7 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added GitHub Actions workflow for automated testing
 
 ## [1.1.1] - 2024-03-21
+
 ### Fixed
+
 - Fixed empty catch blocks with proper error logging
 - Improved array performance by removing array_merge in loops
 - Fixed lines exceeding maximum length
@@ -27,7 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced deprecated getReadConnection/getWriteConnection methods
 
 ## [1.1.0] - 2024-03-21
+
 ### Added
+
 - Full PHP 8.1 compatibility
 - Constructor property promotion for cleaner code
 - Intersection types for optimized fields
@@ -39,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved type safety throughout the codebase
 
 ### Changed
+
 - Updated all dev dependencies to latest versions
 - Improved error handling in connection pools
 - Enhanced type declarations across the module
@@ -46,13 +63,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Strengthened security validations
 
 ### Developer Experience
+
 - Better IDE support through enhanced type hints
 - Clearer code organization with PHP 8.1 features
 - Improved static analysis coverage
 - More maintainable and self-documenting code
 
 ## [1.0.0] - 2024-03-20
+
 ### Added
+
 - Initial release
 - DataLoader implementation for batch loading
 - Cache infrastructure with tag management
@@ -64,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation
 
 ### Optimized Entities
+
 - Products
 - Categories
 - Customers
@@ -76,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Checkout
 
 ### Performance Features
+
 - Query-level caching
 - Field-level result caching
 - Batch loading optimization
@@ -86,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resource usage monitoring
 
 ### Documentation
+
 - Installation guide
 - Configuration options
 - Usage examples

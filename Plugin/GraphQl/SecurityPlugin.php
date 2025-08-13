@@ -5,6 +5,8 @@ namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\GraphQl\Query\QueryProcessor;
+use Magento\Framework\GraphQl\Schema;
+use Magento\GraphQl\Model\Query\Context;
 use Sterk\GraphQlPerformance\Model\Security\RequestValidator;
 
 /**
@@ -30,17 +32,21 @@ class SecurityPlugin
      * Validate request before processing
      *
      * @param QueryProcessor $subject Query processor instance
-     * @param string $source GraphQL query source
+     * @param Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
      * @param string|null $operationName Operation name
      * @param array|null $variables Query variables
+     * @param Context|null $context Query context
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function beforeProcess(
         QueryProcessor $subject,
-        string $source,
+        Schema $schema,
+        ?string $source = null,
         ?string $operationName = null,
         ?array $variables = null,
+        ?Context $context = null,
         ?array $extensions = null
     ): array {
         $this->requestValidator->validate(
@@ -49,6 +55,6 @@ class SecurityPlugin
             $variables ?? []
         );
 
-        return [$source, $operationName, $variables, $extensions];
+        return [$schema, $source, $operationName, $variables, $context, $extensions];
     }
 }

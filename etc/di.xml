@@ -1,93 +1,20 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- Command Line Interface -->
-    <type name="Magento\Framework\Console\CommandList">
-        <arguments>
-            <argument name="commands" xsi:type="array">
-                <item name="graphql_cache_clean" xsi:type="object">Sterk\GraphQlPerformance\Console\Command\CacheCleanCommand</item>
-                <item name="graphql_cache_warm" xsi:type="object">Sterk\GraphQlPerformance\Console\Command\CacheWarmCommand</item>
-                <item name="graphql_performance_report" xsi:type="object">Sterk\GraphQlPerformance\Console\Command\PerformanceReportCommand</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- API Implementations -->
-    <preference for="Sterk\GraphQlPerformance\Api\PerformanceMetricsInterface"
-                type="Sterk\GraphQlPerformance\Model\PerformanceMetrics"/>
-    <preference for="Sterk\GraphQlPerformance\Api\CacheManagementInterface"
-                type="Sterk\GraphQlPerformance\Model\CacheManagement"/>
-
-    <!-- Cache Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\Cache\ResolverCache">
-        <arguments>
-            <argument name="cacheFrontendPool" xsi:type="object">Magento\Framework\App\Cache\Frontend\Pool</argument>
-            <argument name="identifier" xsi:type="string">graphql_resolver</argument>
-            <argument name="tag" xsi:type="string">GRAPHQL_RESOLVER</argument>
-        </arguments>
-    </type>
-
-    <!-- Performance Monitoring -->
-    <type name="Sterk\GraphQlPerformance\Model\Performance\QueryTimer">
-        <arguments>
-            <argument name="config" xsi:type="object">Sterk\GraphQlPerformance\Model\Config</argument>
-            <argument name="logger" xsi:type="object">Sterk\GraphQlPerformance\Logger\Logger</argument>
-        </arguments>
-    </type>
-
-    <!-- GraphQL Schema Config -->
-    <type name="Magento\Framework\GraphQl\Schema\Type\TypeRegistry">
-        <arguments>
-            <argument name="types" xsi:type="array">
-                <item name="PerformanceMetrics" xsi:type="string">Sterk\GraphQlPerformance\Model\GraphQl\Type\PerformanceMetricsType</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <!-- Plugin Configuration -->
+    <!-- Plugin for GraphQL query processing -->
     <type name="Magento\Framework\GraphQl\Query\QueryProcessor">
-        <plugin name="sterk_graphql_performance_security"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\SecurityPlugin"
+        <plugin name="sterk_graphql_performance_connection_manager"
+                type="Sterk\GraphQlPerformance\Plugin\GraphQl\ConnectionManagerPlugin"
                 sortOrder="10"/>
-        <plugin name="sterk_graphql_performance_optimizer"
-                type="Sterk\GraphQlPerformance\Plugin\GraphQl\PerformancePlugin"
-                sortOrder="20"/>
     </type>
 
-    <!-- Connection Pool Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionPoolManager">
+    <!-- Cache Warmer configuration -->
+    <type name="Sterk\GraphQlPerformance\Model\Cache\CacheWarmer">
         <arguments>
-            <argument name="config" xsi:type="object">Sterk\GraphQlPerformance\Model\Config</argument>
+            <argument name="queryProcessor" xsi:type="object">Magento\Framework\GraphQl\Query\QueryProcessor\Proxy</argument>
+            <argument name="storeManager" xsi:type="object">Magento\Store\Model\StoreManagerInterface\Proxy</argument>
+            <argument name="scopeConfig" xsi:type="object">Magento\Framework\App\Config\ScopeConfigInterface\Proxy</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="schemaGenerator" xsi:type="object">Magento\Framework\GraphQl\Schema\SchemaGeneratorInterface</argument>
         </arguments>
     </type>
-
-    <!-- Query Optimizer Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\Performance\QueryOptimizer">
-        <arguments>
-            <argument name="schema" xsi:type="object">Magento\Framework\GraphQl\Schema</argument>
-        </arguments>
-    </type>
-
-    <!-- Security Configuration -->
-    <type name="Sterk\GraphQlPerformance\Model\Security\RequestValidator">
-        <arguments>
-            <argument name="config" xsi:type="object">Sterk\GraphQlPerformance\Model\Config</argument>
-            <argument name="rateLimiter" xsi:type="object">Sterk\GraphQlPerformance\Model\Security\RateLimiter</argument>
-        </arguments>
-    </type>
-
-    <!-- Logger Configuration -->
-    <virtualType name="Sterk\GraphQlPerformance\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
-        <arguments>
-            <argument name="fileName" xsi:type="string">/var/log/graphql_performance.log</argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="Sterk\GraphQlPerformance\Logger\Logger" type="Magento\Framework\Logger\Monolog">
-        <arguments>
-            <argument name="name" xsi:type="string">graphql_performance</argument>
-            <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">Sterk\GraphQlPerformance\Logger\Handler</item>
-            </argument>
-        </arguments>
-    </virtualType>
 </config>

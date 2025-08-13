@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added special handling for __schema and __type queries
 - Fixed RateLimiter to properly handle both Request objects and string identifiers
 - Fixed SecurityPattern enum getDescription method
+- Fixed ConfigPath enum getPath method to correctly use enum value
 - Improved error handling and type safety in security plugins
 
 ## [1.1.5] - 2024-03-15

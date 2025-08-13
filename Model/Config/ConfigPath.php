@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 namespace Sterk\GraphQlPerformance\Model\Config;
 
+/**
+ * Enum defining configuration paths for GraphQL performance settings
+ *
+ * This enum contains the base paths for different configuration sections
+ * in the Magento system configuration. Each case represents a specific
+ * section of GraphQL performance-related settings.
+ */
 enum ConfigPath: string
 {
     case CACHE = 'graphql_performance/cache/';
@@ -19,6 +26,6 @@ enum ConfigPath: string
      */
     public function getPath(string $field): string
     {
-        return self::from($this)->value . $field;
+        return $this->value . $field;
     }
 }

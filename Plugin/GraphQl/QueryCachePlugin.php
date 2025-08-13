@@ -184,17 +184,37 @@ class QueryCachePlugin
      */
     private function getCacheLifetime(string $query): int
     {
-        // Use different lifetimes based on query type
+        // Use different lifetimes based on query type and fields
         if (stripos($query, 'products') !== false) {
+            // Shorter cache for product queries with stock or price
+            if (stripos($query, 'stock_status') !== false || stripos($query, 'price_range') !== false) {
+                return 300; // 5 minutes for dynamic data
+            }
+            
+            // Shorter cache for filtered product queries
+            if (stripos($query, 'es_outlet_urun') !== false || stripos($query, 'es_webe_ozel') !== false) {
+                return 600; // 10 minutes for filtered products
+            }
+
             return $this->config->getResolverCacheLifetime('product');
         }
 
         if (stripos($query, 'categories') !== false) {
+            // Longer cache for brand categories
+            if (stripos($query, 'is_brand') !== false || stripos($query, 'manufacturer') !== false) {
+                return 86400; // 24 hours for brand data
+            }
+
             return $this->config->getResolverCacheLifetime('category');
         }
 
         if (stripos($query, 'cart') !== false) {
             return $this->config->getResolverCacheLifetime('cart');
+        }
+
+        // Special handling for Edip Saat custom queries
+        if (stripos($query, 'brandCategories') !== false || stripos($query, 'GetAllCakmakCategories') !== false) {
+            return 86400; // 24 hours for brand listings
         }
 
         return $this->config->getCacheLifetime();

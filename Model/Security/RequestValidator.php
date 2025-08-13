@@ -154,6 +154,7 @@ class RequestValidator
     {
         // Safe keys that can contain special characters
         $safeKeys = [
+            // Standard GraphQL fields
             'name',
             'match',
             'eq',
@@ -162,7 +163,26 @@ class RequestValidator
             'url_key',
             'url_path',
             'identifier',
-            'search'
+            'search',
+            
+            // Edip Saat specific fields
+            'es_swiss_made',
+            'es_webe_ozel',
+            'es_outlet_urun',
+            'es_teklife_acik',
+            'es_kasa_capi',
+            'es_saat_mekanizma',
+            'es_kasa_cinsi',
+            'es_kordon_tipi',
+            'manufacturer',
+            'category_uid',
+            'store',
+            'content-currency',
+            'preview-version',
+            'x-magento-cache-id',
+            'x-forwarded-for',
+            'x-recaptcha',
+            'x-api-key'
         ];
 
         if (in_array($key, $safeKeys)) {
@@ -171,9 +191,13 @@ class RequestValidator
 
         // Safe patterns for values
         $safePatterns = [
-            '/^[a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s\-_\/]+$/u', // Turkish characters, numbers, spaces, hyphens, underscores, slashes
+            '/^[a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s\-_\/\.]+$/u', // Turkish characters, numbers, spaces, hyphens, underscores, slashes, dots
             '/^[0-9]+$/', // Numbers only
-            '/^[A-Z0-9]{3,}$/' // Category UIDs (e.g., NTc5)
+            '/^[A-Z0-9]{3,}$/', // Category UIDs (e.g., NTc5)
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', // UUIDs
+            '/^(true|false|1|0)$/', // Boolean values
+            '/^[A-Z]{2}$/', // Two-letter country/store codes
+            '/^[A-Z]{2}-[A-Z]{2}$/' // Locale codes (e.g., TR-tr)
         ];
 
         foreach ($safePatterns as $pattern) {

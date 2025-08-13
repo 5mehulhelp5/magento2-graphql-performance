@@ -87,6 +87,26 @@ class QueryCachePlugin
                 $result['data'] = [];
             }
 
+            // Extract operation name from query
+            $operationType = '';
+            if (preg_match('/query\s+(\w+)/', $source, $matches)) {
+                $operationType = $matches[1];
+            }
+
+            // Handle specific query types
+            switch ($operationType) {
+                case 'GetCategoryUidByName':
+                    return $this->handleCategoryByName($result, $variables);
+                case 'StoreConfig':
+                    return $this->handleStoreConfig($result);
+                case 'GetCmsPage':
+                    return $this->handleCmsPage($result, $variables);
+                case 'ProductPage2':
+                    return $this->handleProductPage($result, $variables, $schema, $source, $context, $proceed, $operationName, $extensions);
+                case 'ExtendedProductList':
+                    return $this->handleProductList($result, $variables, $schema, $source, $context, $proceed, $operationName, $extensions);
+            }
+
             // Handle categories
             if (stripos($source, 'categories') !== false) {
                 // Handle category lookup by name
@@ -582,6 +602,284 @@ class QueryCachePlugin
      *
      * @return array
      */
+    /**
+     * Handle GetCategoryUidByName query
+     *
+     * @param array $result
+     * @param array $variables
+     * @return array
+     */
+    private function handleCategoryByName(array $result, array $variables): array
+    {
+        $name = $variables['name'] ?? '';
+
+        // Always return a valid structure
+        return [
+            'data' => [
+                'categories' => [
+                    'items' => $result['data']['categories']['items'] ?? [],
+                    'total_count' => count($result['data']['categories']['items'] ?? []),
+                    '__typename' => 'CategoryResult'
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Handle StoreConfig query
+     *
+     * @param array $result
+     * @return array
+     */
+    private function handleStoreConfig(array $result): array
+    {
+        if (!isset($result['data']['storeConfig'])) {
+            return [
+                'data' => [
+                    'storeConfig' => [
+                        'store_code' => 'default',
+                        'store_name' => 'Edip Saat',
+                        'locale' => 'tr_TR',
+                        'base_currency_code' => 'TRY',
+                        'default_display_currency_code' => 'TRY',
+                        'title_suffix' => ' | Edip Saat',
+                        'title_prefix' => '',
+                        'title_separator' => ' - ',
+                        'default_title' => 'Edip Saat',
+                        'grid_per_page' => 24,
+                        'grid_per_page_values' => '12,24,36',
+                        'list_per_page' => 24,
+                        'category_url_suffix' => '',
+                        'product_url_suffix' => '',
+                        'secure_base_link_url' => 'https://staging-worker.edipsaat.com/',
+                        'secure_base_url' => 'https://staging-worker.edipsaat.com/',
+                        'root_category_uid' => 'Mg==',
+                        'weight_unit' => 'kgs',
+                        'product_reviews_enabled' => true,
+                        'allow_guests_to_write_product_reviews' => true,
+                        'create_account_confirmation' => false,
+                        'order_cancellation_enabled' => true,
+                        'autocomplete_on_storefront' => true,
+                        'minimum_password_length' => 8,
+                        'required_character_classes_number' => 3,
+                        'magento_wishlist_general_is_enabled' => true,
+                        '__typename' => 'StoreConfig'
+                    ]
+                ]
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Handle GetCmsPage query
+     *
+     * @param array $result
+     * @param array $variables
+     * @return array
+     */
+    private function handleCmsPage(array $result, array $variables): array
+    {
+        $identifier = $variables['identifier'] ?? '';
+
+        if (!isset($result['data']['cmsPage']) || $result['data']['cmsPage'] === null) {
+            if ($identifier === 'no-route') {
+                return [
+                    'data' => [
+                        'cmsPage' => null
+                    ],
+                    'errors' => [
+                        [
+                            'message' => __('Page not found'),
+                            'extensions' => [
+                                'category' => 'graphql-no-such-entity',
+                                'identifier' => $identifier
+                            ]
+                        ]
+                    ]
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Handle ProductPage2 query
+     *
+     * @param array $result
+     * @param array $variables
+     * @param Schema $schema
+     * @param string $source
+     * @param mixed $context
+     * @param \Closure $proceed
+     * @param string|null $operationName
+     * @param array|null $extensions
+     * @return array
+     */
+    private function handleProductPage(
+        array $result,
+        array $variables,
+        Schema $schema,
+        string $source,
+        $context,
+        \Closure $proceed,
+        ?string $operationName,
+        ?array $extensions
+    ): array {
+        // Initialize empty product data structure
+        if (!isset($result['data']['products'])) {
+            $result['data']['products'] = [
+                'items' => [],
+                'total_count' => 0
+            ];
+        }
+
+        // Ensure each product has price data
+        if (!empty($result['data']['products']['items'])) {
+            foreach ($result['data']['products']['items'] as &$product) {
+                if (!isset($product['price_range'])) {
+                    $product['price_range'] = [
+                        'maximum_price' => [
+                            'final_price' => [
+                                'value' => 0,
+                                'currency' => 'TRY'
+                            ],
+                            'regular_price' => [
+                                'value' => 0,
+                                'currency' => 'TRY'
+                            ],
+                            'discount' => [
+                                'amount_off' => 0,
+                                'percent_off' => 0
+                            ]
+                        ],
+                        'minimum_price' => [
+                            'final_price' => [
+                                'value' => 0,
+                                'currency' => 'TRY'
+                            ],
+                            'regular_price' => [
+                                'value' => 0,
+                                'currency' => 'TRY'
+                            ],
+                            'discount' => [
+                                'amount_off' => 0,
+                                'percent_off' => 0
+                            ]
+                        ]
+                    ];
+                }
+
+                // Ensure stock status is present
+                if (!isset($product['stock_status'])) {
+                    $product['stock_status'] = 'OUT_OF_STOCK';
+                }
+
+                // Add required fields for price display
+                if (!isset($product['url_key'])) {
+                    $product['url_key'] = '';
+                }
+            }
+        if (empty($result['data']['products']['items'])) {
+            $urlKey = $variables['urlKey'] ?? '';
+
+            // Try to get manufacturer info
+            if (preg_match('/^([a-zA-Z0-9-]+)-[a-zA-Z0-9-]+$/', $urlKey, $matches)) {
+                $brandName = str_replace('-', ' ', $matches[1]);
+                $brandQuery = 'query ($name: String!) { products(filter: {manufacturer: {like: $name}}, pageSize: 1) { items { manufacturer { label } } } }';
+                $brandVars = ['name' => $brandName];
+                $brandResult = $proceed($schema, $brandQuery, $context, $brandVars, null, $extensions);
+
+                if (!empty($brandResult['data']['products']['items'][0]['manufacturer'])) {
+                    return [
+                        'data' => [
+                            'products' => [
+                                'items' => [],
+                                'total_count' => 0,
+                                'manufacturer_info' => $brandResult['data']['products']['items'][0]['manufacturer']
+                            ]
+                        ],
+                        'errors' => [
+                            [
+                                'message' => __('Product not found: %1', $urlKey),
+                                'extensions' => [
+                                    'category' => 'graphql-no-such-entity',
+                                    'url_key' => $urlKey,
+                                    'manufacturer' => $brandName
+                                ]
+                            ]
+                        ]
+                    ];
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Handle ExtendedProductList query
+     *
+     * @param array $result
+     * @param array $variables
+     * @param Schema $schema
+     * @param string $source
+     * @param mixed $context
+     * @param \Closure $proceed
+     * @param string|null $operationName
+     * @param array|null $extensions
+     * @return array
+     */
+    private function handleProductList(
+        array $result,
+        array $variables,
+        Schema $schema,
+        string $source,
+        $context,
+        \Closure $proceed,
+        ?string $operationName,
+        ?array $extensions
+    ): array {
+        if (!isset($result['data']['products'])) {
+            $result['data']['products'] = [];
+        }
+
+        // Ensure all required fields are present
+        $result['data']['products']['items'] = $result['data']['products']['items'] ?? [];
+        $result['data']['products']['total_count'] = count($result['data']['products']['items']);
+
+        // Handle aggregations
+        if (!isset($result['data']['products']['aggregations'])) {
+            $result['data']['products']['aggregations'] = $this->getDefaultAggregations();
+        } else {
+            foreach ($result['data']['products']['aggregations'] as &$aggregation) {
+                $aggregation['options'] = $aggregation['options'] ?? [];
+            }
+        }
+
+        // Handle page info
+        $result['data']['products']['page_info'] = [
+            'current_page' => $variables['currentPage'] ?? 1,
+            'page_size' => $variables['pageSize'] ?? 24,
+            'total_pages' => ceil(($result['data']['products']['total_count'] ?? 0) / ($variables['pageSize'] ?? 24))
+        ];
+
+        // Handle sort fields
+        $result['data']['products']['sort_fields'] = [
+            'options' => [
+                ['label' => 'Position', 'value' => 'position'],
+                ['label' => 'Product Name', 'value' => 'name'],
+                ['label' => 'Price', 'value' => 'price'],
+                ['label' => 'Newest', 'value' => 'created_at'],
+                ['label' => 'Best Sellers', 'value' => 'bestsellers']
+            ]
+        ];
+
+        return $result;
+    }
+
     private function getDefaultAggregations(): array
     {
         return [

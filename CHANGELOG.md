@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed SecurityPattern enum getDescription method
 - Fixed ConfigPath enum getPath method to correctly use enum value
 - Fixed Config class to use ConfigPath enum values correctly
+- Removed introspection query blocking from SecurityPattern
 - Improved error handling and type safety in security plugins
 
 ## [1.1.5] - 2024-03-15

@@ -34,9 +34,9 @@ class SecurityPlugin
      * @param QueryProcessor $subject Query processor instance
      * @param Schema $schema GraphQL schema
      * @param string|null $source GraphQL query source
-     * @param string|null $operationName Operation name
-     * @param array|null $variables Query variables
      * @param Context|null $context Query context
+     * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
@@ -44,9 +44,9 @@ class SecurityPlugin
         QueryProcessor $subject,
         Schema $schema,
         ?string $source = null,
-        ?string $operationName = null,
-        ?array $variables = null,
         ?Context $context = null,
+        ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
         $this->requestValidator->validate(
@@ -55,6 +55,6 @@ class SecurityPlugin
             $variables ?? []
         );
 
-        return [$schema, $source, $operationName, $variables, $context, $extensions];
+        return [$schema, $source, $context, $variables, $operationName, $extensions];
     }
 }

@@ -39,9 +39,9 @@ class QueryCachePlugin
      * @param \Closure $proceed Original method
      * @param Schema $schema GraphQL schema
      * @param string|null $source GraphQL query source
-     * @param string|null $operationName Operation name
-     * @param array|null $variables Query variables
      * @param Context|null $context Query context
+     * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
      * @param array|null $extensions GraphQL extensions
      * @return array Query result
      */
@@ -50,18 +50,18 @@ class QueryCachePlugin
         \Closure $proceed,
         Schema $schema,
         ?string $source = null,
-        ?string $operationName = null,
-        ?array $variables = null,
         ?Context $context = null,
+        ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
         if (empty($source)) {
-            return $proceed($schema, $source, $operationName, $variables, $context, $extensions);
+            return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 
         // Skip caching for mutations
         if ($this->isMutation($source)) {
-            return $proceed($schema, $source, $operationName, $variables, $context, $extensions);
+            return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 
         // Try to get from cache
@@ -79,7 +79,7 @@ class QueryCachePlugin
         }
 
         // Execute query
-        $result = $proceed($schema, $source, $operationName, $variables, $context, $extensions);
+        $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
 
         // Cache the result if no errors
         if (!isset($result['errors'])) {

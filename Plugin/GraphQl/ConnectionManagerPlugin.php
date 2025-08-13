@@ -7,6 +7,7 @@ use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Magento\Framework\App\RequestInterface;
 use Magento\GraphQl\Model\Query\Context;
 use Sterk\GraphQlPerformance\Model\ResourceConnection\ConnectionManager;
+use Magento\Framework\GraphQl\Schema;
 
 /**
  * Plugin for managing database connections in GraphQL operations
@@ -30,26 +31,28 @@ class ConnectionManagerPlugin
      *
      * @param QueryProcessor $subject Query processor instance
      * @param \Closure $proceed Original method
-     * @param mixed ...$args All method arguments
+     * @param Schema $schema GraphQL schema
+     * @param string|null $source GraphQL query source
+     * @param Context|null $context Query context
+     * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
+     * @param array|null $extensions GraphQL extensions
      * @return array
      */
     public function aroundProcess(
         QueryProcessor $subject,
         \Closure $proceed,
-        ...$args
+        Schema $schema,
+        ?string $source = null,
+        ?Context $context = null,
+        ?array $variables = null,
+        ?string $operationName = null,
+        ?array $extensions = null
     ): array {
-        // Extract arguments
-        $schema = $args[0] ?? null;
-        $source = $args[1] ?? null;
-        $context = $args[2] ?? null;
-        $variables = $args[3] ?? null;
-        $operationName = $args[4] ?? null;
-        $extensions = $args[5] ?? null;
-
         // Parse the query to determine operation type
         try {
             if (empty($source)) {
-                return $proceed(...$args);
+                return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
             }
 
             $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
@@ -63,7 +66,7 @@ class ConnectionManagerPlugin
             }
         } catch (\Exception $e) {
             // If parsing fails, proceed with original request
-            return $proceed(...$args);
+            return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
         }
 
         try {
@@ -76,7 +79,7 @@ class ConnectionManagerPlugin
             }
 
             // Execute the query
-            $result = $proceed(...$args);
+            $result = $proceed($schema, $source, $context, $variables, $operationName, $extensions);
 
             // Handle transaction for mutations
             if ($isMutation) {

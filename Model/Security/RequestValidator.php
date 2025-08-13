@@ -40,6 +40,11 @@ class RequestValidator
      */
     public function validate(RequestInterface $request, string $query, array $variables = []): void
     {
+        // Skip validation for introspection queries
+        if ($this->isIntrospectionQuery($query)) {
+            return;
+        }
+
         $this->validateQuerySize($query);
         $this->validateForbiddenPatterns($query);
         $this->validateVariables($variables);
@@ -92,11 +97,13 @@ class RequestValidator
         array_walk_recursive(
             $variables,
             function ($value, $key) {
-                // Validate variable names
-                if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
-                    throw new LocalizedException(
-                        __('Invalid variable name: %1', $key)
-                    );
+                // Only validate string keys (skip numeric array indices)
+                if (is_string($key)) {
+                    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
+                        throw new LocalizedException(
+                            __('Invalid variable name: %1', $key)
+                        );
+                    }
                 }
 
                 // Validate string values
@@ -161,5 +168,17 @@ class RequestValidator
                 __('Authentication required')
             );
         }
+    }
+
+    /**
+     * Check if query is an introspection query
+     *
+     * @param  string $query
+     * @return bool
+     */
+    private function isIntrospectionQuery(string $query): bool
+    {
+        $normalizedQuery = strtolower(preg_replace('/\s+/', ' ', $query));
+        return str_contains($normalizedQuery, '__schema') || str_contains($normalizedQuery, '__type');
     }
 }

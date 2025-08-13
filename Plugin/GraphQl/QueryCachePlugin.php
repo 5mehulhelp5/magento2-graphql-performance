@@ -130,15 +130,15 @@ class QueryCachePlugin
     {
         // Use different lifetimes based on query type
         if (stripos($query, 'products') !== false) {
-            return $this->config->getFieldResolverConfig('product', 'cache_lifetime');
+            return $this->config->getResolverCacheLifetime('product');
         }
 
         if (stripos($query, 'categories') !== false) {
-            return $this->config->getFieldResolverConfig('category', 'cache_lifetime');
+            return $this->config->getResolverCacheLifetime('category');
         }
 
         if (stripos($query, 'cart') !== false) {
-            return $this->config->getFieldResolverConfig('cart', 'cache_lifetime');
+            return $this->config->getResolverCacheLifetime('cart');
         }
 
         return $this->config->getCacheLifetime();

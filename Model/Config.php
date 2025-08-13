@@ -16,6 +16,9 @@ use Sterk\GraphQlPerformance\Model\Config\ConfigPath;
  */
 class Config
 {
+    private const XML_PATH_MONITORING = 'graphql_performance/monitoring/';
+    private const XML_PATH_FIELD_RESOLVERS = 'graphql_performance/field_resolvers/';
+
     /**
      * @param ScopeConfigInterface $scopeConfig Configuration reader
      */
@@ -98,7 +101,7 @@ class Config
         mixed $scopeCode = null
     ): mixed {
         return $this->scopeConfig->getValue(
-            self::XML_PATH_MONITORING . $field,
+            ConfigPath::MONITORING->getPath($field),
             $scope,
             $scopeCode
         );
@@ -120,7 +123,7 @@ class Config
         mixed $scopeCode = null
     ): mixed {
         return $this->scopeConfig->getValue(
-            self::XML_PATH_FIELD_RESOLVERS . $resolver . '/' . $field,
+            ConfigPath::FIELD_RESOLVERS->getPath($resolver . '/' . $field),
             $scope,
             $scopeCode
         );

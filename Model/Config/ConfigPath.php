@@ -24,7 +24,7 @@ enum ConfigPath: string
      * @param  string $field
      * @return string
      */
-    public function getPath(string $field): string
+    public function getPath(string $field = ''): string
     {
         return $this->value . $field;
     }

@@ -32,9 +32,9 @@ class QueryComplexityValidatorPlugin
      * @param \Closure $proceed Original method
      * @param Schema $schema GraphQL schema
      * @param string|null $source GraphQL query source
-     * @param string|null $operationName Operation name
-     * @param array|null $variables Query variables
      * @param ContextInterface|null $context Query context
+     * @param array|null $variables Query variables
+     * @param string|null $operationName Operation name
      * @param array|null $extensions GraphQL extensions
      * @return array
      */
@@ -43,9 +43,9 @@ class QueryComplexityValidatorPlugin
         \Closure $proceed,
         Schema $schema,
         ?string $source = null,
-        ?string $operationName = null,
-        ?array $variables = null,
         ?ContextInterface $context = null,
+        ?array $variables = null,
+        ?string $operationName = null,
         ?array $extensions = null
     ): array {
         if ($source && !$this->isIntrospectionQuery($source)) {
@@ -78,7 +78,7 @@ class QueryComplexityValidatorPlugin
         }
 
         // Proceed with query execution
-        return $proceed($schema, $source, $operationName, $variables, $context, $extensions);
+        return $proceed($schema, $source, $context, $variables, $operationName, $extensions);
     }
 
     /**

@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed introspection query blocking from SecurityPattern
 - Added isAuthRequired method to Config class
 - Fixed QueryComplexityValidatorPlugin to skip validation for introspection queries
+- Fixed QueryComplexityValidatorPlugin parameter order to match Magento's expectations
 - Improved error handling and type safety in security plugins
 
 ## [1.1.5] - 2024-03-15

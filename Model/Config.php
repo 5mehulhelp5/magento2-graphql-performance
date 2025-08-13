@@ -16,9 +16,6 @@ use Sterk\GraphQlPerformance\Model\Config\ConfigPath;
  */
 class Config
 {
-    private const XML_PATH_MONITORING = 'graphql_performance/monitoring/';
-    private const XML_PATH_FIELD_RESOLVERS = 'graphql_performance/field_resolvers/';
-
     /**
      * @param ScopeConfigInterface $scopeConfig Configuration reader
      */
@@ -330,5 +327,19 @@ class Config
         mixed $scopeCode = null
     ): bool {
         return (bool)$this->getFieldResolverConfig($resolver, 'batch_' . $batchType, $scope, $scopeCode);
+    }
+
+    /**
+     * Is authentication required
+     *
+     * @param  string     $scope
+     * @param  mixed|null $scopeCode
+     * @return bool
+     */
+    public function isAuthRequired(
+        string $scope = ScopeInterface::SCOPE_STORE,
+        mixed $scopeCode = null
+    ): bool {
+        return (bool)$this->getQueryConfig('require_authentication', $scope, $scopeCode);
     }
 }

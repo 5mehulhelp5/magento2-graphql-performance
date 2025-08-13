@@ -6,6 +6,9 @@ namespace Sterk\GraphQlPerformance\Plugin\GraphQl;
 use Magento\Framework\GraphQl\Query\QueryProcessor;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Schema;
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Language\Parser;
+use GraphQL\Language\Source;
 use Sterk\GraphQlPerformance\Model\QueryComplexity\ComplexityValidator;
 
 /**
@@ -50,7 +53,7 @@ class QueryComplexityValidatorPlugin
     ): array {
         if ($source && !$this->isIntrospectionQuery($source)) {
             // Parse the query to get AST
-            $documentNode = \GraphQL\Language\Parser::parse(new \GraphQL\Language\Source($source));
+            $documentNode = Parser::parse(new Source($source));
 
             // Get operation
             $operation = null;
@@ -65,7 +68,7 @@ class QueryComplexityValidatorPlugin
 
             if ($operation) {
                 // Create ResolveInfo
-                $info = new \Magento\Framework\GraphQl\Query\Resolver\ResolveInfo(
+                $info = new ResolveInfo(
                     $operation->name ? $operation->name->value : null,
                     [],
                     $schema->getType('Query'),

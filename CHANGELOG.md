@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Updated SecurityPlugin to handle operation name parameter correctly
 - Updated QueryCachePlugin to match new parameter order
 - Fixed dependency injection configuration for schema generation
+- Fixed plugin execution order in di.xml to ensure correct parameter handling
+- Added proper sort order for SecurityPlugin, QueryCachePlugin, and ConnectionManagerPlugin
 
 ## [1.1.2] - 2024-03-22
 

@@ -2,9 +2,20 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- Plugin for GraphQL query processing -->
     <type name="Magento\Framework\GraphQl\Query\QueryProcessor">
+        <!-- Security plugin runs first to validate requests -->
+        <plugin name="sterk_graphql_performance_security"
+                type="Sterk\GraphQlPerformance\Plugin\GraphQl\SecurityPlugin"
+                sortOrder="10"/>
+
+        <!-- Query cache plugin runs second to check cache -->
+        <plugin name="sterk_graphql_performance_query_cache"
+                type="Sterk\GraphQlPerformance\Plugin\GraphQl\QueryCachePlugin"
+                sortOrder="20"/>
+
+        <!-- Connection manager plugin runs last to handle DB connections -->
         <plugin name="sterk_graphql_performance_connection_manager"
                 type="Sterk\GraphQlPerformance\Plugin\GraphQl\ConnectionManagerPlugin"
-                sortOrder="10"/>
+                sortOrder="30"/>
     </type>
 
     <!-- Cache Warmer configuration -->

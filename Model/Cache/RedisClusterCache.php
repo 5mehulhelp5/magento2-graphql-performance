@@ -7,6 +7,7 @@ use Magento\Framework\App\Cache\Type\FrontendPool;
 use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 use Magento\Framework\Serialize\SerializerInterface;
 use Psr\Log\LoggerInterface;
+use Zend_Cache;
 
 /**
  * Redis Cluster implementation for GraphQL caching
@@ -146,8 +147,21 @@ class RedisClusterCache extends TagScope
         }
     }
 
-    public function clean(array $tags = []): bool
+    public function clean($mode = \Zend_Cache::CLEANING_MODE_ALL, array $tags = []): bool
     {
+        // Handle different cleaning modes
+        if ($mode == \Zend_Cache::CLEANING_MODE_ALL) {
+            $tags = [];
+        } elseif ($mode == \Zend_Cache::CLEANING_MODE_OLD) {
+            // Skip cleaning old entries in Redis as it handles TTL automatically
+            return true;
+        } elseif ($mode == \Zend_Cache::CLEANING_MODE_MATCHING_TAG && empty($tags)) {
+            // If no tags provided in matching tag mode, do nothing
+            return true;
+        } elseif ($mode != \Zend_Cache::CLEANING_MODE_MATCHING_TAG && !empty($tags)) {
+            // If tags provided but not in matching tag mode, ignore tags
+            $tags = [];
+        }
         try {
             if (!$this->cluster) {
                 return false;

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.10] - 2024-03-13
+
+### Fixed
+- Fixed RedisClusterCache clean() method signature to match parent class
+- Added proper handling of Zend Cache cleaning modes
+- Fixed compatibility with Magento cache cleaning operations
+
 ## [1.1.9] - 2024-03-13
 
 ### Added
